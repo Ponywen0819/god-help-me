@@ -3,34 +3,7 @@
 \chapter{研究方法與設計}
 \label{chap:method}
 
-本章說明本研究所提出之\emph{標註擴張連結演算法} (Annotation-Grow Linker, AGL) 之完整設計。給定一張 PGP 9.5 染色之皮膚切片影像 $I \in \mathbb{R}^{H \times W \times 3}$、表皮遮罩 $M \in \{0, 255\}^{H \times W}$、以及由人工初步標註所得之二值纖維標註 $A \in \{0, 255\}^{H \times W}$，AGL 之目標為輸出一個\textbf{像素級無向圖} $G = (V, E)$，其中 $V \subseteq \mathbb{Z}^2$ 為骨架節點所對應之像素座標、$E$ 為沿纖維之連線，並於其上計算有效跨越數 $N_{\text{cross}}$。完整流程如演算法~\ref{alg:agl} 所示，由若干階段線性串接而成；以下各節依序詳述：第~\ref{sec:preprocessing}~節說明前處理與成本圖建構；第~\ref{sec:dijkstra}~節說明以連通元件為多源之 Dijkstra 擴張；第~\ref{sec:component-graph}~節描述相遇點偵測與元件層圖之建立；第~\ref{sec:prune-mst}~節說明成本裁剪與最小生成森林；第~\ref{sec:skeleton}~節說明像素級拓樸之建構；最後第~\ref{sec:crossing}~節說明於該拓樸上進行有效跨越計數之完整程序。
-
-% \begin{figure}[htbp]
-%   \centering
-%   % \includegraphics[width=0.95\linewidth]{figures/pipeline.pdf}
-%   \fbox{\parbox{0.9\linewidth}{\centering 此處放置 AGL 完整流程示意圖 (pipeline figure)。\\建議以七個階段之輸入／輸出方塊依序連接。}}
-%   \caption{AGL 演算法之整體流程。}
-%   \label{fig:pipeline}
-% \end{figure}
-
-\begin{algorithm}[htbp]
-  \caption{Annotation-Grow Linker}
-  \label{alg:agl}
-  \textbf{Input:} 影像 $I$，表皮遮罩 $M$，標註 $A$；參數 $\{\text{offset}, r_{\text{bg}}, n_{\text{tile}}, \beta, \sigma_{\min}, \sigma_{\max}, \tau, r_d, \ell_{\min}\}$。\\
-  \textbf{Output:} 像素級拓樸圖 $G$ 與有效跨越數 $N_{\text{cross}}$。
-  \begin{enumerate}
-    \item $M_{\text{ROI}} \gets \text{DilateEpidermisVertically}(M, \text{offset})$
-    \item $I_{\text{enhanced}} \gets \text{Sato}(\text{CLAHE}(\text{BgRemove}(I_g))) \odot M_{\text{ROI}}$；$C \gets \exp(1 - \tilde{I}_{\text{enhanced}}) - 1$
-    \item $L \gets \text{CC}(A \odot M_{\text{ROI}})$，$N \gets \max L$
-    \item $(O, D, \text{prev}_y, \text{prev}_x) \gets \text{MultiSourceDijkstra}(C, L)$
-    \item $\mathcal{P} \gets \text{FindMeetingPoints}(O, D, \text{prev}_y, \text{prev}_x)$
-    \item $G_c \gets \text{BuildComponentGraph}(\mathcal{P}, N)$；$G_c^{\text{pruned}} \gets \text{Prune}(G_c, \tau)$
-    \item $T \gets \text{MinimumSpanningForest}(G_c^{\text{pruned}})$
-    \item $G \gets \text{Skeletonize}\big(\text{Dilate}(\text{DrawPaths}(T), r_d) \cup A\big)$
-    \item $G \gets \text{DetectSegments}(G)$；$G \gets \text{LabelRegions}(G, M)$
-    \item $N_{\text{cross}} \gets \text{CountEffectiveCrossings}(G, M, \ell_{\min})$
-  \end{enumerate}
-\end{algorithm}
+本章說明本研究所提出之\textbf{標註擴張連結} (Annotation Expansion Linker, AEL) 演算法之完整設計。給定一張 PGP 9.5 染色之皮膚切片影像 $I \in \mathbb{R}^{H \times W \times 3}$、表皮遮罩 $M \in \{0, 255\}^{H \times W}$、以及由人工初步標註所得之二值\textbf{纖維微粒} (particle)~\cite{hsueh2026machine} 標註 $A \in \{0, 255\}^{H \times W}$，AEL 之目標為輸出一個\textbf{像素級無向圖} $G_{\text{trim}} = (V_{\text{trim}}, E_{\text{trim}})$，其中 $V_{\text{trim}} \subseteq \mathbb{Z}^2$ 為骨架節點所對應之像素座標集合、$E_{\text{trim}}$ 為沿纖維之連線集合，並於其上計算有效跨越數 $N_{\text{cross}}$。以下各節依序詳述：第~\ref{sec:preprocessing}~節說明前處理與成本圖建構；第~\ref{sec:dijkstra}~節說明以連通元件為多源之 Dijkstra 擴張；第~\ref{sec:component-graph}~節描述相遇點偵測與元件層圖之建立；第~\ref{sec:prune-mst}~節說明成本裁剪與最小生成森林；第~\ref{sec:skeleton}~節說明像素級拓樸之建構；最後第~\ref{sec:crossing}~節說明於該拓樸上進行有效跨越計數之完整程序。
 
 \section{前處理與成本圖建構}
 \label{sec:preprocessing}
@@ -38,78 +11,159 @@
 \subsection{感興趣區域之建立}
 \label{subsec:roi}
 
-IENF 之計數對象為自真皮進入表皮之纖維~\cite{jointtaskforce2010skinbiopsy}，因此合理之分析區域應\textbf{包含表皮本身與其下方一段固定寬度之真皮}，以同時捕捉跨越事件之兩側。令 $M \in \{0, 255\}^{H \times W}$ 為表皮之二值遮罩；本研究定義一個\emph{僅向下膨脹}之運算
+依 EFNS／PNS 計數規範~\cite{jointtaskforce2010skinbiopsy}，IENF 之計數對象為自真皮穿越表皮／真皮交界進入表皮之纖維；判定一條纖維是否符合此規則，需同時觀察其在表皮內與真皮側之走向。故本研究將分析區域定義為\textbf{表皮本身及其下方一段固定寬度之真皮}，使交界線兩側之纖維走向皆落入後續處理範圍。本研究於表皮遮罩 $M$ 上定義一個僅向下膨脹之運算
 
 \begin{equation}
-  M_{\text{ROI}} \;=\; \big(\,M \oplus S_{\text{offset}}\,\big) \cap M_{\downarrow},
+  M_{\text{ROI}} \;=\; \big(\,M \oplus K_{\text{offset}}\,\big) \cap M_{\downarrow},
   \label{eq:roi}
 \end{equation}
 
-其中 $S_{\text{offset}}$ 為半徑 $\text{offset}$ 像素之圓形結構元；$M_{\downarrow}$ 為輔助遮罩，對每個 $x$ 行 (column)，其值在 $y \ge \min_{y'} \{y' : M(y', x) > 0\}$ 處為 1、其他為 0。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」，藉由與膨脹結果取交集可避免膨脹向表皮上方溢出，從而確保 ROI 僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號。本研究預設 $\text{offset} = 50\,\text{px}$。
+\noindent 其中 $K_{\text{offset}}$ 為半徑 $\text{offset}$ 像素之圓形結構元；$M_{\downarrow}$ 為輔助遮罩（如圖~\ref{fig:roi-auxmask} 所示），對每個 $x$ 行 (column)，其值在 $y \ge \min_{y'} \{y' : M(y', x) > 0\}$ 處為 1、其他為 0。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」，藉由與等向性膨脹結果（圖~\ref{fig:roi-unrestricted}）取交集可避免膨脹向表皮上方溢出，從而確保 ROI 僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號，最終所得之 $M_{\text{ROI}}$ 如圖~\ref{fig:roi-restricted} 所示。本研究預設 $\text{offset} = 50$像素。
+
+\begin{figure}[htbp]
+  \centering
+  
+  \begin{subfigure}[b]{\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{aux_mask.png}
+    \caption{}%
+    \label{fig:roi-auxmask}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  \begin{subfigure}[b]{\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{unconstrained_mask.png}
+    \caption{}%
+    \label{fig:roi-unrestricted}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  \begin{subfigure}[b]{\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{roi_mask.png}
+    \caption{}%
+    \label{fig:roi-restricted}
+  \end{subfigure}
+  \caption[感興趣區域之建立]{感興趣區域之建立。三張子圖中之洋紅色邊框皆為原始表皮遮罩 $M$ 之輪廓。(a) 僅向下延伸之輔助遮罩 $M_{\downarrow}$，定義「不高於表皮頂部之像素」；(b) 對 $M$ 等向性膨脹 $\text{offset}$ 像素後之結果，可見分析範圍向表皮上方之背景溢出；(c) 將 (b) 與 (a) 取交集後所得之 $M_{\text{ROI}}$，膨脹範圍被嚴格限制於表皮下方深度 $\text{offset}$ 之真皮帶內，避免納入表皮以上之背景。}
+  \label{fig:roi}
+\end{figure}
 
 \subsection{影像增強}
 \label{subsec:enhance}
 
-由於 PGP 9.5 免疫染色之色彩資訊主要落在綠色通道，本研究將 $I$ 視為三個色彩通道之組合 $I = (I_r, I_g, I_b)$，其中 $I_g : \Omega \to [0, 255]$ 為綠色通道之灰階影像；後續處理皆以 $I_g$ 作為輸入，並依序執行三個運算：形態學背景去除、CLAHE 局部對比增強、與多尺度 Sato 線狀結構強化，分述如下。
+$I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 $I_g : \Omega \to [0, 255]$ 為綠色通道之灰階影像。由於 PGP 9.5 免疫染色之色彩資訊主要落在綠色通道，後續處理皆以 $I_g$ 作為輸入，並依序執行三個運算：形態學背景去除、CLAHE 局部對比增強、與多尺度 Sato 線狀結構強化，分述如下。
 
-\paragraph{形態學背景去除。} 為消除染色不均所造成之慢變背景，本研究以\textbf{灰階形態學開運算} (morphological opening)~\cite{serra1983image,soille1999morphological} 估計 $I_g$ 之緩變背景項
+\paragraph{形態學背景去除：} PGP 9.5 染色於切片各區域之強度本即不均勻，使整張影像存在一層慢變之背景偏移；若直接套用後續之對比增強，背景偏亮處將與真實纖維之響應混淆，不利於成本圖之建構。本研究以\textbf{白色頂帽} (white top-hat) 變換~\cite{serra1983image,soille1999morphological} 消除此一慢變背景，其形式定義為原影像與其形態學開運算之差：
 \begin{equation}
-  B \;=\; I_g \circ S_{r_{\text{bg}}},
-  \label{eq:bg-estimate}
-\end{equation}
-再將其自原影像扣除以得\textbf{白色頂帽} (white top-hat)~\cite{soille1999morphological} 變換之中介影像
-\begin{equation}
-  I_{\text{th}}(p) \;=\; \max\bigl(0,\; I_g(p) - B(p)\bigr).
+  I_{\text{th}} \;=\; I_g - (I_g \circ K_{r_{\text{bg}}}),
   \label{eq:tophat}
 \end{equation}
-其中 $S_{r_{\text{bg}}}$ 為半徑 $r_{\text{bg}}$ 之圓形結構元；於設計上 $r_{\text{bg}}$ 應遠大於纖維之半寬，使開運算將纖維等亮線狀結構自背景中濾除，而僅保留低頻之染色不均項。在此設定下 $I_{\text{th}}$ 等價於只保留比 $S_{r_{\text{bg}}}$ 更細小之亮線狀結構，達成背景平整化之目的。
 
-\paragraph{對比受限直方圖均衡化 (CLAHE)。} CLAHE 透過局部直方圖均衡化與裁剪機制提升區域對比，同時抑制雜訊被過度放大之問題~\cite{zuiderveld1994contrast}。其基本流程可描述如下：首先將輸入影像 $I_{\text{th}}$ 規則切為 $n_{\text{tile}} \times n_{\text{tile}}$ 大小之互不重疊方塊 (tile)，並於每一方塊 $\mathcal{T}$ 上以 $\mathcal{L} = 256$ 個灰階格子統計直方圖 $h_{\mathcal{T}}(k)$；對固定之裁剪閾值 $\beta$，將超過 $\beta$ 之計數均勻重分配至所有灰階以得到裁剪後直方圖
-\begin{equation}
-  \tilde{h}_{\mathcal{T}}(k) \;=\; \min\bigl(h_{\mathcal{T}}(k),\; \beta\bigr) \;+\; \frac{1}{\mathcal{L}} \sum_{j=0}^{\mathcal{L}-1} \max\bigl(0,\; h_{\mathcal{T}}(j) - \beta\bigr).
-  \label{eq:clahe-clip}
-\end{equation}
-方塊內之灰階映射由其累積分布函數定義
-\begin{equation}
-  \Phi_{\mathcal{T}}(k) \;=\; (\mathcal{L} - 1) \cdot \frac{\sum_{j=0}^{k} \tilde{h}_{\mathcal{T}}(j)}{\sum_{j=0}^{\mathcal{L}-1} \tilde{h}_{\mathcal{T}}(j)},
-  \label{eq:clahe-cdf}
-\end{equation}
-位於方塊邊界之像素則以最近四個方塊之 $\Phi_{\mathcal{T}}$ 作雙線性內插以避免拼接邊紋。其中 $n_{\text{tile}}$ 控制局部適應之空間粒度——值越大則均衡化之鄰域越小、局部對比之提升越強，但亦越易放大區域性雜訊；$\beta$ 則為單一灰階格子之計數上限，藉此抑制近似均勻區域中之過度放大效應。輸出記為 $I_{\text{eq}}$。
+\noindent 其中 $K_{r_{\text{bg}}}$ 為尺寸（直徑）$r_{\text{bg}}$ 之圓盤形結構元，$\circ$ 為形態學開運算。其效果為僅保留尺度小於 $K_{r_{\text{bg}}}$ 之亮色細結構，並扣除尺度大於該結構元之慢變背景，使纖維被保留、染色不均項被扣除。所得 $I_{\text{th}}$ 如圖~\ref{fig:enhance-tophat} 所示。
 
-\paragraph{多尺度 Sato 線狀結構強化。} Sato 濾波器藉影像之二階導數結構辨識線狀區域，常用於醫學影像中曲線狀結構之分割與視覺化~\cite{sato1998three}。於尺度 $\sigma$ 下，記 $G_\sigma$ 為標準差 $\sigma$ 之二維高斯核，定義 $I_{\text{eq}}$ 之 Hessian 矩陣為
+
+\paragraph{對比受限直方圖均衡化 (CLAHE)：} 經背景去除後，$I_{\text{th}}$ 之整體灰階分布被壓縮於較窄之動態範圍內，纖維與其周圍之對比隨之降低；若直接以全域直方圖均衡化重映射，雖可恢復整張影像之灰階跨度，但會以單一灰階對應關係處理整張影像，無法針對表皮各局部區域內纖維與背景之相對對比作差異化處理。為此本研究採用 CLAHE~\cite{zuiderveld1994contrast} 對 $I_{\text{th}}$ 進行\textbf{局部}對比增強，記為
 \begin{equation}
-  H_\sigma(p) \;=\; \begin{pmatrix} \partial_{xx}(G_\sigma * I_{\text{eq}}) & \partial_{xy}(G_\sigma * I_{\text{eq}}) \\ \partial_{xy}(G_\sigma * I_{\text{eq}}) & \partial_{yy}(G_\sigma * I_{\text{eq}}) \end{pmatrix}\!(p).
-  \label{eq:hessian}
+  I_{\text{eq}} \;=\; \mathrm{CLAHE}_{\,n_{\text{tile}},\,\beta}(I_{\text{th}}),
+  \label{eq:clahe}
 \end{equation}
-令 $\lambda_1(p), \lambda_2(p)$（$\lambda_1 \le \lambda_2$）為 $H_\sigma(p)$ 之兩個實特徵值；對於\textbf{亮色}線狀結構，沿線方向之強度近乎平坦使 $\lambda_2 \approx 0$，而其法向之強度凹陷使 $\lambda_1 < 0$。據此單一尺度之響應定義為
+
+\noindent 其中方塊尺度 $n_{\text{tile}}$ 控制局部適應之空間粒度，裁剪閾值 $\beta$ 抑制均勻區域之雜訊過度放大；輸出 $I_{\text{eq}}$ 如圖~\ref{fig:enhance-clahe} 所示。
+
+\paragraph{多尺度 Sato 線狀結構強化：} 經 CLAHE 增強後之 $I_{\text{eq}}$ 雖已凸顯纖維與背景之對比，但其中仍殘留與纖維結構無關之亮色雜訊，例如散在之染色亮點與小型團塊；此類響應於灰階上與纖維相近，僅憑灰階強度無法將其與真正之線狀結構區分。為抑制非線狀結構之響應、並僅突顯具管狀幾何特徵之區域，本研究採用 Sato 濾波器~\cite{sato1998three} 對 $I_{\text{eq}}$ 進行線狀結構強化，記其原始響應為
 \begin{equation}
-  V_\sigma(p) \;=\; \max\bigl(0,\; -\lambda_1(p)\bigr),
-  \label{eq:sato-single}
+  S \;=\; \mathrm{Sato}_{\,\Sigma}(I_{\text{eq}}),
+  \label{eq:sato}
 \end{equation}
-多尺度響應則取各尺度之最大值並線性正規化至 $[0, 255]$
+
+\noindent 其中該濾波器基於 Hessian 矩陣之特徵值辨識亮色線狀區域，並對多尺度集合 $\Sigma = \{\sigma_{\min},\; \sigma_{\min}+1,\; \ldots,\; \sigma_{\max}\}$ 取各尺度響應之逐像素最大值，使不同粗細之纖維均能被有效偵測；$\sigma_{\min}, \sigma_{\max}$ 依目標纖維之最小與最大半寬選取。由於 $S$ 之動態範圍因影像而異，本研究再對其進行最小—最大線性正規化以對齊至固定區間 $[0, 255]$：
 \begin{equation}
-  I_{\text{enhanced}}(p) \;=\; \mathcal{N}\!\Bigl(\max_{\sigma \in \Sigma} V_\sigma(p)\Bigr), \qquad I_{\text{enhanced}} : \Omega \to [0, 255],
-  \label{eq:sato-multiscale}
+  I_{\text{enhanced}}(x, y) \;=\; 255 \cdot \frac{S(x, y) - \min_{(x', y') \in \Omega} S(x', y')}{\max_{(x', y') \in \Omega} S(x', y') - \min_{(x', y') \in \Omega} S(x', y')},
+  \label{eq:sato-norm}
 \end{equation}
-其中 $\Sigma = \{\sigma_{\min}, \sigma_{\min} + 1, \ldots, \sigma_{\max}\}$ 為以單位像素為步距之多尺度集合，$\mathcal{N}(\cdot)$ 將輸入線性映射至 $[0, 255]$。$\sigma_{\min}, \sigma_{\max}$ 應依目標纖維於影像中之最小與最大半寬選取，確保所欲偵測之纖維尺度被 $\Sigma$ 完整涵蓋；尺度過小將使粗纖維響應被低估，過大則易使背景紋理之低頻起伏被誤判為線狀結構。此流程之結果使纖維區域之灰階值接近 $255$、非纖維區域接近 $0$，為後續成本設計提供良好之輸入訊號。
+
+\noindent 使纖維區域之響應接近 $255$、非纖維區域接近 $0$（如圖~\ref{fig:enhance-sato} 所示），為後續成本設計提供良好之輸入訊號。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.24\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{input_green_crop.png}
+    \caption{}%
+    \label{fig:enhance-green}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.24\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{top_white_crop.png}
+    \caption{}%
+    \label{fig:enhance-tophat}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.24\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{clahe_crop.png}
+    \caption{}%
+    \label{fig:enhance-clahe}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.24\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{sato_crop.png}
+    \caption{}%
+    \label{fig:enhance-sato}
+  \end{subfigure}
+  \caption[影像增強流水線之逐步視覺化]{影像增強流水線之逐步視覺化。(a) 原始綠色通道 $I_g$，可見染色仍受背景不均勻影響；(b) 形態學白色頂帽 $I_{\text{th}}$，緩變背景已被消除；(c) CLAHE 後之 $I_{\text{eq}}$，局部對比顯著提升，但同時放大背景中之細微雜訊；(d) 多尺度 Sato 響應 $I_{\text{enhanced}}$，依 Hessian 結構強化線狀結構，使纖維響應接近飽和、非纖維區域近乎為零，為後續成本圖建構提供良好之輸入訊號。}
+  \label{fig:enhance}
+\end{figure}
 
 \subsection{像素成本圖}
 \label{subsec:cost}
 
-令 $\tilde{I}_{\text{enhanced}}(p) = I_{\text{enhanced}}(p) / 255 \in [0, 1]$ 為正規化後之纖維響應，本研究將像素成本定義為
+令 $\tilde{I}_{\text{enhanced}}(x, y) = I_{\text{enhanced}}(x, y) / 255 \in [0, 1]$ 為正規化後之纖維響應；考量後續之路徑搜尋僅應於 ROI 內進行，本研究將像素成本定義為
 
 \begin{equation}
-  C(p) \;=\; e^{\,1 - \tilde{I}_{\text{enhanced}}(p)} - 1, \qquad C(p) \in \bigl[0,\; e-1\bigr].
+  C(x, y) \;=\;
+  \begin{cases}
+    e^{\,1 - \tilde{I}_{\text{enhanced}}(x, y)} - 1, & (x, y) \in M_{\text{ROI}}, \\[2pt]
+    +\infty, & (x, y) \notin M_{\text{ROI}}.
+  \end{cases}
   \label{eq:cost}
 \end{equation}
 
-式~\eqref{eq:cost} 具有三項理想性質：
+\noindent 於 ROI 內 $C(x, y) \in [0,\; e - 1]$，於 ROI 外則不納入考慮（如圖~\ref{fig:cost-full} 所示，黑色區域即為 ROI 外不考慮之像素）。式~\eqref{eq:cost} 於 ROI 內具有三項理想性質：
 
 \begin{itemize}
   \item \textbf{邊界收斂性}：$\tilde{I}_{\text{enhanced}} = 1$ 時 $C = 0$，$\tilde{I}_{\text{enhanced}} = 0$ 時 $C = e - 1 \approx 1.718$。
   \item \textbf{單調性}：$C$ 為 $\tilde{I}_{\text{enhanced}}$ 之嚴格遞減函數，響應越強成本越低。
-  \item \textbf{對比放大}：由於指數函數 $e^x$ 之凸性，當 $\tilde{I}_{\text{enhanced}}$ 於 $[0.5, 1]$ 間變動時成本之變化相對平緩；而當 $\tilde{I}_{\text{enhanced}}$ 落入 $[0, 0.5]$ 時成本變化陡峭，從而使 Dijkstra 擴張傾向於沿可靠纖維路徑前進，而非橫切背景區段。
+  \item \textbf{對比放大}：由於指數函數 $e^x$ 之凸性，$\tilde{I}_{\text{enhanced}}$ 於 $[0.5, 1]$ 之強響應區段之成本變化相對平緩、於 $[0, 0.5]$ 之弱響應區段則陡峭上升；強、弱響應之成本差距被指數放大，使後續以累積成本為依據之路徑搜尋自然傾向沿高響應纖維前進、而避開橫切背景。
 \end{itemize}
+
+\noindent 此性質於圖~\ref{fig:cost-zoom} 之局部放大中可清晰觀察：纖維走向上之像素形成連續之低成本走廊，而周圍背景則普遍呈現高成本，二者之邊界明銳。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{cost_map.png}
+    \caption{}%
+    \label{fig:cost-full}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  \begin{subfigure}[b]{\linewidth}
+    \centering
+    \includegraphics[width=0.24\linewidth]{cost_map_zomm.png}
+    \caption{}%
+    \label{fig:cost-zoom}
+  \end{subfigure}
+  \caption[像素成本圖之視覺化]{像素成本圖之視覺化。(a) 整張切片於 ROI 內之 $C(x, y)$；ROI 外之區域以黑色標示，表示其不納入考慮。(b) 局部放大可見纖維響應區之成本明顯低於周圍背景，形成沿纖維之低成本走廊，符合式~\eqref{eq:cost} 之對比放大性質。}
+  \label{fig:cost}
+\end{figure}
 
 \section{多源 Dijkstra 擴張}
 \label{sec:dijkstra}
@@ -117,41 +171,71 @@ IENF 之計數對象為自真皮進入表皮之纖維~\cite{jointtaskforce2010sk
 \subsection{連通元件之標記}
 \label{subsec:cc}
 
-令 $A_{\text{ROI}} = A \cap M_{\text{ROI}}$ 為限制於 ROI 內之標註。以 $A_{\text{ROI}} > 127$ 進行二值化後執行\textbf{8-連通連通元件標記}，得到元件標記圖 $L : \Omega \to \{0, 1, \ldots, N\}$，其中 $L(p) = 0$ 為背景，$L(p) = i$ 代表像素 $p$ 屬於第 $i$ 個元件。
+令 $A_{\text{ROI}} = A \cap M_{\text{ROI}}$ 為限制於 ROI 內之標註。以 $A_{\text{ROI}} > 127$ 進行二值化後執行\textbf{8-連通連通元件標記}，得到元件標記圖 $L : \Omega \to \{0, 1, \ldots, N\}$，其中 $L(x, y) = 0$ 為背景，$L(x, y) = i$ 代表像素 $(x, y)$ 屬於第 $i$ 個元件。每個連通元件即對應影像上一段連續染色之\textbf{纖維微粒} (particle)，亦即由語意分割所能直接判定為纖維之最大可信單位；其內部之像素已被視為同屬一條纖維，故無需再行細分，而元件之間是否屬於同一條纖維才是後續重建之核心問題。本研究即以此為基本單位，將每個元件視為一個獨立來源，於下節中同步執行多源 Dijkstra 擴張。
 
 \subsection{擴張規則}
 \label{subsec:dijkstra-rule}
 
-擴張過程於影像域 $\Omega$ 上維護四張同尺寸之狀態圖：
+以 §\ref{subsec:cc} 所得之元件標記圖 $L$ 作為多源輸入（如圖~\ref{fig:rg-components} 所示，圖中每個連通元件以不同顏色標示），擴張過程需為每個像素 $(x, y) \in \Omega$ 記錄三項資訊：
 \begin{itemize}
-  \item \textbf{距離圖} $D : \Omega \to \mathbb{R}_{\ge 0} \cup \{\infty\}$，記錄各像素至其所屬種子之累積成本；
-  \item \textbf{擁有者圖} $O : \Omega \to \{0, 1, \ldots, N\}$，記錄各像素所屬之元件編號，其中 $O(p) = 0$ 表示該像素尚未被任一元件擴張覆蓋；
-  \item \textbf{前驅座標圖} $\text{prev}_y, \text{prev}_x : \Omega \to \mathbb{Z}$，分別記錄各像素於擴張時之前驅像素之 $y$、$x$ 座標，供後續路徑回溯使用。
+  \item \textbf{累積成本} $D(x, y)$：自來源標註出發、沿最低成本路徑抵達 $(x, y)$ 所累積之成本，初始時標註像素為 $0$、其餘為 $\infty$；
+  \item \textbf{所屬元件} $O(x, y) \in \{0, 1, \ldots, N\}$：提供此最低成本路徑之來源元件編號，$O(x, y) = 0$ 表示尚未被任一元件覆蓋；
+  \item \textbf{前驅像素座標} $(\text{prev}_x(x, y), \text{prev}_y(x, y))$：到達 $(x, y)$ 之最佳路徑中的上一個像素，供後續路徑回溯使用。
 \end{itemize}
 
-初始時，本研究將\emph{所有}標註像素皆設為 $D = 0$ 之來源並令 $O(p) = L(p)$，其餘像素則設 $D(p) = \infty$、$O(p) = 0$；以一個以 $D$ 為鍵之最小優先佇列管理擴張順序。演算法每次自佇列中取出目前累積成本最小之像素 $p$，並檢查其 8-連通鄰域中之每個鄰居 $q$。若經由 $p$ 抵達 $q$ 之成本低於 $q$ 目前記錄之成本，即
+演算法每次優先處理目前累積成本最小之未確定像素 $(x, y)$，並檢查其 8-連通鄰域中之每個鄰居 $(x', y')$。若經由 $(x, y)$ 抵達 $(x', y')$ 之成本低於 $(x', y')$ 目前記錄之成本，即
 
 \begin{equation}
-  D(p) + C(q) < D(q),
+  D(x, y) + C(x', y') < D(x', y'),
   \label{eq:dijkstra-update}
 \end{equation}
 
-則以此較低成本取代原值，令 $D(q) \gets D(p) + C(q)$，並將 $q$ 之擁有者設為 $O(p)$；同時記錄 $\text{prev}_y(q) = y_p$、$\text{prev}_x(q) = x_p$，表示目前到達 $q$ 的最佳路徑來自 $p$。被更新之 $q$ 會重新加入優先佇列，等待後續向外擴張。此擴張與標準單源 Dijkstra 演算法~\cite{dijkstra1959note} 之差別在於\textbf{初始堆中同時存在所有種子}。擴張完成後，每個像素皆被指派給累積成本最低之來源元件；不同來源元件所形成之相鄰區域邊界，即構成後續相遇點搜尋之基礎。因此，整個擴張可視為在影像上形成一個\textbf{以成本為度量之 Voronoi 分割}~\cite{felzenszwalb2012distance}。
+則以此較低成本取代原值，令 $D(x', y') \gets D(x, y) + C(x', y')$，並將 $(x', y')$ 之擁有者設為 $O(x, y)$；同時記錄 $\text{prev}_x(x', y') = x$、$\text{prev}_y(x', y') = y$，表示目前到達 $(x', y')$ 的最佳路徑來自 $(x, y)$。被更新之 $(x', y')$ 隨即成為下一輪之候選像素，待其本身被處理時再進一步向其鄰域擴張。此擴張與標準單源 Dijkstra 演算法~\cite{dijkstra1959note} 之差別在於\textbf{初始堆中同時存在所有種子}。擴張完成後，每個像素皆被指派給累積成本最低之來源元件，所得之 $D(x, y)$ 場如圖~\ref{fig:rg-cost} 所示，可清楚觀察到自各來源沿低成本走廊向外漸增之累積代價；不同來源元件所形成之相鄰區域邊界，即構成後續相遇點搜尋之基礎。因此，整個擴張可視為在影像上形成一個\textbf{以成本為度量之 Voronoi 分割}~\cite{felzenszwalb2012distance}（見圖~\ref{fig:rg-voronoi}，每個像素被指派給其所屬之來源 $O(x, y)$）。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.30\linewidth}
+    \centering
+    \includegraphics[width=\textwidth]{region_grow_components.png}
+    \caption{}%
+    \label{fig:rg-components}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.335\linewidth}
+    \centering
+    \includegraphics[width=\textwidth]{region_grow_cost.png}
+    \caption{}%
+    \label{fig:rg-cost}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.30\linewidth}
+    \centering
+    \includegraphics[width=\textwidth]{region_grow_voronoi.png}
+    \caption{}%
+    \label{fig:rg-voronoi}
+  \end{subfigure}
+  \caption[多源 Dijkstra 擴張之視覺化]{多源 Dijkstra 擴張之視覺化。(a) 各連通元件以不同顏色標示，分別作為獨立來源；(b) 擴張結束後，每個像素之累積成本 $D(x, y)$ 顯示自最近來源沿低成本路徑抵達之代價；(c) 將每個像素指派給所屬來源 $O(x, y)$ 後，影像被劃分為以成本為度量之 Voronoi 區塊，相鄰區塊之邊界即為後續相遇點搜尋之依據。}
+  \label{fig:region-grow}
+\end{figure}
 
 \section{相遇點偵測與元件層圖}
 \label{sec:component-graph}
 
-\subsection{相遇點之形式化定義}
+\subsection{相遇點之定義}
 \label{subsec:meeting-def}
 
-擴張完成後，我們於 $(O, D)$ 上搜尋\textbf{相鄰但屬於不同元件之像素對}。若像素 $p$ 與 $q$ 為 8-連通鄰居，且同時滿足 $O(p) \ne 0$、$O(q) \ne 0$、$O(p) \ne O(q)$，則 $(p, q)$ 為一個\textbf{候選相遇點}；該相遇點之成本定義為
+擴張完成後，我們於 $(O, D)$ 上搜尋\textbf{相鄰但屬於不同元件之像素對}。此處之相鄰關係以 8-連通定義：記 $\mathcal{N}_8(x, y)$ 為像素 $(x, y)$ 之 8-連通鄰居集合，即
+\begin{equation*}
+  \mathcal{N}_8(x, y) \;=\; \bigl\{ (x', y') : (x', y') \ne (x, y),\; |x - x'| \le 1,\; |y - y'| \le 1 \bigr\},
+\end{equation*}
+亦即 $(x, y)$ 周圍含對角線之八個鄰格所成之集合。若像素 $(x, y)$ 與 $(x', y')$ 滿足 $(x', y') \in \mathcal{N}_8(x, y)$，且同時滿足 $O(x, y) \ne 0$、$O(x', y') \ne 0$、$O(x, y) \ne O(x', y')$，則 $\bigl((x, y), (x', y')\bigr)$ 為一個\textbf{候選相遇點}；該相遇點之成本定義為
 
 \begin{equation}
-  w(p, q) \;=\; D(p) + D(q).
+  w(x, y, x', y') \;=\; D(x, y) + D(x', y').
   \label{eq:meet-cost}
 \end{equation}
 
-其中 $D(p)$ 與 $D(q)$ 分別表示由各自來源元件抵達邊界像素 $p$、$q$ 之累積成本，因此 $w(p, q)$ 可視為兩個元件經由此相鄰像素對相接時的路徑成本。
+其中 $D(x, y)$ 與 $D(x', y')$ 分別表示由各自來源元件抵達邊界像素 $(x, y)$、$(x', y')$ 之累積成本，因此 $w(x, y, x', y')$ 可視為兩個元件經由此相鄰像素對相接時的路徑成本。圖~\ref{fig:meet-point} 示意了此一相遇點之偵測：於兩相鄰 Voronoi 領域之交界處，凡屬不同元件之 8-連通像素對皆為候選相遇點。
 
 \subsection{元件層圖之建構}
 \label{subsec:build-gc}
@@ -161,20 +245,20 @@ IENF 之計數對象為自真皮進入表皮之纖維~\cite{jointtaskforce2010sk
 \begin{equation}
   \mathcal{M}_{ab}
   =
-  \bigl\{(p, q) : p \sim_8 q,\; O(p)=a,\; O(q)=b \bigr\}.
+  \bigl\{\bigl((x, y), (x', y')\bigr) : (x', y') \in \mathcal{N}_8(x, y),\; O(x, y)=a,\; O(x', y')=b \bigr\}.
   \label{eq:meeting-set}
 \end{equation}
 
 由於同一組元件之擴張邊界上可能存在多個候選相遇點，本研究僅保留其中成本最低者，作為此兩元件之連接位置：
 
 \begin{equation}
-  (p_{ab}, q_{ab}) = \arg\min_{(p,q)\in\mathcal{M}_{ab}} w(p,q),
+  \bigl((x_a, y_a),\, (x_b, y_b)\bigr) = \arg\min_{((x, y),(x', y'))\in\mathcal{M}_{ab}} w(x, y, x', y'),
   \qquad
-  w_{ab} = w(p_{ab}, q_{ab}).
+  w_{ab} = w(x_a, y_a, x_b, y_b).
   \label{eq:min-meeting}
 \end{equation}
 
-其中 $(p_{ab}, q_{ab})$ 供後續路徑回溯使用。據此，元件層圖 $G_c$ 定義為
+其中 $(x_a, y_a)$ 與 $(x_b, y_b)$ 分別為此元件對 $(a, b)$ 之最低成本相遇點於 $a$ 側與 $b$ 側之像素座標，供後續路徑回溯使用。據此，元件層圖 $G_c$ 定義為
 
 \begin{equation}
   G_c = \Bigl(V_c, E_c\Bigr), \quad
@@ -182,68 +266,189 @@ IENF 之計數對象為自真皮進入表皮之纖維~\cite{jointtaskforce2010sk
   \label{eq:gc}
 \end{equation}
 
+\noindent 換言之，元件層圖 $G_c$ 以各纖維微粒為節點，凡其擴張領域相鄰者即以一條帶權邊相連，邊權 $w_{ab}$ 為兩元件間最低成本相遇點之路徑成本。圖~\ref{fig:meet-point} 一併呈現了由相遇點所導出之元件層圖：每條邊對應一組相鄰元件，其權重即沿成本圖連接兩者所需之最小代價。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{meet_point.png}
+  \caption[相遇點偵測與元件層圖之建構]{相遇點偵測與元件層圖之建構。多源 Dijkstra 擴張完成後，影像被劃分為各元件之成本-Voronoi 領域；於相鄰但屬不同元件之像素對中取累積成本和最低者為該元件對之相遇點 $\bigl((x_a, y_a), (x_b, y_b)\bigr)$，並以其成本 $w_{ab}$ 作為元件層圖 $G_c$ 中對應邊之權重。}
+  \label{fig:meet-point}
+\end{figure}
+
 \section{邊裁剪與最小生成森林}
 \label{sec:prune-mst}
 
-$G_c$ 之邊集在實務上常同時包含\emph{兩類連線}：(i) 成本較低、代表真實纖維延續之合理連線；(ii) 成本極高、來自兩個遙遠元件之擴張前線於某處相遇之偽連線。若直接於 $G_c$ 上求取最小生成森林，後者亦可能被納入並造成跨越真皮之錯接。
+$G_c$ 之邊集在實務上常同時包含兩類連線：(i) 成本較低、代表真實纖維延續之合理連線；(ii) 成本極高、來自兩個遙遠元件之擴張前線於某處相遇之偽連線。若直接於 $G_c$ 上求取最小生成森林，後者亦可能被納入並造成跨越真皮之錯接。
 
 本研究採用一個兩步策略，先以成本閾值排除明顯不可信之邊，再於剩餘圖上保留必要且低成本之連線：
 
 \begin{enumerate}
   \item \textbf{閾值裁剪}：以閾值 $\tau$ 移除 $w_{ab} > \tau$ 之所有邊，得到 $G_c^{\text{pruned}}$。$\tau$ 之取值原則為「中等長度之真實纖維於成本圖上累積之成本上界」，使可信連線得以保留，而成本顯著偏高之偽連線則被排除。
-  \item \textbf{最小生成森林}：於 $G_c^{\text{pruned}}$ 上以 Kruskal 演算法~\cite{kruskal1956shortest} 求取最小生成結構；由於 $G_c^{\text{pruned}}$ 可能不連通，實際得到一個\emph{森林}，每棵樹代表一條重建之纖維。
+  \item \textbf{最小生成森林}：於 $G_c^{\text{pruned}}$ 上以 Kruskal 演算法~\cite{kruskal1956shortest} 求取最小生成結構，記為 $G_{\text{mst}}$；由於 $G_c^{\text{pruned}}$ 可能不連通，$G_{\text{mst}}$ 實際為一個森林，每棵樹代表一條重建之纖維。
 \end{enumerate}
 
-此設計之主要作用在於：\textbf{閾值裁剪階段抑制偽連線、最小生成森林階段抑制冗餘連線}。兩者皆在元件層（而非像素層）上操作，計算成本極低，並且其輸出自然給出了纖維拓樸層級之碎片歸屬關係。
+此設計之主要作用在於：\textbf{閾值裁剪階段抑制偽連線、最小生成森林階段抑制冗餘連線}。兩者皆在元件層（而非像素層）上操作，計算成本極低，並且其輸出自然給出了纖維拓樸層級之碎片歸屬關係。圖~\ref{fig:graph} 比較了此兩步策略之各階段：未裁剪之 $G_c$（圖~\ref{fig:graph-full}）含大量橫跨真皮之高成本偽邊；經閾值 $\tau$ 裁剪後（圖~\ref{fig:graph-pruned}）此類偽邊被移除；最後之最小生成森林 $G_{\text{mst}}$（圖~\ref{fig:graph-mst}）進一步去除冗餘連線，使每棵樹對應一條重建之纖維。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{graph_full.png}
+    \caption{}%
+    \label{fig:graph-full}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{graph_pruned.png}
+    \caption{}%
+    \label{fig:graph-pruned}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{graph_mst.png}
+    \caption{}%
+    \label{fig:graph-mst}
+  \end{subfigure}
+  \caption[元件層圖之裁剪與最小生成森林]{元件層圖之裁剪與最小生成森林。(a) 未裁剪之 $G_c$，所有擴張領域相鄰之元件對皆以邊相連，其中含大量橫跨真皮之高成本偽邊；(b) 以閾值 $\tau$ 移除 $w_{ab} > \tau$ 之邊後所得之 $G_c^{\text{pruned}}$，明顯偏高之偽連線已被排除；(c) 於 $G_c^{\text{pruned}}$ 上以 Kruskal 演算法求得之最小生成森林 $G_{\text{mst}}$，冗餘連線被進一步去除，每棵樹對應一條重建之纖維。}
+  \label{fig:graph}
+\end{figure}
 
 \section{像素級拓樸之建構}
 \label{sec:skeleton}
 
+前述步驟已於元件層完成連結決策，得到最小生成森林 $G_{\text{mst}}$。然而 $G_{\text{mst}}$ 之每條邊僅記錄「哪兩個元件應相連」，尚未對應至影像上之實際像素軌跡。本節將 $G_{\text{mst}}$ 還原為像素層之具體形狀，依序經路徑回溯、橋接遮罩繪製與骨架化得到\textbf{骨架圖} $G_{\text{skel}}$，再經分段偵測與短樁修剪得到\textbf{修剪後拓樸圖} $G_{\text{trim}}$；後者即為供交叉點分析使用之最終像素級拓樸圖 $G$。
+
 \subsection{最小生成森林邊之路徑回溯}
 \label{subsec:path-backtrack}
 
-對最小生成森林 $T$ 中之每條邊 $(a, b)$，可由其最低成本相遇像素對 $(p_{ab}, q_{ab})$ 出發，分別沿 Dijkstra 擴張時記錄之前驅指標 $\text{prev}_y, \text{prev}_x$ 回溯至元件 $a, b$ 之種子；將兩側路徑串接並反向其中一側，即得到一條自 $a$ 之種子貫穿 $p_{ab} \to q_{ab}$ 並抵達 $b$ 之種子之\textbf{完整像素路徑}
+最小生成森林 $G_{\text{mst}}$ 中之每條邊 $(a, b)$ 皆附帶一組最低成本相遇像素對 $\bigl((x_a, y_a), (x_b, y_b)\bigr)$。由此像素對出發，分別沿 Dijkstra 擴張階段所記錄之前驅指標 $\text{prev}_x, \text{prev}_y$ 逐像素回溯，即可各自得到一條通往元件 $a$、$b$ 種子之像素路徑。將兩側路徑於相遇處銜接、並反轉其中一側之順序，便串接成一條自種子 $\mathbf{s}_a$ 出發、行經 $(x_a, y_a) \to (x_b, y_b)$、終於種子 $\mathbf{s}_b$ 之\textbf{完整像素路徑}
 \begin{equation}
-  \Pi_{(a, b)} \;=\; \bigl[s_a, \ldots, p_{ab}, q_{ab}, \ldots, s_b\bigr],
+  \Pi_{(a, b)} \;=\; \bigl[\mathbf{s}_a, \ldots, (x_a, y_a), (x_b, y_b), \ldots, \mathbf{s}_b\bigr].
   \label{eq:path}
 \end{equation}
-此路徑即為最小生成森林邊於像素空間中之實際形狀，將作為下一步繪製橋接遮罩之輸入。
+此路徑即為該最小生成森林邊於像素空間中之實際形狀（如圖~\ref{fig:bs-backtrack} 所示），並作為下一步繪製橋接遮罩之輸入。
 
 \subsection{橋接遮罩與骨架化}
 \label{subsec:bridge-skeleton}
 
-定義\textbf{橋接遮罩} $\mathcal{B} \in \{0, 1\}^{H \times W}$ 為一張與影像同尺寸之二值遮罩，其於所有最小生成森林路徑所經過之像素處取值為 $1$、其餘為 $0$，即
+將所有最小生成森林邊之像素路徑彙整起來，即可定義\textbf{橋接遮罩} $\mathcal{B} \in \{0, 1\}^{H \times W}$一張與影像同尺寸之二值遮罩，於任一最小生成森林路徑所經過之像素處取值為 $1$、其餘為 $0$：
 \begin{equation}
-  \mathcal{B}(p) \;=\; \mathbb{1}\!\Bigl[\, p \in \bigcup_{(a, b) \in T} \Pi_{(a, b)} \,\Bigr],
+  \mathcal{B}(x, y) \;=\;
+  \begin{cases}
+    1, & (x, y) \in \displaystyle\bigcup_{(a, b) \in G_{\text{mst}}} \Pi_{(a, b)}, \\[6pt]
+    0, & (x, y) \notin \displaystyle\bigcup_{(a, b) \in G_{\text{mst}}} \Pi_{(a, b)}.
+  \end{cases}
   \label{eq:bridge-mask}
 \end{equation}
-其中 $\mathbb{1}[\cdot]$ 為指示函數。$\mathcal{B}$ 將最小生成森林各邊之像素路徑彙整為一張單一之像素層遮罩，作為後續骨架化之新增區段來源。為使該遮罩對骨架化算法足夠穩定，先以半徑 $r_d$ 之圓形結構元對其進行膨脹，再與原標註取聯集
+$\mathcal{B}$ 將分散於各邊之像素路徑整合為單一之像素層遮罩（如圖~\ref{fig:bs-pathmask} 所示），構成骨架化時新增區段之來源。
+
+本研究後續以 Zhang--Suen 演算法~\cite{zhang1984fast} 萃取單像素寬骨架，惟該演算法對\textbf{單像素寬}之輸入較為敏感，此類細線於迭代過程中易被逐步消去而造成斷裂。為此，先以半徑 $r_d$ 之小型圓形結構元對 $\mathcal{B}$ 進行膨脹，提升其厚度穩定性（圖~\ref{fig:bs-dilated}），再與原標註取聯集
 \begin{equation}
-  \mathcal{U} \;=\; \bigl(\,A > 0\,\bigr) \;\cup\; \bigl(\,\mathcal{B} \oplus S_{r_d}\,\bigr),
+  \mathcal{U} \;=\; \bigl(\,A > 0\,\bigr) \;\cup\; \bigl(\,\mathcal{B} \oplus K_{r_d}\,\bigr).
   \label{eq:union}
 \end{equation}
+所得之 $\mathcal{U}$ \textbf{同時保留既有之可信區段與新增之橋接區段}（圖~\ref{fig:bs-union}），確保重建結果與原標註兼容。最後將 $\mathcal{U}$ 細化為單像素寬之骨架，並轉換為以 $(x, y)$ 座標為節點、像素間相鄰為邊之\textbf{骨架圖}
+\begin{equation*}
+  G_{\text{skel}} \;=\; (V_{\text{skel}}, E_{\text{skel}}).
+\end{equation*}
 
-此聯集\textbf{同時保留所有既有之可信區段與新增之橋接區段}，確保重建結果與原標註兼容。最後以基於 Zhang--Suen 之骨架化演算法~\cite{zhang1984fast}將 $\mathcal{U}$ 細化為單像素寬之骨架，再將骨架轉換為以 $(y, x)$ 座標為節點、像素間相鄰為邊之\textbf{像素級拓樸圖} $G$。
-
-\section{交叉點分析與有效跨越計數}
-\label{sec:crossing}
-
-為將像素級拓樸 $G$ 轉為可計數之 IENFD，本研究於 $G$ 上依序執行三個步驟：
 
 \subsection{分段偵測}
 \label{subsec:segment}
 
-依節點之度數將 $V$ 分為三類：度為 $1$ 之\textbf{端點} (endpoint)、度 $\ge 3$ 之\textbf{分支點} (branchpoint)、與度為 $2$ 之\textbf{中繼節點}；端點與分支點合稱\textbf{邊界節點}。據此定義 $G$ 中之一條\textbf{片段} (segment) 為以兩個邊界節點為兩端、內部節點皆為中繼節點之路徑。由定義可知任兩條片段之邊集兩兩互斥，且所有片段之邊集聯集恰為 $E$，故片段集合構成邊集 $E$ 之一個分割。每一片段於生物學上對應一段「無分支之纖維弧」。
+骨架圖 $G_{\text{skel}}$ 仍為像素級之節點—邊結構，尚需進一步切分為具拓樸意義之單位。首先依節點之度數將 $V_{\text{skel}}$ 分為三類：度為 $1$ 之\textbf{端點} (endpoint)、度 $\ge 3$ 之\textbf{分支點} (branchpoint)、以及度為 $2$ 之\textbf{中繼節點}；其中端點與分支點合稱\textbf{邊界節點}。一條\textbf{片段} (segment) 即定義為兩端皆為邊界節點、而中間僅由中繼節點串接之路徑。換言之，沿骨架行走時，每當經過一個邊界節點便切斷一次，所得之各段路徑即為片段。如此切分使任兩條片段不共用任何邊，且全部片段之邊聯集恰為 $E_{\text{skel}}$，故片段集合構成 $E_{\text{skel}}$ 之一個分割；而每一片段於生物學上對應一段\textbf{無分支之纖維弧}。
 
 \subsection{短樁片段之修剪}
 \label{subsec:stub-prune}
 
-分段後，若某片段之總像素長度小於 $5\,\text{px}$ 且其邊界節點至少一端為端點（即為\emph{懸掛之短樁}），則將其自 $G$ 中移除，再重新進行分段偵測。此一步驟可有效抑制骨架化之離散化誤差所產生之小毛刺，避免後續區域標記將其誤計為跨越事件。
+分段後，若某片段之總像素長度小於 $\ell_{\min}$（預設 $5\,\text{px}$）且其邊界節點至少一端為端點（即為懸掛之短樁，如圖~\ref{fig:bs-skeleton} 中紅色圓圈所標示），則將其自 $G_{\text{skel}}$ 中移除，再於剩餘骨架上重新進行分段偵測。此一步驟可有效抑制骨架化之離散化誤差所產生之小毛刺，避免後續區域標記將其誤計為跨越事件。修剪並重新分段所得之拓樸圖記為
+\begin{equation*}
+  G_{\text{trim}} \;=\; (V_{\text{trim}}, E_{\text{trim}}),
+\end{equation*}
+即圖~\ref{fig:bs-pruned} 所示之結果。$G_{\text{trim}}$ 為後續交叉點分析所依據之最終像素級拓樸。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.41\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{bs_1.png}
+    \caption{}%
+    \label{fig:bs-backtrack}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.41\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{bs_2.png}
+    \caption{}%
+    \label{fig:bs-pathmask}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  \begin{subfigure}[b]{0.41\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{bs_3.png}
+    \caption{}%
+    \label{fig:bs-dilated}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.41\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{bs_4.png}
+    \caption{}%
+    \label{fig:bs-union}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  \begin{subfigure}[b]{0.41\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{bs_5.png}
+    \caption{}%
+    \label{fig:bs-skeleton}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.41\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{bs_6.png}
+    \caption{}%
+    \label{fig:bs-pruned}
+  \end{subfigure}
+  \caption[橋接遮罩與骨架化之逐步視覺化]{橋接遮罩與骨架化之逐步視覺化。(a) 沿前驅指標回溯所得之最小生成森林邊像素路徑 $\Pi_{(a, b)}$；(b) 將所有回溯路徑彙整為橋接遮罩 $\mathcal{B}$；(c) 以半徑 $r_d$ 之圓形結構元膨脹後之路徑遮罩 $\mathcal{B} \oplus K_{r_d}$，提升骨架化前之厚度穩定性；(d) 膨脹後之路徑遮罩與原纖維微粒標註取聯集所得之 $\mathcal{U}$，同時保留可信區段與新增橋接區段；(e) 將 $\mathcal{U}$ 經 Zhang--Suen 細化所得之單像素寬骨架，紅色圓圈標示待修剪之懸掛短樁；(f) 移除短樁並完成分段後之最終像素級拓樸圖 $G_{\text{trim}}$。}
+  \label{fig:bridge-skeleton}
+\end{figure}
+\section{交叉點分析與有效跨越計數}
+\label{sec:crossing}
+
+在 §\ref{sec:skeleton} 已建構出經分段與短樁修剪之像素級拓樸 $G_{\text{trim}}$ 後，本節依序執行三個步驟以將其轉換為可計數之 IENFD：(i) 於纖維層以微粒涵蓋數篩除偽神經，得到僅由可信神經組成之 $G_{\text{cov}}$；(ii) 於 $G_{\text{cov}}$ 上對節點進行區域標記，並依此判定跨越邊；(iii) 將跨越邊以所屬片段為單位彙整，計數有效跨越事件。
+
+\subsection{纖維層之微粒涵蓋篩選}
+\label{subsec:coverage-filter}
+
+$G_{\text{trim}}$ 之每個連通分量代表一條\textbf{獨立重建之神經}（可能由多段片段串接而成）。然其中或有由極少數微粒拼接而成者，多半源自孤立之染色雜訊或斷續嚴重之背景結構，不應視為合法神經纖維。為此，本研究於後續區域分析之前先施加一道纖維層篩選。
+
+記 $G_{\text{trim}}$ 之第 $i$ 個連通分量為 $T_i$，定義 $T_i$ 所涵蓋之纖維微粒數為
+\begin{equation}
+  n_{\text{cov}}(T_i) \;=\; \bigl|\,\{\, k \in \{1, \ldots, N\} : \exists\, (x, y) \in T_i,\; L(x, y) = k \,\}\,\bigr|,
+  \label{eq:particle-cov}
+\end{equation}
+即 $T_i$ 之像素節點於原始纖維微粒標籤圖（§\ref{subsec:cc}）上所對應之相異微粒數。僅保留滿足
+\begin{equation}
+  n_{\text{cov}}(T_i) \;\ge\; N_{\min}
+  \label{eq:particle-min}
+\end{equation}
+之連通分量（預設 $N_{\min} = 5$），其聯集記為
+\begin{equation*}
+  G_{\text{cov}} \;=\; (V_{\text{cov}}, E_{\text{cov}}) \;=\; \bigcup_{i:\, n_{\text{cov}}(T_i) \,\ge\, N_{\min}} T_i.
+\end{equation*}
+$G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:crossing-coverage} 所示），後續區域標記與跨越判定皆以其為依據。
 
 \subsection{區域標記與跨越判定}
 \label{subsec:region}
 
-對 $G$ 中每個節點 $v = (y, x)$，依其於表皮遮罩 $M$ 之取值定義其所屬區域
+對 $G_{\text{cov}}$ 中每個節點 $v = (x, y)$，依其於表皮遮罩 $M$ 之取值定義其所屬區域
 \begin{equation}
   \text{region}(v) \;=\;
     \begin{cases}
@@ -252,23 +457,65 @@ $G_c$ 之邊集在實務上常同時包含\emph{兩類連線}：(i) 成本較低
     \end{cases}
   \label{eq:region-label}
 \end{equation}
-若邊 $(u, v) \in E$ 之兩端節點分屬不同區域，即 $\text{region}(u) \ne \text{region}(v)$，則稱該邊為一條\textbf{跨越邊} (crossing edge)。
+若邊 $(u, v) \in E_{\text{cov}}$ 之兩端節點分屬不同區域，即 $\text{region}(u) \ne \text{region}(v)$，則稱該邊為一條\textbf{跨越邊} (crossing edge)。圖~\ref{fig:crossing-point} 視覺化所偵測之跨越邊位置。
 
 \subsection{有效跨越計數}
 \label{subsec:effective-count}
 
-在上述標記完成後，我們依\textbf{片段}（而非邊）為單位計算跨越數；遵循 EFNS/PNS 皮膚切片計數規範~\cite{jointtaskforce2010skinbiopsy}，一條片段即使包含多個跨越邊亦僅計為一次。此外本研究要求：
+在上述區域標記完成後，本研究依\textbf{片段}（而非邊）為單位計算跨越數；遵循 EFNS/PNS 皮膚切片計數規範~\cite{jointtaskforce2010skinbiopsy}，一條片段即使包含多個跨越邊亦僅計為一次。偶然搭上 DEJ 一小段即折返之毛刺已於 §\ref{subsec:stub-prune} 之短樁修剪階段一併排除，故於此階段不再對片段於兩側區域之延伸長度施加額外限制。
 
-\begin{equation}
-  \ell_{\text{epi}} \ge \ell_{\min} \quad \text{and} \quad \ell_{\text{der}} \ge \ell_{\min},
-  \label{eq:effective}
-\end{equation}
+綜上所述，一條片段被計為一次有效跨越，需\textbf{同時}滿足：(i) 其所屬連通分量已通過微粒涵蓋篩選（§\ref{subsec:coverage-filter}）而保留於 $G_{\text{cov}}$ 中；(ii) 至少包含一條跨越邊。滿足之片段總數 $N_{\text{cross}}$ 即為 AEL 輸出之有效跨越數，最終計入之片段如圖~\ref{fig:crossing-effective} 所示。在給定切片之表皮長度（可自 $M$ 之上緣輪廓計算）下，$N_{\text{cross}}$ 可直接轉換為 IENFD（fibers/mm），並與臨床人工計數直接比較。
 
-其中 $\ell_{\text{epi}}, \ell_{\text{der}}$ 分別為該片段在表皮與真皮內之\emph{像素路徑長度}（以每一步之中點對照 $M$ 判定區域、再加總歐式長度）、$\ell_{\min}$ 為最小區域長度（預設 $5\,\text{px}$）。此條件確保被計為「有效跨越」之片段確實在兩個區域內都具有足夠之延伸，而非僅是偶然搭上 DEJ 一小段即折返之毛刺。
-
-滿足上述兩項條件之片段總數 $N_{\text{cross}}$ 即為 AGL 輸出之有效跨越數。在給定切片之表皮長度（可自 $M$ 之上緣輪廓計算）下，$N_{\text{cross}}$ 可直接轉換為 IENFD（fibers/mm），並與臨床人工計數直接比較。
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{crossing_coverage.png}
+    \caption{}%
+    \label{fig:crossing-coverage}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{crossing_point.png}
+    \caption{}%
+    \label{fig:crossing-point}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{crossing_effective.png}
+    \caption{}%
+    \label{fig:crossing-effective}
+  \end{subfigure}
+  \caption[交叉點分析三步驟之視覺化]{交叉點分析三步驟之視覺化。(a) 經微粒涵蓋篩選後保留之 $G_{\text{cov}}$，僅保留 $n_{\text{cov}}(T_i) \ge N_{\min}$ 之連通分量；(b) 於 $G_{\text{cov}}$ 上之節點區域標記與跨越邊偵測結果；(c) 將跨越邊以所屬片段為單位彙整後最終計入 $N_{\text{cross}}$ 之有效跨越片段。}
+  \label{fig:crossing}
+\end{figure}
 
 \section{本章小結}
 \label{sec:method-summary}
 
-本章提出之 AGL 演算法以多源 Dijkstra 擴張為核心，將原本不完整之纖維標註逐步整合為一個於像素層級具一致性之拓樸圖：擴張過程於成本圖上自動劃分各元件之 Voronoi 領域，並於相鄰領域邊界處產生具最小累積成本之相遇點，藉此重建因斷裂而失聯之纖維延續關係。為避免遠距離元件之高成本相遇被誤納，AGL 進一步在元件層圖上施以閾值裁剪並計算最小生成森林，使每棵樹自然對應一條重建後之纖維、同時抑制偽連線與冗餘連線。最後將樹邊之像素路徑與原標註取聯集後骨架化，並於骨架上以片段為單位執行區域標記與有效跨越判定；輸出之 $N_{\text{cross}}$ 結合切片之表皮長度即可轉換為臨床可比較之 IENFD（fibers/mm），完成自破碎標註至可量化指標之端到端流程。
+綜合前述各節之說明，AEL 自輸入影像至有效跨越數之完整流程可整理為演算法~\ref{alg:ael}：
+
+\begin{algorithm}[htbp]
+  \caption{Annotation Expansion Linker}
+  \label{alg:ael}
+  \textbf{Input:} 影像 $I$，表皮遮罩 $M$，標註 $A$；參數 $\{\text{offset}, r_{\text{bg}}, n_{\text{tile}}, \beta, \sigma_{\min}, \sigma_{\max}, \tau, r_d, \ell_{\min}, N_{\min}\}$。\\
+  \textbf{Output:} 像素級拓樸圖 $G_{\text{trim}}$ 與有效跨越數 $N_{\text{cross}}$。
+  \begin{enumerate}
+    \item $M_{\text{ROI}} \gets \text{DilateEpidermisVertically}(M, \text{offset})$
+    \item $I_{\text{enhanced}} \gets \text{Sato}(\text{CLAHE}(\text{BgRemove}(I_g))) \odot M_{\text{ROI}}$；$C \gets \exp(1 - \tilde{I}_{\text{enhanced}}) - 1$
+    \item $L \gets \text{CC}(A \odot M_{\text{ROI}})$，$N \gets \max L$
+    \item $(O, D, \text{prev}_y, \text{prev}_x) \gets \text{MultiSourceDijkstra}(C, L)$
+    \item $\mathcal{P} \gets \text{FindMeetingPoints}(O, D, \text{prev}_y, \text{prev}_x)$
+    \item $G_c \gets \text{BuildComponentGraph}(\mathcal{P}, N)$；$G_c^{\text{pruned}} \gets \text{Prune}(G_c, \tau)$
+    \item $G_{\text{mst}} \gets \text{MinimumSpanningForest}(G_c^{\text{pruned}})$
+    \item $G_{\text{skel}} \gets \text{Skeletonize}\big(\text{Dilate}(\text{DrawPaths}(G_{\text{mst}}), r_d) \cup A\big)$
+    \item $G_{\text{trim}} \gets \text{TrimStubs}(G_{\text{skel}}, \ell_{\min})$
+    \item $G_{\text{cov}} \gets \text{FilterByCoverage}(G_{\text{trim}}, L, N_{\min})$
+    \item $G_{\text{cov}} \gets \text{LabelRegions}(G_{\text{cov}}, M)$
+    \item $N_{\text{cross}} \gets \text{CountEffectiveCrossings}(G_{\text{cov}}, M)$
+  \end{enumerate}
+\end{algorithm}
+
+本章提出之 AEL 演算法以多源 Dijkstra 擴張為核心，將原本不完整之纖維微粒標註逐步整合為一個於像素層級具一致性之拓樸圖：擴張過程於成本圖上自動劃分各元件之 Voronoi 領域，並於相鄰領域邊界處產生具最小累積成本之相遇點，藉此重建因斷裂而失聯之纖維延續關係。為避免遠距離元件之高成本相遇被誤納，AEL 進一步在元件層圖上施以閾值裁剪並計算最小生成森林，使每棵樹自然對應一條重建後之纖維、同時抑制偽連線與冗餘連線。最後將樹邊之像素路徑與原微粒標註取聯集後骨架化，並於骨架上以片段為單位執行區域標記與有效跨越判定；輸出之 $N_{\text{cross}}$ 結合切片之表皮長度即可轉換為臨床可比較之 IENFD（fibers/mm），完成自破碎之纖維微粒至可量化指標之端到端流程。
