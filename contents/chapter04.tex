@@ -3,7 +3,7 @@
 \chapter{實驗結果與討論}
 \label{chap:experiment}
 
-本章對本文提出之 AEL 進行系統性之實驗評估。第~\ref{sec:dataset}~節說明資料集與前置流程；第~\ref{sec:metrics}~節定義評估指標；第~\ref{sec:param-analysis}~節分析各超參數之影響並確立預設值；第~\ref{sec:baselines}~節介紹用以比較之基準方法；第~\ref{sec:quant}~節報告定量結果；第~\ref{sec:qual}~節呈現定性分析與失效案例；第~\ref{sec:discussion}~節討論結果之意涵與方法之限制。
+本章對本文提出之 AEL 進行系統性之實驗評估。第~\ref{sec:dataset}~節說明資料集與前置流程；第~\ref{sec:metrics}~節定義評估指標；第~\ref{sec:param-analysis}~節分析各超參數之影響並確立預設值；第~\ref{sec:baselines}~節介紹用以比較之基準方法；第~\ref{sec:quant}~節報告定量結果；第~\ref{sec:qual}~節呈現定性分析與失效案例；第~\ref{sec:discussion}~節討論結果之意涵、與臨床實務之銜接，以及方法於不同場景之敏感度與可遷移性。
 
 \section{資料集}
 \label{sec:dataset}
@@ -29,55 +29,75 @@
 
   \vspace{0.5em}
 
-  \begin{minipage}[t]{0.71\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_image_rgb_full.png}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.205\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_image_rgb_crop.png}
-  \end{minipage}\\[2pt]
-  {\small (a) 原始 RGB 影像 $I$}
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \begin{minipage}[t]{0.71\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_image_rgb_full.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.205\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_image_rgb_crop.png}
+    \end{minipage}
+    \caption{原始 RGB 影像 $I$}%
+    \label{fig:dataset-rgb}
+  \end{subfigure}
 
-  \vspace{0.8em}
+  \vspace{0.5em}
 
-  \begin{minipage}[t]{0.71\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_image_green_full.png}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.205\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_image_green_crop.png}
-  \end{minipage}\\[2pt]
-  {\small (b) 綠色通道 $I_g$}
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \begin{minipage}[t]{0.71\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_image_green_full.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.205\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_image_green_crop.png}
+    \end{minipage}
+    \caption{綠色通道 $I_g$}%
+    \label{fig:dataset-green}
+  \end{subfigure}
 
-  \vspace{0.8em}
+  \vspace{0.5em}
 
-  \begin{minipage}[t]{0.71\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_mask_full.png}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.205\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_mask_crop.png}
-  \end{minipage}\\[2pt]
-  {\small (c) 表皮遮罩 $M$}
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \begin{minipage}[t]{0.71\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_mask_full.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.205\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_mask_crop.png}
+    \end{minipage}
+    \caption{表皮遮罩 $M$}%
+    \label{fig:dataset-mask}
+  \end{subfigure}
 
-  \vspace{0.8em}
+  \vspace{0.5em}
 
-  \begin{minipage}[t]{0.71\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_weka_full.png}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.205\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_weka_crop.png}
-  \end{minipage}\\[2pt]
-  {\small (d) 纖維微粒標註 $A$}
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \begin{minipage}[t]{0.71\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_weka_full.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.205\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_weka_crop.png}
+    \end{minipage}
+    \caption{纖維微粒標註 $A$}%
+    \label{fig:dataset-particle}
+  \end{subfigure}
 
-  \vspace{0.8em}
+  \vspace{0.5em}
 
-  \begin{minipage}[t]{0.71\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_label_full.png}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.205\linewidth}
-    \includegraphics[width=\linewidth]{viz_dataset_inputs_label_crop.png}
-  \end{minipage}\\[2pt]
-  {\small (e) 神經纖維骨架遮罩 $S_{\text{gt}}$}
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \begin{minipage}[t]{0.71\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_label_full.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.205\linewidth}
+      \includegraphics[width=\linewidth]{viz_dataset_inputs_label_crop.png}
+    \end{minipage}
+    \caption{神經纖維骨架遮罩 $S_{\text{gt}}$}%
+    \label{fig:dataset-skel}
+  \end{subfigure}
 
-  \caption[資料集輸入資料示意]{資料集單張切片之輸入資料示意。左欄為全切片影像、右欄為左欄紅框所標示區域之局部放大。(a) 免疫螢光染色後拍攝之原始 RGB 影像 $I$；(b) 作為 AEL 主要輸入之綠色通道 $I_g$；(c) 以多邊形人工標註之表皮遮罩 $M$；(d) 人工標註之纖維微粒 $A$，為 AEL 之輸入而非真值；(e) 專家人工標註之神經纖維骨架二值遮罩 $S_{\text{gt}}$，作為拓樸品質評估之真值。}
+  \caption[資料集輸入資料示意]{資料集單張切片之輸入資料示意。左欄為全切片影像、右欄為左欄紅框所標示區域之局部放大。(a) 為免疫螢光染色後拍攝之原始影像，後續處理以其 (b) 綠色通道為主要輸入；(c) 表皮遮罩與 (d) 纖維微粒標註均為人工標註，惟 $A$ 為 AEL 之輸入而非真值；(e) 由專家標註，作為拓樸品質評估之真值。}
   \label{fig:dataset-inputs}
 \end{figure}
 
@@ -155,7 +175,7 @@ clDice 為兩者之調和平均
 \section{參數分析}
 \label{sec:param-analysis}
 
-於 \S\ref{sec:metrics} 確立評估指標後，本節先行檢視 AEL 各超參數對重建品質之影響，俾使後續主實驗（\S\ref{sec:quant}）所採之各參數取值皆有明確之實驗依據。AEL 全流程雖涉及多個參數，但其中多數——如 ROI 膨脹半徑 $\text{offset}$、橋接膨脹半徑 $r_d$、短樁修剪長度 $\ell_{\min}$、微粒涵蓋門檻 $N_{\min}$、評估膨脹半徑 $r_v$ 等——係依影像解析度或實作慣例固定，於本研究中不隨資料調整；真正需經實驗檢視之超參數共\textbf{六個}，分屬前處理、線狀結構強化與連結三個階段。
+於 \S\ref{sec:metrics} 確立評估指標後，本節先行檢視 AEL 各超參數對重建品質之影響，俾使後續主實驗（\S\ref{sec:quant}）所採之各參數取值皆有明確之實驗依據。AEL 全流程雖涉及多個參數，但其中多數——如 ROI 膨脹半徑 $\text{offset}$、橋接膨脹半徑 $r_d$、短樁修剪長度 $\ell_{\min}$、微粒涵蓋門檻 $N_{\min}$、評估膨脹半徑 $r_v$ 等——係依影像解析度或實作慣例固定，於本研究中不隨資料調整；真正需經實驗檢視之超參數共\textbf{六個}，分屬前處理、線狀結構濾波與連結三個階段。
 
 本節對此六者採\textbf{單因子擾動}：以各參數於 AEL 之預設值（完整配置見表~\ref{tab:hyperparams}，即下列各表所標之 reference）為基準，每次僅變動一個參數、其餘固定為預設值，並於全部 $77$ 張切片上量測 clDice、HD95 與 avgHD 三項拓樸品質指標。為判定預設值是否確實優於其鄰近取值，對每一個非 reference 之取值，將其與 reference 之逐切片配對差值執行\textbf{單尾 Wilcoxon 符號秩檢定}~\cite{wilcoxon1945individual}，對立假設設為「reference 較佳」（clDice 較高、HD95 與 avgHD 較低）；下列各表以 $p$ 欄報告其顯著性，並以 $*$、$**$ 分別標示 $p < 0.05$ 與 $p < 0.01$。此外，對效果於影像上清晰可辨之參數，另佐以視覺化（如圖~\ref{fig:bg-remove}）以說明其作用機制；至於擾動幅度極小、難以目視區辨之參數，則僅以擾動表呈現，不另附圖。
 
@@ -195,6 +215,8 @@ clDice 為兩者之調和平均
   \centering
   \caption{白色頂帽結構元尺寸 $r_{\text{bg}}$ 之擾動結果（$n = 77$ 張切片）。$p$ 為單尾 Wilcoxon 符號秩檢定（對立假設：reference 較佳）；$*\,p<0.05$、$**\,p<0.01$。}
   \label{tab:param-bg}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{ccccccc}
     \toprule
     $r_{\text{bg}}$ & clDice (\%) $\uparrow$ & $p$ & HD95 (um) $\downarrow$ & $p$ & avgHD (um) $\downarrow$ & $p$ \\
@@ -255,6 +277,8 @@ clDice 為兩者之調和平均
   \centering
   \caption{CLAHE 對比裁剪閾值 $\beta$ 之擾動結果（$n = 77$ 張切片）。檢定方式同表~\ref{tab:param-bg}。}
   \label{tab:param-clip}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{ccccccc}
     \toprule
     $\beta$ & clDice (\%) $\uparrow$ & $p$ & HD95 (um) $\downarrow$ & $p$ & avgHD (um) $\downarrow$ & $p$ \\
@@ -274,6 +298,8 @@ clDice 為兩者之調和平均
   \centering
   \caption{CLAHE 方塊尺度 $n_{\text{tile}}$ 之擾動結果（$n = 77$ 張切片）。檢定方式同表~\ref{tab:param-bg}。}
   \label{tab:param-grid}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{ccccccc}
     \toprule
     $n_{\text{tile}}$ & clDice (\%) $\uparrow$ & $p$ & HD95 (um) $\downarrow$ & $p$ & avgHD (um) $\downarrow$ & $p$ \\
@@ -293,6 +319,8 @@ clDice 為兩者之調和平均
   \centering
   \caption{Sato 最大尺度 $\sigma_{\max}$（$\sigma_{\min}$ 固定為 $1$）之擾動結果（$n = 77$ 張切片）。檢定方式同表~\ref{tab:param-bg}。}
   \label{tab:param-sstop}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{ccccccc}
     \toprule
     $\sigma_{\max}$ & clDice (\%) $\uparrow$ & $p$ & HD95 (um) $\downarrow$ & $p$ & avgHD (um) $\downarrow$ & $p$ \\
@@ -312,6 +340,8 @@ clDice 為兩者之調和平均
   \centering
   \caption{Sato 最小尺度 $\sigma_{\min}$（$\sigma_{\max}$ 固定為 $4$）之擾動結果（$n = 77$ 張切片）。檢定方式同表~\ref{tab:param-bg}。}
   \label{tab:param-sstart}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{ccccccc}
     \toprule
     $\sigma_{\min}$ & clDice (\%) $\uparrow$ & $p$ & HD95 (um) $\downarrow$ & $p$ & avgHD (um) $\downarrow$ & $p$ \\
@@ -329,6 +359,8 @@ clDice 為兩者之調和平均
   \centering
   \caption{邊裁剪閾值 $\tau$ 之擾動結果（$n = 77$ 張切片）。檢定方式同表~\ref{tab:param-bg}。}
   \label{tab:param-prune}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{ccccccc}
     \toprule
     $\tau$ & clDice (\%) $\uparrow$ & $p$ & HD95 (um) $\downarrow$ & $p$ & avgHD (um) $\downarrow$ & $p$ \\
@@ -350,7 +382,13 @@ clDice 為兩者之調和平均
 為檢視 AEL 之優勢，我們將其與下列兩類方法比較：
 
 \begin{enumerate}
-  \item \textbf{MST}：為隔離\textbf{連結策略}此一單一變因，本文以最樸素之 MST 連結為基準（並非文獻既有方法）。其前處理流程（ROI 建立、影像增強、成本圖 $C$ 之建構）與 AEL 完全相同，僅於連結階段以\textbf{端點對端點之最短路徑成本}取代 AEL 之多源擴張。具體而言，元件層圖之節點為各纖維微粒元件 $\{A_i\}$；對任意元件對 $(A_i, A_j)$，若其端點間之最小歐式直線距離不超過閾值 $d_{\max}$（本文取 $d_{\max} = 15\,\text{px}$），則自 $A_i$ 之端點於 $C$ 上以 Dijkstra 擴張至 $A_j$ 之端點，取所有端點對中最短路徑成本之最小值作為邊權，否則不建邊（排除明顯過遠之配對、亦使圖稀疏化）。於所得（一般而言非連通）之圖上取最小生成森林後，將每條樹邊以其對應之 Dijkstra 路徑於像素層級實體化、與原始元件骨架取聯集，即得 MST 之預測骨架 $S_{\text{pred}}^{\text{MST}}$。MST 不套用 AEL 之形態學剪枝；其跨越計數則於 $S_{\text{pred}}^{\text{MST}}$ 上採用與 AEL 相同之分段、區域標記與有效跨越判定，代表「以成對最短路徑取代多源擴張」之基準。
+  \item \textbf{MST}：為隔離\textbf{連結策略}此一單一變因，本文以最樸素之 MST 連結為基準（並非文獻既有方法）。其前處理流程（ROI 建立、影像增強、成本圖 $C$ 之建構）與 AEL 完全相同，僅於連結階段以\textbf{端點對端點之最短路徑成本}取代 AEL 之多源擴張。連結之具體步驟分為圖建構、連結與骨架化、計數程序三部分。
+
+  \textbf{(a) 圖建構：} 元件層圖之節點為各纖維微粒元件 $\{A_i\}$；對任意元件對 $(A_i, A_j)$，若其端點間之最小歐式直線距離不超過閾值 $d_{\max}$（本文取 $d_{\max} = 15\,\text{px}$），則自 $A_i$ 之端點於 $C$ 上以 Dijkstra 擴張至 $A_j$ 之端點，取所有端點對中最短路徑成本之最小值作為邊權；否則不建邊（排除明顯過遠之配對、亦使圖稀疏化）。
+
+  \textbf{(b) 連結與骨架化：} 於所得之圖上取最小生成森林後，將每條樹邊以其對應之 Dijkstra 路徑於像素層級實體化、與原始元件骨架取聯集，即得 MST 之預測骨架 $S_{\text{pred}}^{\text{MST}}$。MST 不套用 AEL 之形態學剪枝。
+
+  \textbf{(c) 計數程序：} 於 $S_{\text{pred}}^{\text{MST}}$ 上採用與 AEL 相同之分段、區域標記與有效跨越判定，代表「以成對最短路徑取代多源擴張」之基準。
   \item \textbf{Raw-Skeleton}：不執行任何連結，直接對 $A$ 骨架化並依本文之跨越計數程序計算 $N_{\text{cross}}$；代表「不補足微粒」之下限。
 \end{enumerate}
 
@@ -370,6 +408,8 @@ clDice 為兩者之調和平均
   \centering
   \caption{各連結方法於本資料集上之跨越計數指標（$n = 77$ 張切片）。MAE、RMSE 採與 AEL 配對之 Wilcoxon 符號秩檢定，$\rho$ 採自身顯著性 $t$ 檢定（細節見\S\ref{subsec:significance}）；AEL 為基準，以 --- 表示。Raw-Skeleton 各切片預測跨越計數恆為 $0$，$\rho$ 無法定義。$**\,p<0.01$。}
   \label{tab:main-results}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{lcccccc}
     \toprule
     Method & MAE $\downarrow$ & $p$ & RMSE $\downarrow$ & $p$ & $\rho$ $\uparrow$ & $p$ \\
@@ -394,6 +434,8 @@ Raw-Skeleton 之 MAE 與 RMSE 則極高且顯著劣於 AEL 與 MST：本資料�
   \centering
   \caption{各連結方法於本資料集上之拓樸品質指標（以重建骨架對專家標註之中心線比對，$n = 77$ 張切片）。$p$ 為各方法與 AEL 之逐切片配對差值之 Wilcoxon 符號秩檢定（見\S\ref{subsec:significance}）；$**\,p<0.01$。}
   \label{tab:topology-results}
+  \small
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{lcccccc}
     \toprule
     Method & clDice (\%) $\uparrow$ & $p$ & HD95 (um) $\downarrow$ & $p$ & avgHD (um) $\downarrow$ & $p$ \\
@@ -407,7 +449,7 @@ Raw-Skeleton 之 MAE 與 RMSE 則極高且顯著劣於 AEL 與 MST：本資料�
 
 AEL 於三項指標上皆優於兩個基準，與\S\ref{subsec:counting-results} 之 $\rho$ 排序一致，進一步佐證高 $\rho$ 確實對應較佳之重建品質。Raw-Skeleton 之 clDice 為 $71.17\%$、HD95 高達 $15.239\,\text{um}$、avgHD 為 $2.202\,\text{um}$，三項指標皆為三者之最劣——其 clDice 雖因部分微粒本即落於真實纖維之容忍範圍內而未明顯崩壞，但 HD95 與 avgHD 之數值顯示仍存在大量遠離真值之孤立元件，反映未經連結之骨架於拓樸層面之嚴重缺陷；MST 經微粒連結後三項指標皆有量級改善（clDice $89.30\%$、HD95 $3.044\,\text{um}$、avgHD $0.784\,\text{um}$），再次說明\textbf{連結重組}本身即足以大幅恢復拓樸品質。
 
-AEL 較 MST 之進一步改善則於三項指標上呈現可解釋之層次：clDice 僅多 $1.12$ 百分點（$89.30 \to 90.42$）、avgHD 降低約 $9\%$（$1.944 \to 1.778\,\text{um}$）、HD95 則降低約 $21\%$（$3.044 \to 2.404\,\text{um}$）。此一層次與 AEL 之代價走廊設計相符：clDice 採 $1.28\,\text{um}$ 之物理容忍半徑，凡落於真實纖維附近之路徑皆被計入命中，MST 既已連結成功，其 clDice 自然貼近 AEL；avgHD 對全骨架之雙向最短距離取平均，AEL 之改善幅度有限；而 HD95 所刻畫之最壞情形偏差，正是 MST 因不受形態學代價約束、易產生偏離真值之短捷徑路徑之處——AEL 之多源代價聚合於此處發揮最大作用，使最壞情形之偏差得以顯著壓低。
+AEL 較 MST 之進一步改善則於三項指標上呈現可解釋之層次：clDice 僅多 $1.12$ 百分點（$89.30 \to 90.42$）、avgHD 降低約 $5\%$（$0.784 \to 0.740\,\text{um}$）、HD95 則降低約 $21\%$（$3.044 \to 2.404\,\text{um}$）。此一層次與 AEL 之代價走廊設計相符：clDice 採 $1.28\,\text{um}$ 之物理容忍半徑，凡落於真實纖維附近之路徑皆被計入命中，MST 既已連結成功，其 clDice 自然貼近 AEL；avgHD 對全骨架之雙向最短距離取平均，AEL 之改善幅度有限；而 HD95 所刻畫之最壞情形偏差，正是 MST 因不受形態學代價約束、易產生偏離真值之短捷徑路徑之處——AEL 之多源代價聚合於此處發揮最大作用，使最壞情形之偏差得以顯著壓低。
 
 \section{定性分析}
 \label{sec:qual}
@@ -543,7 +585,7 @@ AEL 較 MST 之進一步改善則於三項指標上呈現可解釋之層次：cl
   \label{fig:qual-ael-wins}
 \end{figure}
 
-\paragraph{兩者皆差：} 第三類為兩種方法皆未能重建出與 $S_{\text{gt}}$ 相符拓樸之切片（兩者 HD95 皆高），如圖~\ref{fig:qual-both-bad} 所示。此類切片之染色訊號\textbf{並不微弱}，問題反而出在局部出現強烈染色之飽和亮結構（亮帶或亮塊）——這些結構並非專家標註之纖維，但其於成本圖上之成本與真實纖維同樣偏低，使成本圖於該區\textbf{失去鑑別度}。圖中區域 1 即有一道飽和亮帶緊鄰纖維：MST 之端點對最短路徑被此低成本帶吸引而\textbf{繞道}，補出大幅偏離 $S_{\text{gt}}$ 之路徑，疊合圖上留下大量紅色多餘段；AEL 之成本走廊擴張雖未發生同等程度之繞道，卻因走廊遭亮結構截斷而使重建\textbf{破碎}為數段，疊合圖上則表現為多處 $S_{\text{gt}}$ 未被連及之綠色漏連段。兩者之誤差形態雖異（繞道對破碎），HD95 卻同樣偏高。本切片之三項指標亦反映此「皆差且接近」之狀態：clDice 為 $87.38\%$（MST）對 $87.42\%$（AEL）幾乎無差、HD95 自 $5.277$ 降至 $4.659\,\text{um}$（$-12\%$）、avgHD 自 $1.248$ 降至 $1.232\,\text{um}$（$-1\%$）；AEL 雖仍微幅優於 MST，惟改善幅度遠小於前兩例，與本案例為「兩者皆差」之挑樣意圖相符。此一情境界定了 AEL 之適用前提——當成本圖無法將強烈染色之非纖維亮結構與真實纖維區分時，任何僅依賴成本圖之連結方法皆面臨同等限制；後續若需穩健處理此類切片，須回到前處理階段尋求改善（例如對非管狀亮結構更具鑑別力之線狀結構強化，或結合學習式纖維增強），而非僅在連結策略上著手。
+\paragraph{兩者皆差：} 第三類為兩種方法皆未能重建出與 $S_{\text{gt}}$ 相符拓樸之切片（兩者 HD95 皆高），如圖~\ref{fig:qual-both-bad} 所示。此類切片之染色訊號\textbf{並不微弱}，問題反而出在局部出現強烈染色之飽和亮結構（亮帶或亮塊）——這些結構並非專家標註之纖維，但其於成本圖上之成本與真實纖維同樣偏低，使成本圖於該區\textbf{失去鑑別度}。圖中區域 1 即有一道飽和亮帶緊鄰纖維：MST 之端點對最短路徑被此低成本帶吸引而\textbf{繞道}，補出大幅偏離 $S_{\text{gt}}$ 之路徑，疊合圖上留下大量紅色多餘段；AEL 之成本走廊擴張雖未發生同等程度之繞道，卻因走廊遭亮結構截斷而使重建\textbf{破碎}為數段，疊合圖上則表現為多處 $S_{\text{gt}}$ 未被連及之綠色漏連段。兩者之誤差形態雖異（繞道對破碎），HD95 卻同樣偏高。本切片之三項指標亦反映此「皆差且接近」之狀態：clDice 為 $87.38\%$（MST）對 $87.42\%$（AEL）幾乎無差、HD95 自 $5.277$ 降至 $4.659\,\text{um}$（$-12\%$）、avgHD 自 $1.248$ 降至 $1.232\,\text{um}$（$-1\%$）；AEL 雖仍微幅優於 MST，惟改善幅度遠小於前兩例，與本案例為「兩者皆差」之挑樣意圖相符。此一情境界定了 AEL 之適用前提——當成本圖無法將強烈染色之非纖維亮結構與真實纖維區分時，任何僅依賴成本圖之連結方法皆面臨同等限制；後續若需穩健處理此類切片，須回到前處理階段尋求改善（例如對非管狀亮結構更具鑑別力之線狀結構濾波，或結合學習式纖維增強），而非僅在連結策略上著手。
 
 \begin{figure}[htbp]
   \centering
@@ -606,22 +648,12 @@ AEL 較 MST 之進一步改善則於三項指標上呈現可解釋之層次：cl
   \label{fig:qual-both-bad}
 \end{figure}
 
-\section{討論與限制}
+\section{討論}
 \label{sec:discussion}
 
 \subsection{結果詮釋}
 
-上述實驗 (定量結果見第~\ref{sec:quant}~節) 支持本文之核心主張：\textbf{將連結準則建立於影像成本圖上，能同時抑制純幾何方法之錯接與過度連接}。在計數指標上，AEL 之 MAE 與 RMSE 為三者最低、$\rho$ 為各方法中最高，且在拓樸品質上亦取得最高之 clDice 與最低之 HD95、avgHD。
-
-\subsection{失效模式}
-
-本文亦觀察到 AEL 仍有下列失效模式：
-
-\begin{itemize}
-  \item \textbf{強染色背景}。若染色雜訊於 Sato 濾波後呈現與真實纖維相近之響應，其成本亦會偏低，使 Dijkstra 擴張「繞道」經過該雜訊而非直接連接原纖維，產生形狀異常之重建路徑。此情況在染色過度之切片上較常見。
-  \item \textbf{對纖維微粒標註之依賴}。AEL 以纖維微粒標註 $A$ 所提供之元件為連結對象、本身不重新偵測纖維，其重建品質因而受 $A$ 之完整性與正確性所限：$A$ 漏標之纖維段無從於連結階段憑空補回，$A$ 之偽陽性微粒則會被一併連入而衍生多餘結構。此一限制源於輸入而非連結策略，須回到上游之纖維微粒偵測方能改善。
-  \item \textbf{表皮遮罩不精確}。由於跨越計數依賴 $M$ 精確描述 DEJ，當 $M$ 於某處偏移時，有效跨越之判定亦會偏差；此為所有基於遮罩之計數方法共通之限制。
-\end{itemize}
+上述實驗 (定量結果見第~\ref{sec:quant}~節) 支持本文之核心主張：\textbf{將連結準則建立於影像成本圖上，能同時抑制純幾何方法之錯接與過度連接}。在計數指標上，AEL 之 MAE 與 RMSE 為三者最低、$\rho$ 為各方法中最高，且在拓樸品質上亦取得最高之 clDice 與最低之 HD95、avgHD。具體之失效情境（如強染色背景下之繞道與破碎）已於\S\ref{sec:qual}「兩者皆差」案例中以圖~\ref{fig:qual-both-bad} 詳述；屬於研究框架層級之結構性限制（資料規模、上游切分依賴、二維切片等）則彙整於第~\ref{sec:limitations}~節。
 
 \subsection{與臨床實務之銜接}
 
@@ -629,4 +661,4 @@ AEL 之輸出為可視化之拓樸圖，對臨床人員具備\textbf{可稽核�
 
 \subsection{敏感度與可遷移性}
 
-本文之預設參數於所使用之資料集上表現穩定，但若應用於不同之切片厚度、染色通訊協定或顯微鏡，建議首先校正 $\sigma$ 之範圍（以符合纖維像素寬度）以及 $\tau$（以符合成本圖之尺度）。其餘參數對結果相對不敏感。
+本文之預設參數於所使用之資料集上表現穩定。若應用於不同之切片厚度、染色協定或顯微鏡，\textbf{主要需重新校正連結階段之邊裁剪閾值 $\tau$}——其於\S\ref{sec:param-analysis} 之擾動結果中影響最為實質而顯著（所有非預設取值於三項指標上皆達 $p < 0.01$），須依新資料之成本圖尺度重新搜尋最適值。Sato 之尺度範圍 $[\sigma_{\min}, \sigma_{\max}]$ 則須\textbf{對應新影像下纖維之像素寬度}（$\sigma_{\min}$ 涵蓋最細纖維、$\sigma_{\max}$ 涵蓋最粗纖維），屬隨資料而確定之校準性常數而非自由超參數。其餘參數於\S\ref{sec:param-analysis} 之擾動範圍內對結果相對不敏感，可沿用本文預設或依實作慣例設定。

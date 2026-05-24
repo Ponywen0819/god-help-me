@@ -3,23 +3,23 @@
 \chapter{文獻回顧}
 \label{chap:related}
 
-本章回顧與本論文研究直接相關之四類文獻：第~\ref{sec:ienf-related}~節說明 IENFD 量化之臨床背景與既有自動化嘗試；第~\ref{sec:vesselness}~節整理影像增強與血管／纖維性濾波之理論基礎；第~\ref{sec:segmentation}~節討論既有 IENF 切分方法之兩條路徑，及其與拓樸層計數之間之轉換缺口；第~\ref{sec:graph-tracing}~節回顧圖論式纖維追蹤，特別是最短路徑、最小生成樹與骨架化方法在生醫影像重建中的應用。
+本章回顧與本論文研究直接相關之四類文獻：第~\ref{sec:ienf-related}~節說明 IENFD 量化之臨床背景與既有自動化嘗試；第~\ref{sec:vesselness}~節整理影像增強與線狀結構濾波之理論基礎；第~\ref{sec:segmentation}~節討論既有 IENF 切分方法之兩條路徑，及其與拓樸層計數之間之轉換缺口；第~\ref{sec:graph-tracing}~節回顧圖論式纖維追蹤，特別是最短路徑、最小生成樹與骨架化方法在生醫影像重建中的應用。
 
 \section{表皮內神經纖維密度量化}
 \label{sec:ienf-related}
 
 IENFD 自 2005 年 EFNS 發佈之量測指引（後於 2010 年更新）~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy} 以來被奉為小纖維神經病變診斷之參考標準，其量測規則要求判讀者於 PGP 9.5 染色之皮膚垂直切片中，沿表皮／真皮交界逐一辨識由真皮穿越進入表皮之神經纖維，並將「一條進入後分支者」僅計為一次。由於此規則同時涉及「拓樸連續性判定」與「跨越事件去重」兩項子任務，代表性之早期自動化工作~\cite{vanacker2016automated, dabbah2011automatic} 集中於第一步之影像增強與分割，並未真正觸及拓樸層面之推理。
 
-Vanacker 等人~\cite{vanacker2016automated} 提出以形態學閉運算配合 Otsu 閾值對 PGP 9.5 影像進行二值化，再以連通元件數粗略估計纖維數，但由於缺乏跨越去重機制，容易高估密度，亦無法處理表皮內分支；類似以閾值化加連通元件統計之策略亦見於角膜共軛焦顯微 (CCM) 影像之糖尿病周邊神經病變評估~\cite{dabbah2011automatic}。此類方法皆顯示，從分割結果到可計數之拓樸結構之間存在結構性缺口，而此缺口正是本研究所欲處理之核心。
+Vanacker 等人~\cite{vanacker2016automated} 提出以形態學閉運算配合 Otsu 閾值對 PGP 9.5 影像進行二值化，再以連通元件數粗略估計纖維數，但由於缺乏跨越去重機制，容易高估密度，亦無法處理表皮內分支；類似以閾值化加連通元件統計之策略亦見於角膜共軛焦顯微 (CCM) 影像之糖尿病周邊神經病變評估~\cite{dabbah2011automatic}。上述工作皆顯示，從分割結果到可計數之拓樸結構之間存在結構性缺口，而此缺口正是本研究所欲處理之核心。
 
-\section{影像增強與血管／纖維性濾波}
+\section{影像增強與線狀結構濾波}
 \label{sec:vesselness}
 
 PGP 9.5 染色呈現之神經纖維在影像上為細長之線狀結構 (curvilinear structure)，其灰階變化在局部呈現「一個方向強變化、另一方向弱變化」的二階微分特徵。Frangi 等人 (1998)~\cite{frangi1998multiscale} 將此觀察形式化為基於 Hessian 矩陣特徵值之血管性 (vesselness) 量測：設 $\lambda_1, \lambda_2$ 為影像於多尺度 Gaussian 平滑後之 Hessian 特徵值且 $|\lambda_1| \le |\lambda_2|$，則沿血管方向 $\lambda_1 \approx 0$、橫向 $|\lambda_2|$ 大，可據此設計出對線狀結構具高響應、對團塊或雜訊具低響應之濾波。
 
 Sato 等人 (1998)~\cite{sato1998three} 進一步提出以不同權重加總 $\lambda_2$ 並對黑／白線同時處理之變體，其輸出對多尺度結構（粗細不一之纖維）具有良好之穩定性，並廣泛實作於 \texttt{scikit-image}~\cite{vanderwalt2014scikit} 之 \texttt{sato} 函式中。Hessian 矩陣並非偵測曲線狀結構之唯一形式化方式：Türetken 等人~\cite{turetken2013detecting} 提出基於\textbf{多方向定向通量} (multi-directional oriented flux) 之偵測器，於每個尺度沿多個方向積分影像之梯度通量，相較於 Hessian 假設「沿單一方向之強對比」之理想管狀模型，對形態不規則、分支頻繁或局部斷裂之曲線狀結構亦能穩定響應。
 
-在血管性濾波之前，另需處理 PGP 9.5 染色常見之背景不均。研究上常以形態學開運算 (morphological opening)~\cite{soille1999morphological} 估計影像之慢變背景，再以原影像減去背景得到對比一致之結果；之後再以對比受限直方圖均衡化 (CLAHE)~\cite{zuiderveld1994contrast} 進一步提升局部對比。相較於對整張影像共用同一灰階重映射之全域直方圖均衡化，CLAHE 透過分塊適應與每塊裁剪閾值機制，可在強化細小纖維對比之同時抑制近均勻區域中之雜訊過度放大。本論文之前處理鏈即沿用此策略。
+在線狀結構濾波之前，另需處理 PGP 9.5 染色常見之背景不均。研究上常以形態學開運算 (morphological opening)~\cite{soille1999morphological} 估計影像之慢變背景，再以原影像減去背景得到對比一致之結果；之後再以對比受限直方圖均衡化 (CLAHE)~\cite{zuiderveld1994contrast} 進一步提升局部對比。相較於對整張影像共用同一灰階重映射之全域直方圖均衡化，CLAHE 透過分塊適應與每塊裁剪閾值機制，可在強化細小纖維對比之同時抑制近均勻區域中之雜訊過度放大。本論文之前處理鏈即沿用此策略。
 
 \section{神經纖維之語意分割與其破碎化問題}
 \label{sec:segmentation}
