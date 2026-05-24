@@ -87,6 +87,8 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
 
 \noindent 使纖維區域之響應接近 $255$、非纖維區域接近 $0$（如圖~\ref{fig:enhance-sato} 所示），為後續成本設計提供良好之輸入訊號。
 
+在曲線狀結構偵測器之選擇上，本研究採用 Sato 濾波而非 Türetken 等人之多方向定向通量~\cite{turetken2013detecting} 等非 Hessian 變體，係考量 PGP 9.5 染色之 IENF profile 經形態學去背景與 CLAHE 對比正規化後，其管狀幾何已足夠規則，Sato 於 \texttt{scikit-image} 中已有成熟實作且計算成本顯著較低，便於重現；針對角膜共軛焦顯微等纖維形態更不規則之場景，定向通量類方法之導入屬可延伸之研究方向。
+
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}[b]{0.24\linewidth}
