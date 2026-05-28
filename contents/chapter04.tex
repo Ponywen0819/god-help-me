@@ -3,7 +3,7 @@
 \chapter{GUI 操作說明}
 \label{chap:tool}
 
-為使第~\ref{chap:method}~章所述之 AEL 演算法得以互動執行、視覺檢驗、並進一步支援使用者於重建結果上手動修整再重新計數，本研究實作了一套桌面端之圖形介面工具（以下簡稱 \textbf{GUI}）。本章作為其使用手冊：第~\ref{sec:tool-overview}~節說明設計動機；第~\ref{sec:tool-layout}~節描述介面布局；第~\ref{sec:tool-layers}~節逐項說明影像圖層之載入與顯示控制；第~\ref{sec:tool-pipeline}~節說明 AEL 之四階段管線於介面上之執行方式；第~\ref{sec:tool-params}~節列出可由使用者調整之全部演算法參數；第~\ref{sec:tool-modes}~節說明檢視與編輯兩種互動模式；第~\ref{sec:tool-edit}~節列出圖形編輯之全部操作；最後第~\ref{sec:tool-shortcuts}~節彙整鍵盤與滑鼠之操作速查表。
+為使第~\ref{chap:method}~章所述之 AEL 演算法得以互動執行、視覺檢驗、並進一步支援使用者於重建結果上手動修整再重新計數，本研究實作了一套桌面端之圖形使用者介面（GUI）工具（以下簡稱\textbf{本工具}）。本章作為其使用手冊，依序介紹設計動機、介面布局、典型工作流、影像圖層、管線執行、參數設定、互動模式、圖形編輯與操作速查表。
 
 \section{設計動機}
 \label{sec:tool-overview}
@@ -16,34 +16,49 @@
   \item \textbf{階段獨立執行與快取：} 由於 AEL 各階段之計算成本不一（其中 Sato 濾波與多源擴張最為耗時），使用者於探索參數時希望僅重跑受影響之階段而非整條管線；下游階段亦應能直接套用上游之快取結果而毋需重新計算。
 \end{enumerate}
 
-本 GUI 即針對此三項需求設計：以多圖層疊合呈現中介產物、提供互動式圖形編輯與重新計數、並以階段化之管線執行配合後端快取支援增量重算。
+本工具即針對此三項需求設計：以多圖層疊合呈現中介產物、提供互動式圖形編輯與重新計數、並以階段化之管線執行配合後端快取支援增量重算。
 
 \section{介面布局}
 \label{sec:tool-layout}
 
-本 GUI 之主視窗分為三大區塊（圖~\ref{fig:tool-layout}）：
+本工具之主視窗分為三大區塊（圖~\ref{fig:tool-layout}）：
 
 \begin{enumerate}
   \item \textbf{左側邊欄 (Sidebar)：} 上半為影像圖層管理（第~\ref{sec:tool-layers}~節），下半為 AEL 管線控制（第~\ref{sec:tool-pipeline}~節）；最下方另含一段操作說明文字。
-  \item \textbf{頂部工具列 (Top Toolbar)：} 左半含應用程式名稱 \textbf{本 GUI} 與模式切換按鈕（\textbf{檢視／平移}與\textbf{編輯圖}）；右半顯示當前重建圖之節點數與邊數，並提供清除按鈕用以清空重建圖。
+  \item \textbf{頂部工具列 (Top Toolbar)：} 左半為模式切換按鈕（\textbf{檢視／平移}與\textbf{編輯圖}）；右半顯示當前重建圖之節點數與邊數，並提供清除按鈕用以清空重建圖。
   \item \textbf{中央畫布 (Canvas)：} 影像圖層與重建圖之疊合區域，支援平移、縮放與互動式編輯。當有效跨越計數已產生時，畫布左上角會顯示當前計數。
 \end{enumerate}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/gui_main.png}
-  \caption[本 GUI 主視窗布局]{本 GUI 主視窗布局。圖中紅色框為左側邊欄（上半為圖層、下半為管線）、黃色框為頂部工具列（含模式切換與圖統計）、綠色框為中央畫布（影像與重建圖之疊合區）。}
+  \caption[本工具主視窗布局]{本工具主視窗布局。圖中紅色框（左側）為左側邊欄（上半為圖層、下半為管線）、黃色框（上方）為頂部工具列（含模式切換與圖統計）、綠色框（中央）為中央畫布（影像與重建圖之疊合區）。}
   \label{fig:tool-layout}
 \end{figure}
+
+\section{典型工作流}
+\label{sec:tool-workflow}
+
+第一次使用本工具者，可依下列五步完成「載入 → 自動計數 → 人工修整 → 重新計數」之完整流程：
+
+\begin{enumerate}
+  \item \textbf{上傳三張影像：}於左側邊欄上半之圖層管理區，依序點擊「原始影像」、「表皮遮罩」、「纖維微粒遮罩」之上傳按鈕，分別載入該切片之 RGB 影像、表皮二值遮罩與纖維微粒標註遮罩。
+  \item \textbf{（可選）開啟參數視窗檢視預設值：}若無特殊需求，可直接沿用預設參數；如需調整，可於管線區塊頂部點擊「參數」按鈕（詳見第~\ref{sec:tool-params}~節）。
+  \item \textbf{執行管線。}點擊邊欄下半之「全部執行」按鈕，後端會依序執行感興趣區域、前處理、重建與計數四階段（第~\ref{sec:tool-pipeline}~節）；完成後畫布上即呈現重建圖，左上角顯示有效神經數。
+  \item \textbf{（可選）人工修整：}若自動重建之結果與專家判讀有出入，可切換至\textbf{編輯圖}模式（頂部工具列），於畫布上新增、刪除節點與邊以修整圖（第~\ref{sec:tool-edit}~節）。
+  \item \textbf{重新計數：}修整完畢後，於管線區塊單獨點擊\textbf{計數}按鈕，即可將當前修整後之圖送回後端重新計數，左上角資訊框與綠色有效跨越邊會同步更新（詳見第~\ref{subsec:count-current}~節）。
+\end{enumerate}
+
+後續各節依介面元素之分類詳述其全部選項與行為。
 
 \section{影像圖層}
 \label{sec:tool-layers}
 
-本 GUI 於畫布上最多疊合\textbf{五張影像圖層與一層重建圖}，由下而上之疊合順序與來源詳列於表~\ref{tab:layers}。
+本工具於畫布上最多疊合\textbf{五張影像圖層與一層重建圖}，由下而上之疊合順序與來源詳列於表~\ref{tab:layers}。
 
 \begin{table}[htbp]
   \centering
-  \caption{本 GUI 之畫布圖層由下而上之配置。}
+  \caption{本工具之畫布圖層由下而上之配置。}
   \label{tab:layers}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -52,10 +67,10 @@
     圖層名稱 & 來源 & 預設顯色 \\
     \midrule
     原始影像       & 使用者上傳之原始影像     & 依顯色模式渲染 \\
-    表皮遮罩       & 使用者上傳之表皮遮罩     & 白色 \texttt{\#ffffff} \\
-    感興趣區域遮罩  & 感興趣區域階段之輸出           & 青色 \texttt{\#22d3ee} \\
-    前處理結果圖    & 前處理階段之輸出（Sato 響應圖） & 粉紅 \texttt{\#f472b6} \\
-    纖維微粒遮罩    & 使用者上傳之纖維微粒遮罩 & 黃色 \texttt{\#ffff00} \\
+    表皮遮罩       & 使用者上傳之表皮遮罩     & 白色 \texttt{\#FFFFFF} \\
+    感興趣區域遮罩  & 感興趣區域階段之輸出           & 青色 \texttt{\#22D3EE} \\
+    前處理結果圖    & 前處理階段之輸出（Sato 響應圖） & 粉紅 \texttt{\#F472B6} \\
+    纖維微粒遮罩    & 使用者上傳之纖維微粒遮罩 & 黃色 \texttt{\#FFFF00} \\
     重建圖         & 重建與計數階段之輸出，或使用者編輯結果 & 藍／綠／黃 \\
     \bottomrule
   \end{tabular}
@@ -85,32 +100,37 @@
   \item \textbf{透明度滑桿：} 範圍 $0\%$--$100\%$，控制原始影像圖層之最終透明度。
 \end{itemize}
 
-\subsection{表皮遮罩圖層}
-\label{subsec:layer-mask}
+\subsection{遮罩類圖層之共通控制}
+\label{subsec:layer-masks}
 
-表皮遮罩為使用者上傳之表皮二值遮罩。其控制元件包含：
+除原始影像之外，餘下之表皮遮罩、感興趣區域遮罩、前處理結果圖、纖維微粒遮罩四層皆套用同一套上色機制（第~\ref{subsec:tinted-mask}~節），並共用同一組控制元件：
 
 \begin{itemize}
-  \item \textbf{上傳／替換按鈕：} 同原始影像，開啟原生檔案對話框。
-  \item \textbf{眼睛圖示切換鈕：} 用以快速顯示／隱藏整個圖層。
-  \item \textbf{透明度滑桿：} 範圍 $0\%$--$100\%$。
-  \item \textbf{色彩選擇器：} HTML 原生色彩控制項，預設值為白色 \texttt{\#ffffff}，用以設定表皮遮罩之染色（透過第~\ref{subsec:tinted-mask}~節所述之上色機制）。
+  \item \textbf{眼睛圖示切換鈕：}快速顯示／隱藏整個圖層。
+  \item \textbf{透明度滑桿：}範圍 $0\%$--$100\%$，控制該層之最終透明度。
+  \item \textbf{色彩選擇器：}HTML 原生色彩控制項，設定該層之染色（即上色機制中所覆蓋之純色）。
+  \item \textbf{上傳／替換按鈕（僅來自使用者上傳者具有）：}點擊後開啟原生檔案對話框，支援 \texttt{png}、\texttt{jpg}、\texttt{tif}、\texttt{tiff}、\texttt{webp} 等格式。
 \end{itemize}
 
-\subsection{感興趣區域遮罩圖層}
-\label{subsec:layer-roi}
+四層之差異僅在於來源、預設染色與出現時機，整理如表~\ref{tab:mask-layers}。其中感興趣區域遮罩與前處理結果圖之控制元件下方各自顯示一行說明文字，標示其來源（分別為「由表皮遮罩與偏移量計算」與「Sato 強化之纖維響應」）。
 
-感興趣區域遮罩為感興趣區域階段之輸出，對應第~\ref{subsec:roi}~節所述之 $M_{\text{ROI}}$；於該階段執行完畢後，此圖層之控制元件便會出現於邊欄上。其控制元件與表皮遮罩圖層相同，包含眼睛切換、透明度滑桿與色彩選擇器（預設青色 \texttt{\#22d3ee}）；於控制元件下方另顯示一行說明文字「由表皮遮罩與偏移量計算」以標示其來源。
-
-\subsection{前處理結果圖圖層}
-\label{subsec:layer-preprocess}
-
-前處理結果圖為前處理階段之輸出，對應第~\ref{subsec:enhance}~節所述之 Sato 線狀結構響應圖 $I_{\text{enhanced}}$；於該階段執行完畢後，此圖層之控制元件便出現於邊欄上。其控制元件與感興趣區域遮罩相同（預設粉紅色 \texttt{\#f472b6}）；於控制元件下方另顯示一行說明文字「Sato 強化之纖維響應」以標示其來源。
-
-\subsection{纖維微粒遮罩圖層}
-\label{subsec:layer-annotation}
-
-纖維微粒遮罩為使用者上傳之纖維微粒遮罩，即 AEL 之輸入 $A$。其控制元件與表皮遮罩完全相同（預設黃色 \texttt{\#ffff00}）。
+\begin{table}[htbp]
+  \centering
+  \caption{四個遮罩類圖層之差異。}
+  \label{tab:mask-layers}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{lllc}
+    \toprule
+    圖層名稱 & 來源 & 預設染色 & 出現時機 \\
+    \midrule
+    表皮遮罩       & 使用者上傳                                         & 白色 \texttt{\#FFFFFF}  & 上傳後立即出現 \\
+    感興趣區域遮罩  & 感興趣區域階段之 $M_{\text{ROI}}$                    & 青色 \texttt{\#22D3EE} & 該階段完成後 \\
+    前處理結果圖    & 前處理階段之 Sato 響應圖 $I_{\text{enhanced}}$        & 粉紅 \texttt{\#F472B6} & 該階段完成後 \\
+    纖維微粒遮罩    & 使用者上傳（即 AEL 之輸入 $A$）                      & 黃色 \texttt{\#FFFF00} & 上傳後立即出現 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{重建圖圖層}
 \label{subsec:layer-graph}
@@ -121,7 +141,7 @@
   \item \textbf{節點顏色}：
     \begin{itemize}
       \item 藍色 \texttt{\#60A5FA}：一般節點（無特殊狀態）。
-      \item 黃色 \texttt{\#FCD34D}：當前\textbf{活躍鏈式起點}。鏈式為使用者於編輯模式下逐次建立新節點與邊之主要互動方式，其完整定義與操作詳見第~\ref{subsec:edit-create}~節；此處僅須了解：每當有一個節點被標示為黃色，下一次點擊空白處即會以一條新邊與之相連。
+      \item 黃色 \texttt{\#FCD34D}：當前\textbf{活躍鏈式起點}（編輯模式下之核心狀態，詳見第~\ref{subsec:edit-create}~節）。
       \item 紅色 \texttt{\#EF4444}：被使用者點選之節點（待執行刪除或檢視之對象）。
     \end{itemize}
   \item \textbf{邊顏色}：
@@ -143,16 +163,16 @@
 \subsection{階段按鈕與啟用條件}
 \label{subsec:stage-buttons}
 
-四個階段按鈕依序排列並各自於右側顯示狀態圖示（如圖~\ref{fig:tool-stage-status}）：
+四個階段按鈕依序排列並各自於右側顯示狀態圖示（圖~\ref{fig:tool-stage-status}）。
 
-\begin{itemize}
-  \item \textbf{待執行}：尚未執行。
-  \item \textbf{執行中}（旋轉動畫）：執行中。
-  \item \textbf{完成}：已完成。
-\end{itemize}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.3\linewidth]{figures/gui_stage_status.png}
+  \caption[階段按鈕之狀態圖示]{階段按鈕之三種狀態圖示示例。圖中由上而下：感興趣區域為「完成」、前處理為「執行中」、重建與計數為「待執行」。}
+  \label{fig:tool-stage-status}
+\end{figure}
 
-
-階段按鈕之啟用條件依序為（各階段「完成」狀態之外觀詳見圖~\ref{fig:tool-stage-status}）：
+階段按鈕之啟用條件依序為：
 
 \begin{enumerate}
   \item \textbf{感興趣區域}：需原始影像、表皮遮罩、纖維微粒遮罩三張影像皆已上傳。
@@ -161,12 +181,6 @@
   \item \textbf{計數}：需重建階段狀態為「完成」（即作業內已有重建圖）。此按鈕之特殊性在於：其執行對象\textbf{永遠為當下畫布上之重建圖}，包含使用者於重建後手動編輯之版本（詳見第~\ref{subsec:count-current}~節）。
 \end{enumerate}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.3\linewidth]{figures/gui_stage_status.png}
-  \caption[階段按鈕之狀態圖示]{階段按鈕之三種狀態圖示示例。圖中由上而下：感興趣區域為「完成」、前處理為「執行中」、重建與計數為「待執行」。}
-  \label{fig:tool-stage-status}
-\end{figure}
 當管線中任一階段處於執行中狀態時，所有階段按鈕與全部執行按鈕皆會暫時停用，避免並發送出多筆請求。
 
 \subsection{各階段之輸出}
@@ -260,7 +274,7 @@
 \section{互動模式}
 \label{sec:tool-modes}
 
-本 GUI 之畫布提供兩種互動模式，可由頂部工具列之兩個按鈕切換：
+本工具之畫布提供兩種互動模式，可由頂部工具列之兩個按鈕切換：
 
 \begin{itemize}
   \item \textbf{檢視／平移模式}（指標圖示，深灰色背景表示啟用）：預設模式，所有滑鼠左鍵拖曳皆視為平移；點擊空白處不會建立節點，可安全瀏覽影像而不致誤觸圖形。
@@ -288,7 +302,7 @@
 \subsection{節點與邊之新增}
 \label{subsec:edit-create}
 
-本 GUI 之圖形編輯採用\textbf{鏈式}模式：所有節點與邊之新增皆以「活躍起點」此一狀態為核心，圍繞其\textbf{產生、延伸、結束}三個階段進行。當畫布上存在活躍起點時，下一次互動會以該起點為基礎延伸出邊；反之則僅進行單純之建立或選取。實際之滑鼠操作可歸納為\textbf{左鍵點空白處}與\textbf{左鍵點現有節點}兩類，各自於有／無活躍起點時行為略異：
+本工具之圖形編輯採用\textbf{鏈式}模式：所有節點與邊之新增皆以「活躍起點」此一狀態為核心，圍繞其\textbf{產生、延伸、結束}三個階段進行。當畫布上存在活躍起點時，下一次互動會以該起點為基礎延伸出邊；反之則僅進行單純之建立或選取。實際之滑鼠操作可歸納為\textbf{左鍵點空白處}與\textbf{左鍵點現有節點}兩類，各自於有／無活躍起點時行為略異：
 
 \begin{enumerate}
   \item \textbf{左鍵點空白處：}
@@ -361,12 +375,12 @@
 \subsection{編輯後重新計數}
 \label{subsec:edit-recount}
 
-完成圖形編輯後，於邊欄之管線區塊單獨點擊\textbf{計數}按鈕即可將當前重建圖（含所有編輯）送回後端重新計數；左上角之有效神經數資訊框與綠色有效跨越邊會立即同步更新（詳見第~\ref{subsec:count-current}~節）。此即本 GUI 提供之人機協同主要工作流。
+完成圖形編輯後，於管線區塊單獨點擊\textbf{計數}按鈕即可將當前（含編輯之）重建圖送回後端重新計數（其運作原理詳見第~\ref{subsec:count-current}~節）。
 
 \section{鍵盤與滑鼠操作速查表}
 \label{sec:tool-shortcuts}
 
-表~\ref{tab:shortcuts-global} 至表~\ref{tab:shortcuts-edit} 彙整 本 GUI 之全部互動操作。
+表~\ref{tab:shortcuts-global} 至表~\ref{tab:shortcuts-edit} 彙整本工具之全部互動操作。
 
 \begin{table}[htbp]
   \centering
@@ -428,4 +442,6 @@
 \section{本章小結}
 \label{sec:tool-summary}
 
-本章作為本 GUI 之使用手冊，依序說明了其主視窗布局、五層影像之疊合與染色機制、四階段管線之執行流程、可由使用者調整之全部演算法參數、檢視與編輯兩種互動模式，以及圖形編輯之全部操作與鍵盤速查表。本 GUI 將 AEL 之自動重建流程與專家之人工修整能力整合於同一介面下，使第~\ref{chap:method}~章所提出之演算法不僅可被執行，亦可被檢驗、被微調、被重新計數；其輸出之拓樸圖既可供臨床稽核，亦可作為下一階段（第~\ref{chap:experiment}~章）量化評估之基礎。
+本章作為本工具之使用手冊，依序說明了主視窗布局、典型工作流、影像圖層之疊合與染色、四階段管線之執行、可調整之全部演算法參數、互動模式與圖形編輯操作。
+
+本工具將 AEL 之自動重建流程與專家之人工修整能力整合於同一介面，使第~\ref{chap:method}~章所提出之演算法不僅可被執行，亦可被檢驗、被微調、被重新計數。其輸出之拓樸圖既可供臨床稽核，亦可作為下一階段（第~\ref{chap:experiment}~章）量化評估之基礎。
