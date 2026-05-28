@@ -1,4 +1,431 @@
 % !TeX root = ../main.tex
 
-\chapter{待補}
-\label{chap:placeholder}
+\chapter{GUI 操作說明}
+\label{chap:tool}
+
+為使第~\ref{chap:method}~章所述之 AEL 演算法得以互動執行、視覺檢驗、並進一步支援使用者於重建結果上手動修整再重新計數，本研究實作了一套桌面端之圖形介面工具（以下簡稱 \textbf{GUI}）。本章作為其使用手冊：第~\ref{sec:tool-overview}~節說明設計動機；第~\ref{sec:tool-layout}~節描述介面布局；第~\ref{sec:tool-layers}~節逐項說明影像圖層之載入與顯示控制；第~\ref{sec:tool-pipeline}~節說明 AEL 之四階段管線於介面上之執行方式；第~\ref{sec:tool-params}~節列出可由使用者調整之全部演算法參數；第~\ref{sec:tool-modes}~節說明檢視與編輯兩種互動模式；第~\ref{sec:tool-edit}~節列出圖形編輯之全部操作；最後第~\ref{sec:tool-shortcuts}~節彙整鍵盤與滑鼠之操作速查表。
+
+\section{設計動機}
+\label{sec:tool-overview}
+
+第~\ref{chap:method}~章之 AEL 雖為一全自動之演算法流程，於臨床導入時仍存在三項實務需求，使一個專屬之操作介面有其必要：
+
+\begin{enumerate}
+  \item \textbf{中介產物之視覺檢驗：} AEL 之輸出為一純量計數 $N_{\text{cross}}$，但其品質高度依賴前處理、成本圖與多源擴張等中介結果之合理性；臨床端使用者需能即時觀察各階段之輸出疊合於原始影像上，以判斷個別參數設定是否合理。
+  \item \textbf{人為修整之回饋迴圈：} 於染色嚴重斷裂或微粒標註本身有誤之切片上，自動重建之結果未必能完全符合專家判讀；使用者需能於重建後直接在影像上新增、刪除節點與邊，並以修整後之拓樸\textbf{重新}進行有效跨越計數。
+  \item \textbf{階段獨立執行與快取：} 由於 AEL 各階段之計算成本不一（其中 Sato 濾波與多源擴張最為耗時），使用者於探索參數時希望僅重跑受影響之階段而非整條管線；下游階段亦應能直接套用上游之快取結果而毋需重新計算。
+\end{enumerate}
+
+本 GUI 即針對此三項需求設計：以多圖層疊合呈現中介產物、提供互動式圖形編輯與重新計數、並以階段化之管線執行配合後端快取支援增量重算。
+
+\section{介面布局}
+\label{sec:tool-layout}
+
+本 GUI 之主視窗分為三大區塊（圖~\ref{fig:tool-layout}）：
+
+\begin{enumerate}
+  \item \textbf{左側邊欄 (Sidebar)：} 上半為影像圖層管理（第~\ref{sec:tool-layers}~節），下半為 AEL 管線控制（第~\ref{sec:tool-pipeline}~節）；最下方另含一段操作說明文字。
+  \item \textbf{頂部工具列 (Top Toolbar)：} 左半含應用程式名稱 \textbf{本 GUI} 與模式切換按鈕（\textbf{檢視／平移}與\textbf{編輯圖}）；右半顯示當前重建圖之節點數與邊數，並提供清除按鈕用以清空重建圖。
+  \item \textbf{中央畫布 (Canvas)：} 影像圖層與重建圖之疊合區域，支援平移、縮放與互動式編輯。當有效跨越計數已產生時，畫布左上角會顯示當前計數。
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/gui_main.png}
+  \caption[本 GUI 主視窗布局]{本 GUI 主視窗布局。圖中紅色框為左側邊欄（上半為圖層、下半為管線）、黃色框為頂部工具列（含模式切換與圖統計）、綠色框為中央畫布（影像與重建圖之疊合區）。}
+  \label{fig:tool-layout}
+\end{figure}
+
+\section{影像圖層}
+\label{sec:tool-layers}
+
+本 GUI 於畫布上最多疊合\textbf{五張影像圖層與一層重建圖}，由下而上之疊合順序與來源詳列於表~\ref{tab:layers}。
+
+\begin{table}[htbp]
+  \centering
+  \caption{本 GUI 之畫布圖層由下而上之配置。}
+  \label{tab:layers}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{lp{5.5cm}l}
+    \toprule
+    圖層名稱 & 來源 & 預設顯色 \\
+    \midrule
+    原始影像       & 使用者上傳之原始影像     & 依顯色模式渲染 \\
+    表皮遮罩       & 使用者上傳之表皮遮罩     & 白色 \texttt{\#ffffff} \\
+    感興趣區域遮罩  & 感興趣區域階段之輸出           & 青色 \texttt{\#22d3ee} \\
+    前處理結果圖    & 前處理階段之輸出（Sato 響應圖） & 粉紅 \texttt{\#f472b6} \\
+    纖維微粒遮罩    & 使用者上傳之纖維微粒遮罩 & 黃色 \texttt{\#ffff00} \\
+    重建圖         & 重建與計數階段之輸出，或使用者編輯結果 & 藍／綠／黃 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{二值影像之上色機制}
+\label{subsec:tinted-mask}
+
+除原始影像之外，\textbf{表皮遮罩、感興趣區域遮罩、前處理結果圖、纖維微粒遮罩四層皆採同一套上色機制}：以原圖之亮度作為透明度遮罩、再於其上覆蓋使用者指定之純色。其效果為：影像越亮處顏色越飽和（完全不透明）、影像越暗處越接近完全透明。對二值之遮罩而言，白色像素被完全染上選定顏色、黑色像素則完全透明；對連續灰階之前處理結果圖（Sato 響應圖）而言，纖維響應愈強之像素愈接近飽和色、背景則保持透明。每層之透明度滑桿則進一步控制整層之最終透明度。
+
+\subsection{原始影像圖層}
+\label{subsec:layer-original}
+
+原始影像為使用者上傳之 RGB 原始切片影像。其控制元件包含：
+
+\begin{itemize}
+  \item \textbf{上傳／替換按鈕：} 點擊後開啟原生檔案對話框，支援 \texttt{png}、\texttt{jpg}、\texttt{tif}、\texttt{tiff}、\texttt{webp} 等格式。首次上傳完成後，畫布會自動執行放大率與位置之調整，依容器尺寸與影像原始尺寸計算最大可顯示縮放比例，並將影像置中。
+  \item \textbf{眼睛圖示切換鈕：} 位於原始影像標題列右側，用以快速顯示／隱藏整個圖層。隱藏後其下方之顯色模式與透明度控制亦會一併摺起。
+  \item \textbf{顯色模式下拉選單：} 控制原始影像之顯色通道，可選之四種模式為：
+    \begin{itemize}
+      \item \textbf{紅色通道}：僅以紅色通道為強度。
+      \item \textbf{綠色通道}（預設）：僅以綠色通道為強度，亦為 AEL 後端實際使用之輸入通道。
+      \item \textbf{藍色通道}：僅以藍色通道為強度。
+      \item \textbf{綠色通道（Viridis）}：以綠色通道為強度，再套用 Viridis 色階以增強對比，便於檢視纖維走向。
+    \end{itemize}
+    當選擇變更時畫布上之原始影像圖層會立即重新渲染。
+  \item \textbf{透明度滑桿：} 範圍 $0\%$--$100\%$，控制原始影像圖層之最終透明度。
+\end{itemize}
+
+\subsection{表皮遮罩圖層}
+\label{subsec:layer-mask}
+
+表皮遮罩為使用者上傳之表皮二值遮罩。其控制元件包含：
+
+\begin{itemize}
+  \item \textbf{上傳／替換按鈕：} 同原始影像，開啟原生檔案對話框。
+  \item \textbf{眼睛圖示切換鈕：} 用以快速顯示／隱藏整個圖層。
+  \item \textbf{透明度滑桿：} 範圍 $0\%$--$100\%$。
+  \item \textbf{色彩選擇器：} HTML 原生色彩控制項，預設值為白色 \texttt{\#ffffff}，用以設定表皮遮罩之染色（透過第~\ref{subsec:tinted-mask}~節所述之上色機制）。
+\end{itemize}
+
+\subsection{感興趣區域遮罩圖層}
+\label{subsec:layer-roi}
+
+感興趣區域遮罩為感興趣區域階段之輸出，對應第~\ref{subsec:roi}~節所述之 $M_{\text{ROI}}$；於該階段執行完畢後，此圖層之控制元件便會出現於邊欄上。其控制元件與表皮遮罩圖層相同，包含眼睛切換、透明度滑桿與色彩選擇器（預設青色 \texttt{\#22d3ee}）；於控制元件下方另顯示一行說明文字「由表皮遮罩與偏移量計算」以標示其來源。
+
+\subsection{前處理結果圖圖層}
+\label{subsec:layer-preprocess}
+
+前處理結果圖為前處理階段之輸出，對應第~\ref{subsec:enhance}~節所述之 Sato 線狀結構響應圖 $I_{\text{enhanced}}$；於該階段執行完畢後，此圖層之控制元件便出現於邊欄上。其控制元件與感興趣區域遮罩相同（預設粉紅色 \texttt{\#f472b6}）；於控制元件下方另顯示一行說明文字「Sato 強化之纖維響應」以標示其來源。
+
+\subsection{纖維微粒遮罩圖層}
+\label{subsec:layer-annotation}
+
+纖維微粒遮罩為使用者上傳之纖維微粒遮罩，即 AEL 之輸入 $A$。其控制元件與表皮遮罩完全相同（預設黃色 \texttt{\#ffff00}）。
+
+\subsection{重建圖圖層}
+\label{subsec:layer-graph}
+
+重建圖繪製於所有影像圖層之上，其內容為當前拓樸圖之節點（圓點）與邊（線段／折線）。其各項視覺屬性如下：
+
+\begin{itemize}
+  \item \textbf{節點顏色}：
+    \begin{itemize}
+      \item 藍色 \texttt{\#60A5FA}：一般節點（無特殊狀態）。
+      \item 黃色 \texttt{\#FCD34D}：當前\textbf{活躍鏈式起點}。鏈式為使用者於編輯模式下逐次建立新節點與邊之主要互動方式，其完整定義與操作詳見第~\ref{subsec:edit-create}~節；此處僅須了解：每當有一個節點被標示為黃色，下一次點擊空白處即會以一條新邊與之相連。
+      \item 紅色 \texttt{\#EF4444}：被使用者點選之節點（待執行刪除或檢視之對象）。
+    \end{itemize}
+  \item \textbf{邊顏色}：
+    \begin{itemize}
+      \item 藍色 \texttt{\#3B82F6}：一般邊。
+      \item 綠色 \texttt{\#34D399}：經計數階段判定為\textbf{有效跨越段}之邊（對應第~\ref{sec:crossing}~節之 $N_{\text{cross}}$ 之構成）。
+      \item 黃色 \texttt{\#FCD34D}：被使用者點選之邊。
+    \end{itemize}
+  \item \textbf{邊之幾何形式}：由重建／計數階段傳回之邊，若含有像素層之軌跡，則以\textbf{折線}沿該像素軌跡繪製，忠實呈現多源區域擴張所回溯之實際路徑；否則（如使用者於編輯模式下手動新增之邊）以兩端節點之直線連接。
+\end{itemize}
+
+重建圖無獨立之顯示／隱藏切換鈕，亦不參與其他圖層之透明度控制；其作為演算法輸出與使用者編輯之主要呈現載體，預設恆為顯示。
+
+\section{管線階段執行}
+\label{sec:tool-pipeline}
+
+邊欄下半部之\textbf{神經管線}區塊為 AEL 之四階段控制台，包含一個\textbf{參數}按鈕、四個階段按鈕（\textbf{感興趣區域}、\textbf{前處理}、\textbf{重建}、\textbf{計數}）、與一個\textbf{全部執行}按鈕。
+
+\subsection{階段按鈕與啟用條件}
+\label{subsec:stage-buttons}
+
+四個階段按鈕依序排列並各自於右側顯示狀態圖示（如圖~\ref{fig:tool-stage-status}）：
+
+\begin{itemize}
+  \item \textbf{待執行}：尚未執行。
+  \item \textbf{執行中}（旋轉動畫）：執行中。
+  \item \textbf{完成}：已完成。
+\end{itemize}
+
+
+階段按鈕之啟用條件依序為（各階段「完成」狀態之外觀詳見圖~\ref{fig:tool-stage-status}）：
+
+\begin{enumerate}
+  \item \textbf{感興趣區域}：需原始影像、表皮遮罩、纖維微粒遮罩三張影像皆已上傳。
+  \item \textbf{前處理}：需感興趣區域階段狀態為「完成」。
+  \item \textbf{重建}：需前處理階段狀態為「完成」。重建按鈕\textbf{自動鏈接}至計數階段，其完成後會立即觸發一次計數，使用者於此情境下無須另行按下計數按鈕。
+  \item \textbf{計數}：需重建階段狀態為「完成」（即作業內已有重建圖）。此按鈕之特殊性在於：其執行對象\textbf{永遠為當下畫布上之重建圖}，包含使用者於重建後手動編輯之版本（詳見第~\ref{subsec:count-current}~節）。
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.3\linewidth]{figures/gui_stage_status.png}
+  \caption[階段按鈕之狀態圖示]{階段按鈕之三種狀態圖示示例。圖中由上而下：感興趣區域為「完成」、前處理為「執行中」、重建與計數為「待執行」。}
+  \label{fig:tool-stage-status}
+\end{figure}
+當管線中任一階段處於執行中狀態時，所有階段按鈕與全部執行按鈕皆會暫時停用，避免並發送出多筆請求。
+
+\subsection{各階段之輸出}
+\label{subsec:stage-output}
+
+四階段對應之演算邏輯與輸出如下，與第~\ref{chap:method}~章之各節對應：
+
+\begin{enumerate}
+  \item \textbf{感興趣區域階段。} 對應第~\ref{subsec:roi}~節，於表皮遮罩上執行向下膨脹得 $M_{\text{ROI}}$，並於邊欄出現新的感興趣區域遮罩圖層控制。
+  \item \textbf{前處理階段。} 對應第~\ref{subsec:enhance}~節之完整影像增強鏈，依序執行綠色通道擷取、白色頂帽去背景、CLAHE 與多尺度 Sato 線狀結構濾波，並同步於後端計算下游重建階段所需之像素成本圖 $C$；前端則接收 Sato 響應圖並渲染於前處理結果圖圖層。
+  \item \textbf{重建階段。} 對應第~\ref{sec:dijkstra}~節至第~\ref{sec:skeleton}~節，執行多源 Dijkstra 擴張、相遇點偵測、元件層圖建立、閾值裁剪、最小生成森林、橋接遮罩、Zhang--Suen 骨架化、分段偵測與短樁修剪，最終得 $G_{\text{trim}}$，並以重建圖繪製於畫布上。\textbf{此階段之執行會完整覆蓋畫布上既有之重建圖}；若使用者於前次重建後曾手動編輯，該編輯不會被保留。
+  \item \textbf{計數階段。} 對應第~\ref{sec:crossing}~節，依當前圖之纖維涵蓋篩選、區域標記與線段層之有效跨越判定，輸出 $N_{\text{cross}}$。完成後：
+    \begin{itemize}
+      \item 畫布左上角浮現「\textbf{有效神經數：$N$}」之資訊框。
+      \item 被判定為有效跨越段之邊由藍色變為綠色（\texttt{\#34D399}）。
+    \end{itemize}
+\end{enumerate}
+
+\subsection{計數階段永以當前重建圖為對象}
+\label{subsec:count-current}
+
+計數階段之執行對象由前端決定，分為兩種情形：
+
+\begin{itemize}
+  \item \textbf{由重建階段自動鏈接而觸發之計數：} 計數對象為剛剛由重建階段產生之重建圖。此即「重建 → 自動計數」之預設流程。
+  \item \textbf{使用者主動點擊計數按鈕：} 計數對象為\textbf{當下畫布上之重建圖}，含使用者所有手動編輯。
+\end{itemize}
+
+此設計使「重建 → 編輯 → 重新計數」之人機協同流程成為一階互動：使用者只需於完成自動重建後切入編輯模式、修整重建圖，再點一次計數，畫布上之有效神經數與綠色邊即同步更新。
+
+\subsection{全部執行按鈕}
+\label{subsec:run-all}
+
+\textbf{全部執行}為一鍵串接執行「感興趣區域 $\to$ 前處理 $\to$ 重建 $\to$ 計數」四階段之按鈕；任一階段失敗即停止後續執行，並於管線區塊下方之紅色錯誤框中顯示錯誤訊息。全部執行之啟用條件為：三張輸入影像皆已上傳、且管線目前無任何階段處於執行中狀態。
+
+\section{演算法參數設定}
+\label{sec:tool-params}
+
+點擊管線區塊頂部之\textbf{參數}按鈕將開啟參數設定視窗。其內含演算法各階段之可調整參數，並於右上角提供以下兩個按鈕：
+
+\begin{itemize}
+  \item \textbf{重置}：將所有參數還原為預設值。
+  \item \textbf{關閉}：關閉視窗（亦可按 \texttt{Esc} 鍵或點擊視窗外之半透明遮罩關閉）。
+\end{itemize}
+
+視窗底部之\textbf{完成}按鈕亦為關閉操作。所有參數之更動均\textbf{即時生效}並會自動保存於本機，下次重新開啟應用程式時會自動回復上次之設定。\textbf{參數變動不會自動觸發重算}，使用者須主動點擊欲重跑之階段或全部執行。
+
+視窗之版面分為三個區段（如圖~\ref{fig:tool-params-modal}）：
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/gui_parameter_modal.png}
+  \caption[參數設定視窗]{參數設定視窗。左欄為前處理區段，右欄上半為連結區段、下半為後處理區段；右上角重置按鈕可一鍵還原預設值。}
+  \label{fig:tool-params-modal}
+\end{figure}
+
+\subsection{參數列表}
+\label{subsec:params-list}
+
+參數視窗共暴露三大區段、九項可調參數，與第~\ref{chap:method}~章之對應符號及定義出處列於表~\ref{tab:params-all}。
+
+\begin{table}[htbp]
+  \centering
+  \caption{參數設定視窗之全部參數列表（依區段分組）。}
+  \label{tab:params-all}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{llccl}
+    \toprule
+    區段 & 參數名稱 & 預設值 & 對應符號 & 對應之 method 章節 \\
+    \midrule
+    \multirow{6}{*}{前處理}
+       & \texttt{Epidermis Offset (px)}    & $50$   & $\text{offset}$    & 第~\ref{subsec:roi}~節，式~\eqref{eq:roi} \\
+       & \texttt{Background Kernel}        & $51$   & $r_{\text{bg}}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:tophat} \\
+       & \texttt{CLAHE Clip Limit}         & $20.0$ & $\beta$            & 第~\ref{subsec:enhance}~節，式~\eqref{eq:clahe} \\
+       & \texttt{CLAHE Grid Size}          & $16$   & $n_{\text{tile}}$  & 第~\ref{subsec:enhance}~節，式~\eqref{eq:clahe} \\
+       & \texttt{Sato $\sigma$ Start}      & $3$    & $\sigma_{\min}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:sato} \\
+       & \texttt{Sato $\sigma$ Stop}       & $8$    & $\sigma_{\max}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:sato} \\
+    \midrule
+    連結 & \texttt{Prune Threshold} & $20.0$ & $\tau$ & 第~\ref{sec:prune-mst}~節 \\
+    \midrule
+    \multirow{2}{*}{後處理}
+       & \texttt{Min Tree Components} & $1$ & $N_{\min}$    & 第~\ref{subsec:coverage-filter}~節，式~\eqref{eq:particle-min} \\
+       & \texttt{Stub Length}         & $5$ & $\ell_{\min}$ & 第~\ref{subsec:stub-prune}~節 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{關於 \texttt{Min Tree Components}：} 此參數對應第~\ref{subsec:coverage-filter}~節之纖維層微粒涵蓋門檻 $N_{\min}$，用以排除子樹所涵蓋之微粒數過少之連通分量。\textbf{本研究將其預設值設為 $N_{\min} = 1$，即不啟用任何微粒涵蓋數量之檢查}，所有經 MST 連結之子樹皆視為有效神經候選。將此參數於 GUI 中獨立暴露之目的，乃是依~\cite{hsueh2026machine} 之臨床操作要求，留予使用者依\textbf{自身之經驗法則}逐切片調整之彈性：染色破碎、雜訊明顯之切片可調高此值以排除由零星微粒拼接而成之偽神經；染色完整、纖維連續性高者則維持預設值即可接納更多微粒。
+
+\section{互動模式}
+\label{sec:tool-modes}
+
+本 GUI 之畫布提供兩種互動模式，可由頂部工具列之兩個按鈕切換：
+
+\begin{itemize}
+  \item \textbf{檢視／平移模式}（指標圖示，深灰色背景表示啟用）：預設模式，所有滑鼠左鍵拖曳皆視為平移；點擊空白處不會建立節點，可安全瀏覽影像而不致誤觸圖形。
+  \item \textbf{編輯圖模式}（鉛筆圖示，藍色背景表示啟用）：開啟圖形編輯之全部互動。模式啟用時畫布頂端中央會出現一條提示「編輯模式啟用中，點擊以新增節點」。
+\end{itemize}
+
+模式切換僅可透過工具列按鈕；當前版本之程式中並未綁定 \texttt{Tab} 鍵為切換熱鍵。
+
+\subsection{平移、縮放與適配視野}
+\label{subsec:tool-viewport}
+
+兩種模式皆支援以下視野操作：
+
+\begin{itemize}
+  \item \textbf{平移}：於檢視／平移模式下，按住滑鼠\textbf{左鍵}拖曳即可平移；於任意模式下，\textbf{中鍵}拖曳、\texttt{Shift} + 左鍵拖曳、或 \texttt{Ctrl} + 左鍵拖曳亦可平移。
+  \item \textbf{縮放}：滑鼠滾輪。縮放會\textbf{以游標當前位置為中心}進行，便於對特定區域逐步放大檢視。縮放比例之上下限為 $0.1\times$ 至 $10\times$。
+  \item \textbf{自動適配視野 (fit-to-view)}：當原始影像圖層被替換為新影像時，畫布會自動依容器尺寸計算最大可顯示縮放比例（保留約 $24$ 像素邊距）並將影像置中。
+\end{itemize}
+
+\section{圖形編輯操作}
+\label{sec:tool-edit}
+
+進入\textbf{編輯圖}模式後，使用者可於重建圖上進行節點與邊之新增、選取、刪除等互動。本節逐項列出全部編輯操作。
+
+\subsection{節點與邊之新增}
+\label{subsec:edit-create}
+
+本 GUI 之圖形編輯採用\textbf{鏈式}模式：所有節點與邊之新增皆以「活躍起點」此一狀態為核心，圍繞其\textbf{產生、延伸、結束}三個階段進行。當畫布上存在活躍起點時，下一次互動會以該起點為基礎延伸出邊；反之則僅進行單純之建立或選取。實際之滑鼠操作可歸納為\textbf{左鍵點空白處}與\textbf{左鍵點現有節點}兩類，各自於有／無活躍起點時行為略異：
+
+\begin{enumerate}
+  \item \textbf{左鍵點空白處：}
+  \begin{enumerate}
+    \item \textit{無活躍起點時：}於游標位置建立一個新節點，並將該節點設為活躍起點（鏈式之\textbf{產生}）。
+    \item \textit{已有活躍起點時：}於游標位置建立一個新節點，並以一條新邊將其與原活躍起點相連，然後將剛建立之節點設為新的活躍起點（鏈式之\textbf{延伸}）。
+  \end{enumerate}
+
+  \item \textbf{左鍵點現有節點：}
+  \begin{enumerate}
+    \item \textit{無活躍起點時：}將被點擊之節點設為活躍起點，畫面上不新增節點或邊（亦屬\textbf{產生}，惟起點為既有節點）。
+    \item \textit{已有活躍起點時：}若被點擊之節點與活躍起點不同，且兩者之間尚無邊，則建立一條新邊將兩者相連（重複之邊不會被加入）；無論是否新增邊，被點擊之節點都會被設為新的活躍起點（亦屬\textbf{延伸}，惟端點為既有節點）。
+  \end{enumerate}
+\end{enumerate}
+
+\paragraph{延伸過程之預覽：}當存在活躍起點時，畫面會即時繪製一條由活躍起點延伸至當前滑鼠位置之淺藍色虛線，作為下一條邊之預覽。此預覽僅為視覺輔助，實際之邊建立仍需於游標位置觸發一次左鍵點擊方會發生。
+
+\paragraph{結束當前鏈式：}當不再需要延伸當前鏈式時，可藉由下列任一操作將活躍起點清空、結束鏈式：
+
+\begin{itemize}
+  \item 右鍵點擊畫布任意位置。
+  \item 按下 \texttt{Esc} 鍵。
+\end{itemize}
+
+\noindent 結束後，下一次左鍵點擊將以「無活躍起點」之狀態重新進入產生階段。
+
+
+\subsection{選取}
+\label{subsec:edit-select}
+
+於編輯模式下：
+
+\begin{itemize}
+  \item \textbf{左鍵點邊}：將該邊設為選取狀態，邊色變為黃色 \texttt{\#FCD34D}、線寬加粗。
+  \item \textbf{左鍵點節點}：將該節點同時設為「活躍鏈式起點」並清空原有選取（被點之節點變黃 \texttt{\#FCD34D}，惟鏈式操作優先於選取）。
+  \item \textbf{右鍵點邊或節點}：將該元素設為選取狀態，並於滑鼠位置開啟選單（詳見第~\ref{subsec:edit-context-menu}~節）。
+\end{itemize}
+
+\noindent 按下 \texttt{Esc} 將同時清空當前選取、活躍鏈式起點與選單。
+
+\subsection{刪除}
+\label{subsec:edit-delete}
+  
+可透過下列任一方式刪除被選取之元素：
+
+\begin{itemize}
+  \item \textbf{按下 \texttt{Del} 或 \texttt{Backspace} 鍵。} 若有選取節點則刪除節點（連同所有與其相連之邊），否則刪除選取邊。
+  \item \textbf{右鍵 → 選單。} 詳見下節。
+\end{itemize}
+
+刪邊時，凡因該刪除而\textbf{變為孤立（不再與任何邊相連）之節點，會被自動清除}；此設計避免畫布上累積無意義之孤點。刪節點時則直接連同所有與其相鄰之邊一併移除，並且若被刪節點為當前鏈式之活躍起點，活躍狀態亦會被清空。
+
+\subsection{右鍵選單}
+\label{subsec:edit-context-menu}
+
+於編輯模式下右鍵點擊邊或節點，會在滑鼠位置浮現一個固定定位之選單：
+
+\begin{itemize}
+  \item 對\textbf{邊}：選單含一項「刪除邊」（右側標示快捷鍵 \texttt{Del}）。
+  \item 對\textbf{節點}：選單含一項「刪除節點」（右側標示快捷鍵 \texttt{Del}）。
+\end{itemize}
+
+點擊選單項目即執行對應之刪除；點擊選單外或按 \texttt{Esc} 即關閉選單而不執行任何動作。選單之背景與邊框採與其他介面元素一致之深色主題。
+
+\subsection{清除（清空重建圖）}
+\label{subsec:edit-clear}
+
+頂部工具列右側之紅色圖示按鈕為\textbf{清除}。點擊後跳出一個確認對話框「確定要清除所有節點與邊嗎？」，確認後清空重建圖之所有節點與邊；取消則無任何效果。此按鈕不受編輯／檢視模式影響，於任一模式下皆可使用。
+
+\subsection{編輯後重新計數}
+\label{subsec:edit-recount}
+
+完成圖形編輯後，於邊欄之管線區塊單獨點擊\textbf{計數}按鈕即可將當前重建圖（含所有編輯）送回後端重新計數；左上角之有效神經數資訊框與綠色有效跨越邊會立即同步更新（詳見第~\ref{subsec:count-current}~節）。此即本 GUI 提供之人機協同主要工作流。
+
+\section{鍵盤與滑鼠操作速查表}
+\label{sec:tool-shortcuts}
+
+表~\ref{tab:shortcuts-global} 至表~\ref{tab:shortcuts-edit} 彙整 本 GUI 之全部互動操作。
+
+\begin{table}[htbp]
+  \centering
+  \caption{全域操作（不受編輯／檢視模式影響）。}
+  \label{tab:shortcuts-global}
+  \small
+  \setlength{\tabcolsep}{6pt}
+  \begin{tabular}{ll}
+    \toprule
+    操作 & 對應動作 \\
+    \midrule
+    滑鼠滾輪 & 以游標位置為中心縮放畫布 \\
+    中鍵拖曳 & 平移畫布 \\
+    \texttt{Shift} + 左鍵拖曳 & 平移畫布 \\
+    \texttt{Ctrl} + 左鍵拖曳 & 平移畫布 \\
+    \texttt{Esc} & 清空當前選取、結束鏈式、關閉選單／參數視窗 \\
+    清除按鈕 & 確認後清空整個重建圖 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{檢視／平移模式之操作。}
+  \label{tab:shortcuts-view}
+  \small
+  \setlength{\tabcolsep}{6pt}
+  \begin{tabular}{ll}
+    \toprule
+    操作 & 對應動作 \\
+    \midrule
+    左鍵拖曳 & 平移畫布 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{編輯圖模式之操作。}
+  \label{tab:shortcuts-edit}
+  \small
+  \setlength{\tabcolsep}{6pt}
+  \begin{tabular}{ll}
+    \toprule
+    操作 & 對應動作 \\
+    \midrule
+    左鍵點空白處      & 建立新節點（若有活躍起點則同時建立連線並延伸鏈式） \\
+    左鍵點現有節點    & 將其加入鏈式；若兩節點之間無邊則建立一條新邊 \\
+    左鍵點邊          & 選取該邊（變黃） \\
+    右鍵點畫布空白處  & 結束當前鏈式 \\
+    右鍵點邊／節點    & 選取該元素並開啟選單 \\
+    \texttt{Esc}      & 結束鏈式、清空選取、關閉選單 \\
+    \texttt{Del}      & 刪除選取之節點（含其所有邊）；若無節點選取則刪除選取之邊 \\
+    \texttt{Backspace} & 同 \texttt{Del} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{本章小結}
+\label{sec:tool-summary}
+
+本章作為本 GUI 之使用手冊，依序說明了其主視窗布局、五層影像之疊合與染色機制、四階段管線之執行流程、可由使用者調整之全部演算法參數、檢視與編輯兩種互動模式，以及圖形編輯之全部操作與鍵盤速查表。本 GUI 將 AEL 之自動重建流程與專家之人工修整能力整合於同一介面下，使第~\ref{chap:method}~章所提出之演算法不僅可被執行，亦可被檢驗、被微調、被重新計數；其輸出之拓樸圖既可供臨床稽核，亦可作為下一階段（第~\ref{chap:experiment}~章）量化評估之基礎。
