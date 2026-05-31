@@ -44,7 +44,7 @@
 \begin{enumerate}
   \item \textbf{上傳三張影像：}於左側邊欄上半之圖層管理區，依序點擊「原始影像」、「表皮遮罩」、「纖維微粒遮罩」之上傳按鈕，分別載入該切片之 RGB 影像、表皮二值遮罩與纖維微粒標註遮罩。
   \item \textbf{（可選）開啟參數視窗檢視預設值：}若無特殊需求，可直接沿用預設參數；如需調整，可於管線區塊頂部點擊「參數」按鈕（詳見第~\ref{sec:tool-params}~節）。
-  \item \textbf{執行管線。}點擊邊欄下半之「全部執行」按鈕，後端會依序執行感興趣區域、前處理、重建與計數四階段（第~\ref{sec:tool-pipeline}~節）；完成後畫布上即呈現重建圖，左上角顯示有效神經數。
+  \item \textbf{執行管線。}點擊邊欄下半之「全部執行」按鈕，後端會依序執行感興趣區域、前處理、重建與計數四階段（第~\ref{sec:tool-pipeline}~節）；完成後畫布上即呈現重建圖，左上角顯示有效跨越數。
   \item \textbf{（可選）人工修整：}若自動重建之結果與專家判讀有出入，可切換至\textbf{編輯圖}模式（頂部工具列），於畫布上新增、刪除節點與邊以修整圖（第~\ref{sec:tool-edit}~節）。
   \item \textbf{重新計數：}修整完畢後，於管線區塊單獨點擊\textbf{計數}按鈕，即可將當前修整後之圖送回後端重新計數，左上角資訊框與綠色有效跨越邊會同步更新（詳見第~\ref{subsec:count-current}~節）。
 \end{enumerate}
@@ -194,7 +194,7 @@
   \item \textbf{重建階段。} 對應第~\ref{sec:dijkstra}~節至第~\ref{sec:skeleton}~節，執行多源 Dijkstra 擴張、相遇點偵測、元件層圖建立、閾值裁剪、最小生成森林、橋接遮罩、Zhang--Suen 骨架化、分段偵測與短樁修剪，最終得 $G_{\text{trim}}$，並以重建圖繪製於畫布上。\textbf{此階段之執行會完整覆蓋畫布上既有之重建圖}；若使用者於前次重建後曾手動編輯，該編輯不會被保留。
   \item \textbf{計數階段。} 對應第~\ref{sec:crossing}~節，依當前圖之纖維涵蓋篩選、區域標記與線段層之有效跨越判定，輸出 $N_{\text{cross}}$。完成後：
     \begin{itemize}
-      \item 畫布左上角浮現「\textbf{有效神經數：$N$}」之資訊框。
+      \item 畫布左上角浮現「\textbf{有效跨越數：$N$}」之資訊框。
       \item 被判定為有效跨越段之邊由藍色變為綠色（\texttt{\#34D399}）。
     \end{itemize}
 \end{enumerate}
@@ -209,7 +209,7 @@
   \item \textbf{使用者主動點擊計數按鈕：} 計數對象為\textbf{當下畫布上之重建圖}，含使用者所有手動編輯。
 \end{itemize}
 
-此設計使「重建 → 編輯 → 重新計數」之人機協同流程成為一階互動：使用者只需於完成自動重建後切入編輯模式、修整重建圖，再點一次計數，畫布上之有效神經數與綠色邊即同步更新。
+此設計使「重建 → 編輯 → 重新計數」之人機協同流程成為一階互動：使用者只需於完成自動重建後切入編輯模式、修整重建圖，再點一次計數，畫布上之有效跨越數與綠色邊即同步更新。
 
 \subsection{全部執行按鈕}
 \label{subsec:run-all}
@@ -254,17 +254,17 @@
     \midrule
     \multirow{6}{*}{前處理}
        & \texttt{Epidermis Offset (px)}    & $50$   & $\text{offset}$    & 第~\ref{subsec:roi}~節，式~\eqref{eq:roi} \\
-       & \texttt{Background Kernel}        & $51$   & $r_{\text{bg}}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:tophat} \\
-       & \texttt{CLAHE Clip Limit}         & $20.0$ & $\beta$            & 第~\ref{subsec:enhance}~節，式~\eqref{eq:clahe} \\
-       & \texttt{CLAHE Grid Size}          & $16$   & $n_{\text{tile}}$  & 第~\ref{subsec:enhance}~節，式~\eqref{eq:clahe} \\
-       & \texttt{Sato $\sigma$ Start}      & $3$    & $\sigma_{\min}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:sato} \\
-       & \texttt{Sato $\sigma$ Stop}       & $8$    & $\sigma_{\max}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:sato} \\
+       & \texttt{Background Kernel}        & $2$    & $r_{\text{bg}}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:tophat} \\
+       & \texttt{CLAHE Clip Limit}         & $30$   & $\beta$            & 第~\ref{subsec:enhance}~節，式~\eqref{eq:clahe} \\
+       & \texttt{CLAHE Grid Size}          & $768$  & $n_{\text{tile}}$  & 第~\ref{subsec:enhance}~節，式~\eqref{eq:clahe} \\
+       & \texttt{Sato $\sigma$ Start}      & $1$    & $\sigma_{\min}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:sato} \\
+       & \texttt{Sato $\sigma$ Stop}       & $4$    & $\sigma_{\max}$    & 第~\ref{subsec:enhance}~節，式~\eqref{eq:sato} \\
     \midrule
     連結 & \texttt{Prune Threshold} & $20.0$ & $\tau$ & 第~\ref{sec:prune-mst}~節 \\
     \midrule
     \multirow{2}{*}{後處理}
        & \texttt{Min Tree Components} & $1$ & $N_{\min}$    & 第~\ref{subsec:coverage-filter}~節，式~\eqref{eq:particle-min} \\
-       & \texttt{Stub Length}         & $5$ & $\ell_{\min}$ & 第~\ref{subsec:stub-prune}~節 \\
+       & \texttt{Stub Length}         & $3$ & $\ell_{\min}$ & 第~\ref{subsec:stub-prune}~節 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -291,7 +291,7 @@
 \begin{itemize}
   \item \textbf{平移}：於檢視／平移模式下，按住滑鼠\textbf{左鍵}拖曳即可平移；於任意模式下，\textbf{中鍵}拖曳、\texttt{Shift} + 左鍵拖曳、或 \texttt{Ctrl} + 左鍵拖曳亦可平移。
   \item \textbf{縮放}：滑鼠滾輪。縮放會\textbf{以游標當前位置為中心}進行，便於對特定區域逐步放大檢視。縮放比例之上下限為 $0.1\times$ 至 $10\times$。
-  \item \textbf{自動適配視野 (fit-to-view)}：當原始影像圖層被替換為新影像時，畫布會自動依容器尺寸計算最大可顯示縮放比例（保留約 $24$ 像素邊距）並將影像置中。
+  \item \textbf{自動適配視野 (fit-to-view)}：當原始影像圖層被替換為新影像時，畫布會自動依容器尺寸計算最大可顯示縮放比例（保留約 $24\,\text{像素}$ 邊距）並將影像置中。
 \end{itemize}
 
 \section{圖形編輯操作}

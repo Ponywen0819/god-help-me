@@ -14,6 +14,10 @@
   小纖維神經病變 (Small Fiber Neuropathy)
 }
 
+\item[DEJ]{
+  表皮／真皮交界 (Dermal--Epidermal Junction)
+}
+
 \item[AEL]{
   標註擴張連結 (Annotation Expansion Linker)，本論文所提出之方法
 }
@@ -51,19 +55,47 @@
 }
 
 \item[$M_{\text{ROI}}$]{
-  垂直膨脹後之感興趣區域遮罩 (Vertically dilated ROI mask)
+  向下膨脹後之感興趣區域遮罩 (Vertically dilated ROI mask)
+}
+
+\item[$\text{offset}$]{
+  感興趣區域向下膨脹之圓形結構元半徑（預設 $50$ 像素）
 }
 
 \item[$A$]{
-  二值化之神經纖維標註影像 (Binary annotation of nerve fibers)
+  二值化之纖維微粒標註影像 (Binary particle annotation)
 }
 
-\item[$E$]{
-  經前處理強化後之灰階影像 (Preprocessed vesselness-enhanced image)
+\item[$I_{\text{th}}$]{
+  白色頂帽去背景後之影像 (White top-hat background-removed image)
+}
+
+\item[$r_{\text{bg}}$]{
+  白色頂帽結構元半徑（預設 $2$ 像素）
+}
+
+\item[$I_{\text{eq}}$]{
+  CLAHE 局部對比增強後之影像 (CLAHE-equalized image)
+}
+
+\item[$\beta$]{
+  CLAHE 之對比裁剪閾值（預設 $30$）
+}
+
+\item[$n_{\text{tile}}$]{
+  CLAHE 之方塊尺度（預設 $768$ 像素）
+}
+
+\item[$\sigma_{\min},\,\sigma_{\max}$]{
+  Sato 多尺度線狀結構濾波之最小／最大尺度（取 $1$／$4$ 像素）
+}
+
+\item[$I_{\text{enhanced}}$]{
+  Sato 線狀結構濾波並正規化後之纖維響應影像 (Vesselness-enhanced image)
 }
 
 \item[$C$]{
-  像素成本圖 (Pixel-level cost map)，$C(p) = \exp(1 - \tilde{E}(p)) - 1$
+  像素成本圖 (Pixel-level cost map)，$C(p) = \exp\!\bigl(1 - \tilde{I}_{\text{enhanced}}(p)\bigr) - 1$
 }
 
 \item[$L$]{
@@ -75,39 +107,83 @@
 }
 
 \item[$D(p)$]{
-  像素 $p$ 從任一種子經最小成本路徑所累積之成本 (Dijkstra distance)
+  像素 $p$ 從任一種子經最小成本路徑所累積之成本 (Accumulated cost)
 }
 
 \item[$O(p)$]{
   像素 $p$ 所歸屬之元件索引 (Owner component of pixel $p$)
 }
 
+\item[$\mathcal{M}_{ab}$]{
+  元件對 $(a, b)$ 之候選相遇點集合 (Candidate meeting points)
+}
+
+\item[$w_{ab}$]{
+  元件對 $(a, b)$ 之最小相遇成本，即元件層圖之邊權 (Edge weight)
+}
+
 \item[$G_{c}$]{
   元件層圖 (Component-level graph)，節點為連通元件、邊為跨元件相遇點
 }
 
-\item[$T$]{
-  由 $G_{c}$ 經裁剪後求得之最小生成森林
-}
-
 \item[$\tau$]{
-  相鄰元件間相遇成本之裁剪閾值 (Edge pruning threshold)
+  相鄰元件間相遇成本之裁剪閾值（預設 $20$）
 }
 
-\item[$k_{d}$]{
-  多源區域擴張之每元件停止係數 (Per-component stopping multiplier)
+\item[$G_{\text{mst}}$]{
+  由 $G_{c}$ 經裁剪後求得之最小生成森林，每棵樹對應一條重建纖維
 }
 
-\item[$\sigma$]{
-  Sato 線狀結構濾波之尺度參數 (Scale parameter of Sato filter)
+\item[$\Pi_{(a,b)}$]{
+  最小生成森林邊 $(a, b)$ 經前驅回溯所得之像素路徑 (Back-tracked pixel path)
+}
+
+\item[$\mathcal{B}$]{
+  彙整所有回溯路徑而成之橋接遮罩 (Bridge mask)
 }
 
 \item[$r_{d}$]{
-  骨架化前橋接路徑之膨脹半徑 (Dilation radius of bridging paths)
+  骨架化前橋接路徑之膨脹半徑（預設 $1$ 像素）
+}
+
+\item[$G_{\text{skel}}$]{
+  橋接遮罩與原標註聯集後骨架化所得之骨架圖 (Skeleton graph)
 }
 
 \item[$\ell_{\min}$]{
-  一條分段被認定為有效跨越所需之最小區域長度 (px)
+  短樁修剪之最小線段長度；長度小於此值之懸掛短樁將被移除（預設 $3$ 像素）
+}
+
+\item[$G_{\text{trim}}$]{
+  經分段與短樁修剪後之最終像素級拓樸圖 (Trimmed topology graph)
+}
+
+\item[$N_{\min}$]{
+  一條獨立神經須涵蓋之最小纖維微粒數（預設 $1$）
+}
+
+\item[$G_{\text{cov}}$]{
+  經微粒涵蓋篩選後保留之拓樸圖 (Coverage-filtered graph)
+}
+
+\item[$N_{\text{cross}}$]{
+  AEL 所輸出之有效跨越數 (Effective crossing count)
+}
+
+\item[$N^{*}_{\text{cross}}$]{
+  專家依 EFNS 規則人工計數所得之有效跨越數真值
+}
+
+\item[$S_{\text{pred}}$]{
+  演算法輸出之重建纖維骨架 (Predicted skeleton)
+}
+
+\item[$S_{\text{gt}}$]{
+  專家標註之纖維骨架真值 (Ground-truth skeleton)
+}
+
+\item[$r_{v}$]{
+  拓樸品質評估時骨架之容忍膨脹半徑（取 $1.28\,\mu\text{m}$）
 }
 
 \end{denotation}

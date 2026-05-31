@@ -18,7 +18,7 @@
   \label{eq:roi}
 \end{equation}
 
-\noindent 其中 $K_{\text{offset}}$ 為半徑 $\text{offset}$ 像素之圓形結構元；$M_{\downarrow}$ 為輔助遮罩（如圖~\ref{fig:roi-auxmask} 所示），對每個 $x$ 行 (column)，其值在 $y \le y_{\max}(x)$ 處為 1、其他為 0，其中 $y_{\max}(x) = \max\{\,y : M(y, x) > 0\,\}$ 為該行表皮遮罩內最高之 $y$ 座標。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」，藉由與等向性膨脹結果（圖~\ref{fig:roi-unrestricted}）取交集可避免膨脹向表皮上方溢出，從而確保感興趣區域僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號，最終所得之 $M_{\text{ROI}}$ 如圖~\ref{fig:roi-restricted} 所示。本研究預設 $\text{offset} = 50$像素。
+\noindent 其中 $K_{\text{offset}}$ 為半徑 $\text{offset}\,\text{像素}$ 之圓形結構元；$M_{\downarrow}$ 為輔助遮罩（如圖~\ref{fig:roi-auxmask} 所示），對每個 $x$ 行 (column)，其值在 $y \le y_{\max}(x)$ 處為 1、其他為 0，其中 $y_{\max}(x) = \max\{\,y : M(y, x) > 0\,\}$ 為該行表皮遮罩內最高之 $y$ 座標。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」，藉由與等向性膨脹結果（圖~\ref{fig:roi-unrestricted}）取交集可避免膨脹向表皮上方溢出，從而確保感興趣區域僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號，最終所得之 $M_{\text{ROI}}$ 如圖~\ref{fig:roi-restricted} 所示。本研究預設 $\text{offset} = 50\,\text{像素}$。
 
 \begin{figure}[htbp]
   \centering
@@ -47,7 +47,7 @@
     \caption{}%
     \label{fig:roi-restricted}
   \end{subfigure}
-  \caption[感興趣區域之建立]{感興趣區域之建立。三張子圖中之洋紅色邊框皆為原始表皮遮罩 $M$ 之輪廓。(a) 僅向下延伸之輔助遮罩 $M_{\downarrow}$，定義「不高於表皮頂部之像素」，圖中紅色虛線代表某一特定 $x$ 座標所對應之垂直掃描線，紅色箭頭所指之位置即為該行於表皮遮罩內之最高點 $y_{\max}(x)$；(b) 對 $M$ 等向性膨脹 $\text{offset}$ 像素後之結果，可見分析範圍向表皮上方之背景溢出；(c) 將 (b) 與 (a) 取交集後所得之 $M_{\text{ROI}}$，膨脹範圍被嚴格限制於表皮下方深度 $\text{offset}$ 之真皮帶內，避免納入表皮以上之背景。}
+  \caption[感興趣區域之建立]{感興趣區域之建立。三張子圖中之洋紅色邊框皆為原始表皮遮罩 $M$ 之輪廓。(a) 僅向下延伸之輔助遮罩 $M_{\downarrow}$，定義「不高於表皮頂部之像素」，圖中紅色虛線代表某一特定 $x$ 座標所對應之垂直掃描線，紅色箭頭所指之位置即為該行於表皮遮罩內之最高點 $y_{\max}(x)$；(b) 對 $M$ 等向性膨脹 $\text{offset}\,\text{像素}$ 後之結果，可見分析範圍向表皮上方之背景溢出；(c) 將 (b) 與 (a) 取交集後所得之 $M_{\text{ROI}}$，膨脹範圍被嚴格限制於表皮下方深度 $\text{offset}$ 之真皮帶內，避免納入表皮以上之背景。}
   \label{fig:roi}
 \end{figure}
 
@@ -62,7 +62,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
   \label{eq:tophat}
 \end{equation}
 
-\noindent 其中 $K_{r_{\text{bg}}}$ 為尺寸（直徑）$r_{\text{bg}}$ 之圓盤形結構元，$\circ$ 為形態學開運算。其效果為僅保留尺度小於 $K_{r_{\text{bg}}}$ 之亮色細結構，並扣除尺度大於該結構元之慢變背景，使纖維被保留、染色不均項被扣除。輸入 $I_g$（圖~\ref{fig:enhance-green}）經此變換後得 $I_{\text{th}}$（圖~\ref{fig:enhance-tophat}），可見原本散布於纖維周圍之慢變背景被消除，僅留下纖維本身之亮色細結構。
+\noindent 其中 $K_{r_{\text{bg}}}$ 為半徑 $r_{\text{bg}}$（本研究預設 $r_{\text{bg}} = 2\,\text{像素}$）之圓盤形結構元，$\circ$ 為形態學開運算。其效果為僅保留尺度小於 $K_{r_{\text{bg}}}$ 之亮色細結構，並扣除尺度大於該結構元之慢變背景，使纖維被保留、染色不均項被扣除。輸入 $I_g$（圖~\ref{fig:enhance-green}）經此變換後得 $I_{\text{th}}$（圖~\ref{fig:enhance-tophat}），可見原本散布於纖維周圍之慢變背景被消除，僅留下纖維本身之亮色細結構。
 
 
 \paragraph{對比受限直方圖均衡化 (CLAHE)：} 經背景去除後，$I_{\text{th}}$ 之整體灰階分布被壓縮於較窄之動態範圍內，纖維與其周圍之對比隨之降低；若直接以全域直方圖均衡化重映射，雖可恢復整張影像之灰階跨度，但會以單一灰階對應關係處理整張影像，無法針對表皮各局部區域內纖維與背景之相對對比作差異化處理。為此本研究採用 CLAHE~\cite{zuiderveld1994contrast} 對 $I_{\text{th}}$ 進行\textbf{局部}對比增強，記為
@@ -71,7 +71,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
   \label{eq:clahe}
 \end{equation}
 
-\noindent 其中方塊尺度 $n_{\text{tile}}$ 控制局部適應之空間粒度，裁剪閾值 $\beta$ 抑制均勻區域之雜訊過度放大；輸出 $I_{\text{eq}}$ 如圖~\ref{fig:enhance-clahe} 所示。
+\noindent 其中方塊尺度 $n_{\text{tile}}$（本研究預設 $768\,\text{像素}$）控制局部適應之空間粒度，裁剪閾值 $\beta$（本研究預設 $30$）抑制均勻區域之雜訊過度放大；輸出 $I_{\text{eq}}$ 如圖~\ref{fig:enhance-clahe} 所示。
 
 \begin{figure}[htbp]
   \centering
@@ -112,7 +112,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
   \label{eq:sato}
 \end{equation}
 
-\noindent 其中該濾波器基於 Hessian 矩陣之特徵值辨識亮色線狀區域，並對多尺度集合 $\Sigma = \{\sigma_{\min},\; \sigma_{\min}+1,\; \ldots,\; \sigma_{\max}\}$ 取各尺度響應之逐像素最大值，使不同粗細之纖維均能被有效偵測；$\sigma_{\min}, \sigma_{\max}$ 依目標纖維之最小與最大半寬選取。由於 $S$ 之動態範圍因影像而異，本研究再對其進行最小—最大線性正規化以對齊至固定區間 $[0, 255]$：
+\noindent 其中該濾波器基於 Hessian 矩陣之特徵值辨識亮色線狀區域，並對多尺度集合 $\Sigma = \{\sigma_{\min},\; \sigma_{\min}+1,\; \ldots,\; \sigma_{\max}\}$ 取各尺度響應之逐像素最大值，使不同粗細之纖維均能被有效偵測；$\sigma_{\min}, \sigma_{\max}$ 依目標纖維之最小與最大半寬選取，本研究於所用資料集上取 $\sigma_{\min} = 1$、$\sigma_{\max} = 4\,\text{像素}$。由於 $S$ 之動態範圍因影像而異，本研究再對其進行最小—最大線性正規化以對齊至固定區間 $[0, 255]$：
 \begin{equation}
   I_{\text{enhanced}}(x, y) \;=\; 255 \cdot \frac{S(x, y) - \min_{(x', y') \in \Omega} S(x', y')}{\max_{(x', y') \in \Omega} S(x', y') - \min_{(x', y') \in \Omega} S(x', y')},
   \label{eq:sato-norm}
@@ -385,8 +385,6 @@ $G_c$ 之邊集在實務上常同時包含兩類連線：(i) 成本較低、代�
   \caption[橋接遮罩與骨架化之逐步視覺化]{橋接遮罩與骨架化之逐步視覺化。(a) 沿前驅指標回溯所得之最小生成森林邊像素路徑 $\Pi_{(a, b)}$；(b) 將所有回溯路徑彙整為橋接遮罩 $\mathcal{B}$；(c) 以半徑 $r_d$ 之圓形結構元膨脹後之路徑遮罩 $\tilde{\mathcal{B}}$；(d) 膨脹後之路徑遮罩與原纖維微粒標註取聯集所得之 $\mathcal{U}$；(e) 將 $\mathcal{U}$ 經 Zhang--Suen 細化所得之單像素寬骨架，紅色圓圈標示待修剪之懸掛短樁；(f) 移除短樁並完成分段後之最終像素級拓樸圖 $G_{\text{trim}}$，圖中紅色圓點代表端點、藍色圓點代表分支點、黃色圓點代表中繼節點（為避免視覺擁擠，黃色僅標示部分代表性中繼節點，並非全部）。}
   \label{fig:bridge-skeleton}
 \end{figure}
-\section{交叉點分析與有效跨越計數}
-\label{sec:crossing}
 
 \subsection{橋接遮罩與骨架化}
 \label{subsec:bridge-skeleton}
@@ -433,6 +431,9 @@ $\mathcal{B}$ 將分散於各邊之像素路徑整合為單一之像素層遮罩
 \end{equation*}
 \noindent 其中 $G_{\text{trim}}$ 為後續交叉點分析所依據之最終像素級拓樸，如圖~\ref{fig:bs-pruned} 所示之結果。
 
+
+\section{交叉點分析與有效跨越計數}
+\label{sec:crossing}
 
 在 第~\ref{sec:skeleton}~節已建構出經分段與短樁修剪之像素級拓樸 $G_{\text{trim}}$ 後，本節依序執行三個步驟以將其轉換為可計數之 IENFD：(i) 於纖維層以微粒涵蓋數篩除偽神經，得到僅由可信神經組成之 $G_{\text{cov}}$；(ii) 於 $G_{\text{cov}}$ 上對節點進行區域標記，並依此判定跨越邊；(iii) 將跨越邊以所屬線段為單位彙整，計數有效跨越事件。
 
