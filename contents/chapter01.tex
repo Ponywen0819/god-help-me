@@ -6,7 +6,7 @@
 \section{研究背景}
 \label{sec:background}
 
-表皮內神經纖維 (Intraepidermal Nerve Fiber, IENF) 為末梢感覺神經由真皮穿越表皮／真皮交界並伸入表皮層之無髓鞘小纖維，其密度 (Intraepidermal Nerve Fiber Density, IENFD) 在近二十年間已被多項國際臨床指引認可為診斷\textbf{小纖維神經病變} (Small Fiber Neuropathy, SFN) 之黃金標準生物指標~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}。SFN 常見於糖尿病周邊神經病變、化療誘發性神經病變、遺傳性感覺神經病變等臨床族群；由於傳統之神經傳導檢查 (Nerve Conduction Study, NCS) 僅能反映有髓鞘之粗纖維功能，無法偵測小纖維的受損，因此以皮膚切片量測 IENFD 在臨床上具有無可取代之角色。
+表皮內神經纖維 (Intraepidermal Nerve Fiber, IENF) 為末梢感覺神經由真皮穿越表皮／真皮交界並伸入表皮層之無髓鞘小纖維，其密度 (Intraepidermal Nerve Fiber Density, IENFD) 在近二十年間已被多項國際臨床指引認可為診斷\textbf{小纖維神經病變} (Small Fiber Neuropathy, SFN) 之黃金標準生物指標~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}。SFN 常見於糖尿病周邊神經病變、化療誘發性神經病變、遺傳性感覺神經病變等臨床族群；由於傳統之神經傳導檢查 (Nerve Conduction Study, NCS) 僅能反映有髓鞘之粗纖維功能，無法偵測小纖維的受損，因此以皮膚切片量測 IENFD 在臨床上具有難以取代之角色。
 
 取得 IENFD 的標準流程係於病人小腿遠端以 $3\,\text{mm}$ 環鑽取下皮膚樣本，經 PGP 9.5 免疫組織化學染色後，製成 $50\,\mu\text{m}$ 之垂直切片。病理醫師或技術員於顯微鏡或影像上以人工方式計算\textbf{「跨越表皮／真皮交界 (dermal–epidermal junction, DEJ) 之神經纖維數量」}，再除以該切片之表皮長度，以每毫米之纖維數 (fibers/mm) 呈現 IENFD。該計數遵循 European Federation of Neurological Societies (EFNS) 所提之規則~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}：一條纖維無論於表皮內如何分支，皆僅計為一次；僅計算由真皮穿越 DEJ 進入表皮之纖維，而不計算完全位於表皮內或真皮內之線段。上述流程確立了 IENFD 之臨床量測標準，然其執行迄今仍高度倚賴人工判讀，於效率、一致性與可稽核性上皆存有改進空間。
 
@@ -33,11 +33,11 @@
 本研究之核心目標為：\textbf{在不依賴額外人工干預之前提下，將由語意分割所得之纖維微粒重建為與影像成本一致、可直接用於有效跨越計數之纖維拓樸結構。} 為達此目標，本研究提出 \textbf{標註擴張連結} (Annotation Expansion Linker, AEL)。本論文之主要貢獻如下：
 
 \begin{itemize}
-  \item \textbf{基於影像之連結準則。} 不同於純粹幾何之連結方法，本研究將連結問題形式化為一個建立於\textbf{像素成本圖}上的多源最短路徑問題。成本圖由綠色通道經 CLAHE 與 Sato 線狀結構濾波而得，使「沿纖維行進」之成本遠低於「橫跨背景」之成本，從而使連結路徑自然遵循影像之纖維線索。
+  \item \textbf{基於影像之連結準則。} 不同於純粹幾何之連結方法，本研究將連結問題形式化為一個建立於\textbf{像素成本圖}上的多源最短路徑問題。成本圖由綠色通道經 CLAHE 與 Sato 線狀結構濾波而得，使「沿纖維行進」之成本遠低於「橫跨背景」之成本，從而使連結路徑傾向沿影像之纖維線索延伸。
 
-  \item \textbf{元件層圖與裁剪—MST 重建。} 以各連通元件為獨立來源執行多源區域擴張，並於擴張場中搜尋任意兩元件之最小成本相遇點，將其萃取為元件層圖之邊；再以成本閾值裁剪異常邊後求最小生成森林，確保每個真實纖維僅保留必要之連結、避免過度連線。
+  \item \textbf{元件層圖與裁剪—MST 重建。} 以各連通元件為獨立來源執行多源區域擴張，並於擴張場中搜尋任意兩元件之最小成本相遇點，將其萃取為元件層圖之邊；再以成本閾值裁剪異常邊後求最小生成森林，使每個真實纖維傾向僅保留必要之連結、抑制過度連線。
 
-  \item \textbf{像素級拓樸與跨越判定。} 將 MST 所回溯之跨元件路徑與原標註合併並骨架化，得到可供後續分段 (segment) 與跨越判定使用之像素級圖結構；在此結構上結合表皮遮罩執行分段偵測、區域標記與有效跨越計數，形成一個端到端的完整流程。
+  \item \textbf{像素級拓樸與跨越判定。} 將 MST 所回溯之跨元件路徑與原標註合併並骨架化，得到可供後續分段 (segment) 與跨越判定使用之像素級圖結構；在此結構上結合表皮遮罩執行分段偵測、區域標記與有效跨越計數，形成一個完整流程。
 
 \end{itemize}
 
