@@ -3,7 +3,7 @@
 \chapter{研究方法與設計}
 \label{chap:method}
 
-本章說明本研究所提出之\textbf{標註擴張連結} (Annotation Expansion Linker, AEL) 演算法之完整設計。給定一張 PGP 9.5 染色之皮膚切片影像 $I \in \mathbb{R}^{H \times W \times 3}$、表皮遮罩 $M \in \{0, 255\}^{H \times W}$、以及由人工初步標註所得之二值\textbf{纖維微粒} (particle)~\cite{hsueh2026machine} 標註 $A \in \{0, 255\}^{H \times W}$，AEL 之目標為輸出一個\textbf{像素級無向圖} $G_{\text{trim}} = (V_{\text{trim}}, E_{\text{trim}})$，其中 $V_{\text{trim}} \subseteq \mathbb{Z}^2$ 為骨架節點所對應之像素座標集合、$E_{\text{trim}}$ 為沿纖維之連線集合，並於其上計算有效跨越數 $N_{\text{cross}}$。以下各節依序詳述：第~\ref{sec:preprocessing}~節說明前處理與成本圖建構；第~\ref{sec:dijkstra}~節說明多源區域擴張；第~\ref{sec:component-graph}~節描述相遇點偵測與元件層圖之建立；第~\ref{sec:prune-mst}~節說明成本裁剪與最小生成森林；第~\ref{sec:skeleton}~節說明像素級拓樸之建構；最後第~\ref{sec:crossing}~節說明於該拓樸上進行有效跨越計數之完整程序。
+本章說明本研究所提出之\textbf{標註擴張連結} (Annotation Expansion Linker, AEL) 演算法之完整設計。給定一張 PGP 9.5 染色之皮膚切片影像 $I \in \mathbb{R}^{H \times W \times 3}$、表皮遮罩 $M \in \{0, 255\}^{H \times W}$、以及由人工初步標註所得之二值\textbf{纖維微粒} (particle)~\cite{hsueh2026machine} 標註 $P \in \{0, 255\}^{H \times W}$，AEL 之目標為輸出一個\textbf{像素級無向圖} $G_{\text{trim}} = (V_{\text{trim}}, E_{\text{trim}})$，其中 $V_{\text{trim}} \subseteq \mathbb{Z}^2$ 為骨架節點所對應之像素座標集合、$E_{\text{trim}}$ 為沿纖維之連線集合，並於其上計算有效跨越數 $N_{\text{pred}}$。以下各節依序詳述：第~\ref{sec:preprocessing}~節說明前處理與成本圖建構；第~\ref{sec:dijkstra}~節說明多源區域擴張；第~\ref{sec:component-graph}~節描述相遇點偵測與元件層圖之建立；第~\ref{sec:prune-mst}~節說明成本裁剪與最小生成森林；第~\ref{sec:skeleton}~節說明像素級拓樸之建構；最後第~\ref{sec:crossing}~節說明於該拓樸上進行有效跨越計數之完整程序。
 
 \section{前處理與成本圖建構}
 \label{sec:preprocessing}
@@ -172,7 +172,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
 \subsection{連通元件之標記}
 \label{subsec:cc}
 
-令 $A_{\text{ROI}} = A \cap M_{\text{ROI}}$ 為限制於感興趣區域內之標註。以 $A_{\text{ROI}} > 127$ 進行二值化後執行\textbf{8-連通連通元件標記}，得到元件標記圖 $L : \Omega \to \{0, 1, \ldots, N\}$，其中 $N$ 為該切片所偵測出之纖維微粒總數，$L(x, y) = 0$ 為背景，$L(x, y) = i$（$i \ge 1$）代表像素 $(x, y)$ 屬於第 $i$ 個元件。每個連通元件即對應影像上一段連續染色之\textbf{纖維微粒} (particle)，其內部之像素已被視為同屬一條纖維，故無需再行細分，而元件之間是否屬於同一條纖維才是後續重建之核心問題。本研究即以此為基本單位，將每個元件視為一個獨立來源，於下節中同步執行多源區域擴張。
+令 $P_{\text{ROI}} = P \cap M_{\text{ROI}}$ 為限制於感興趣區域內之標註。以 $P_{\text{ROI}} > 127$ 進行二值化後執行\textbf{8-連通連通元件標記}，得到元件標記圖 $L : \Omega \to \{0, 1, \ldots, N\}$，其中 $N$ 為該切片所偵測出之纖維微粒總數，$L(x, y) = 0$ 為背景，$L(x, y) = i$（$i \ge 1$）代表像素 $(x, y)$ 屬於第 $i$ 個元件。每個連通元件即對應影像上一段連續染色之\textbf{纖維微粒} (particle)，其內部之像素已被視為同屬一條纖維，故無需再行細分，而元件之間是否屬於同一條纖維才是後續重建之核心問題。本研究即以此為基本單位，將每個元件視為一個獨立來源，於下節中同步執行多源區域擴張。
 
 \subsection{擴張規則}
 \label{subsec:dijkstra-rule}
@@ -215,7 +215,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
     \caption{}%
     \label{fig:rg-voronoi}
   \end{subfigure}
-  \caption[多源區域擴張之視覺化]{多源區域擴張之視覺化。(a) 各連通元件以不同顏色標示，分別作為獨立來源；(b) 擴張結束後，每個像素之累積成本 $D(x, y)$ 顯示自最近來源沿低成本路徑抵達之代價；(c) 將每個像素指派給所屬來源 $O(x, y)$ 後，影像被劃分為以成本為度量之沃羅諾伊區塊，相鄰區塊之邊界即為後續相遇點搜尋之依據。}
+  \caption[多源區域擴張之視覺化]{多源區域擴張之視覺化。(a) 各連通元件以不同顏色標示，分別作為獨立來源；(b) 擴張結束後，每個像素之累積成本 $D(x, y)$ 顯示自最近來源沿低成本路徑抵達之成本；(c) 將每個像素指派給所屬來源 $O(x, y)$ 後，影像被劃分為以成本為度量之沃羅諾伊區塊，相鄰區塊之邊界即為後續相遇點搜尋之依據。}
   \label{fig:region-grow}
 \end{figure}
 
@@ -271,7 +271,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
   \label{eq:gc-edges}
 \end{equation}
 
-\noindent 換言之，元件層圖 $G_c$ 以各纖維微粒為節點，凡其擴張領域相鄰者即以一條帶權邊相連，邊權 $w_{ab}$ 為兩元件間最低成本相遇點之路徑成本。圖~\ref{fig:meet-point} 一併呈現了由相遇點所導出之元件層圖：每條邊對應一組相鄰元件，其權重即沿成本圖連接兩者所需之最小代價。
+\noindent 換言之，元件層圖 $G_c$ 以各纖維微粒為節點，凡其擴張領域相鄰者即以一條帶權邊相連，邊權 $w_{ab}$ 為兩元件間最低成本相遇點之路徑成本。圖~\ref{fig:meet-point} 一併呈現了由相遇點所導出之元件層圖：每條邊對應一組相鄰元件，其權重即沿成本圖連接兩者所需之最小成本。
 
 \begin{figure}[htbp]
   \centering
@@ -477,7 +477,7 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
 
 在上述區域標記完成後，本研究依\textbf{線段}（而非邊）為單位計算跨越數；遵循 EFNS/PNS 切片計數規範~\cite{jointtaskforce2010skinbiopsy}，一條線段即使包含多個跨越邊亦僅計為一次。偶然搭上 DEJ 一小段即折返之毛刺已於 第~\ref{subsec:stub-prune}~節之短樁修剪階段一併排除，故於此階段不再對線段於兩側區域之延伸長度施加額外限制。
 
-綜上所述，一條線段被計為一次有效跨越，需\textbf{同時}滿足：(i) 其所屬連通分量已通過微粒涵蓋篩選（第~\ref{subsec:coverage-filter}~節）而保留於 $G_{\text{cov}}$ 中；(ii) 至少包含一條跨越邊。滿足之線段總數 $N_{\text{cross}}$ 即為 AEL 輸出之有效跨越數，最終計入之線段如圖~\ref{fig:crossing-effective} 所示。若已知切片之表皮長度（可自 $M$ 之上緣輪廓計算），$N_{\text{cross}}$ 可用於計算 IENFD，並與專家人工計數直接比較。
+綜上所述，一條線段被計為一次有效跨越，需\textbf{同時}滿足：(i) 其所屬連通分量已通過微粒涵蓋篩選（第~\ref{subsec:coverage-filter}~節）而保留於 $G_{\text{cov}}$ 中；(ii) 至少包含一條跨越邊。滿足之線段總數 $N_{\text{pred}}$ 即為 AEL 輸出之有效跨越數，最終計入之線段如圖~\ref{fig:crossing-effective} 所示。若已知切片之表皮長度（可自 $M$ 之上緣輪廓計算），$N_{\text{pred}}$ 可用於計算 IENFD，並與專家人工計數直接比較。
 
 \begin{figure}[htbp]
   \centering
@@ -501,36 +501,36 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
     \caption{}%
     \label{fig:crossing-effective}
   \end{subfigure}
-  \caption[交叉點分析三步驟之視覺化]{交叉點分析三步驟之視覺化。三張子圖中之黃色虛線皆為表皮遮罩 $M$ 之下邊緣，作為區分表皮側與真皮側之參考。(a) 經微粒涵蓋篩選後保留之 $G_{\text{cov}}$，僅保留 $n_{\text{cov}}(T_i) \ge N_{\min}$ 之連通分量；(b) 於 $G_{\text{cov}}$ 上之節點區域標記與跨越邊偵測結果；(c) 將跨越邊以所屬線段為單位彙整後最終計入 $N_{\text{cross}}$ 之有效跨越線段。}
+  \caption[交叉點分析三步驟之視覺化]{交叉點分析三步驟之視覺化。三張子圖中之黃色虛線皆為表皮遮罩 $M$ 之下邊緣，作為區分表皮側與真皮側之參考。(a) 經微粒涵蓋篩選後保留之 $G_{\text{cov}}$，僅保留 $n_{\text{cov}}(T_i) \ge N_{\min}$ 之連通分量；(b) 於 $G_{\text{cov}}$ 上之節點區域標記與跨越邊偵測結果；(c) 將跨越邊以所屬線段為單位彙整後最終計入 $N_{\text{pred}}$ 之有效跨越線段。}
   \label{fig:crossing}
 \end{figure}
 
 \section{本章小結}
 \label{sec:method-summary}
 
-綜合前述各節之說明，AEL 自輸入影像至有效跨越數之完整流程可整理為演算法~\ref{alg:ael}。本研究提出之 AEL 演算法以多源區域擴張為核心，將原本不完整之纖維微粒標註逐步整合為一個於像素層級具一致性之拓樸圖：擴張過程於成本圖上自動劃分各元件之 沃羅諾伊 領域，並於相鄰領域邊界處產生具最小累積成本之相遇點，藉此重建因斷裂而失聯之纖維延續關係。為避免遠距離元件之高成本相遇被誤納，AEL 進一步在元件層圖上施以閾值裁剪並計算最小生成森林，使每棵樹對應一條重建後之纖維、同時抑制偽連線與冗餘連線。最後將樹邊之像素路徑與原微粒標註取聯集後骨架化，並於骨架上以線段為單位執行區域標記與有效跨越判定；輸出之 $N_{\text{cross}}$ 結合切片之表皮長度即和 IENFD 相比，完成自破碎之纖維微粒至可量化指標之完整流程。
+綜合前述各節之說明，AEL 自輸入影像至有效跨越數之完整流程可整理為演算法~\ref{alg:ael}。本研究提出之 AEL 演算法以多源區域擴張為核心，將原本不完整之纖維微粒標註逐步整合為一個於像素層級具一致性之拓樸圖：擴張過程於成本圖上自動劃分各元件之 沃羅諾伊 領域，並於相鄰領域邊界處產生具最小累積成本之相遇點，藉此重建因斷裂而失聯之纖維延續關係。為避免遠距離元件之高成本相遇被誤納，AEL 進一步在元件層圖上施以閾值裁剪並計算最小生成森林，使每棵樹對應一條重建後之纖維、同時抑制偽連線與冗餘連線。最後將樹邊之像素路徑與原微粒標註取聯集後骨架化，並於骨架上以線段為單位執行區域標記與有效跨越判定；輸出之 $N_{\text{pred}}$ 結合切片之表皮長度即和 IENFD 相比，完成自破碎之纖維微粒至可量化指標之完整流程。
 
 
 \begin{algorithm}[htbp]
   \caption{Annotation Expansion Linker}
   \label{alg:ael}
-  \textbf{Input:} histological image $I$, epidermis mask $M$, particle annotation $A$; parameters $\{\text{offset}, r_{\text{bg}}, n_{\text{tile}}, \beta, \sigma_{\min}, \sigma_{\max}, \tau, r_d, \ell_{\min}, N_{\min}\}$.\\
-  \textbf{Output:} pixel-level topology graph $G_{\text{trim}}$ and effective crossing count $N_{\text{cross}}$.
+  \textbf{Input:} histological image $I$, epidermis mask $M$, particle annotation $P$; parameters $\{\text{offset}, r_{\text{bg}}, n_{\text{tile}}, \beta, \sigma_{\min}, \sigma_{\max}, \tau, r_d, \ell_{\min}, N_{\min}\}$.\\
+  \textbf{Output:} pixel-level topology graph $G_{\text{trim}}$ and effective crossing count $N_{\text{pred}}$.
   \begin{enumerate}
     \item $M_{\text{ROI}} \gets$ the mask obtained by dilating $M$ downward by $\text{offset}$ pixels, so that the analysis domain covers the epidermis and a fixed dermis strip beneath it.
     \item $I_{\text{enhanced}} \gets$ the result of removing the slowly varying background from the green channel $I_g$, applying CLAHE for local contrast enhancement, running the multi-scale Sato vesselness filter, and masking by $M_{\text{ROI}}$.
     \item $C \gets \exp(1 - \tilde{I}_{\text{enhanced}}) - 1$, the pixel cost map derived from the normalized vesselness response.
-    \item $L \gets$ the label map of the connected components of $A \cap M_{\text{ROI}}$;\; $N \gets \max L$, the total number of components used as expansion seeds.
+    \item $L \gets$ the label map of the connected components of $P \cap M_{\text{ROI}}$;\; $N \gets \max L$, the total number of components used as expansion seeds.
     \item $(O, D, \text{prev}_y, \text{prev}_x) \gets$ the per-pixel owner, accumulated cost, and predecessor coordinates produced by running a multi-source region expansion on $C$ with all components in $L$ as simultaneous seeds.
     \item $\mathcal{P} \gets$ the set of inter-component meeting points obtained by scanning each pixel's 8-connected neighborhood and, for each adjacent component pair, keeping only the lowest-cost pixel pair.
     \item $G_c \gets$ the component-level graph built from $\mathcal{P}$, with one node per component and one edge per adjacent component pair.
     \item $G_c^{\text{pruned}} \gets$ the same graph after removing edges whose weight exceeds the threshold $\tau$.
     \item $G_{\text{mst}} \gets$ the minimum spanning forest of $G_c^{\text{pruned}}$, in which each tree corresponds to one reconstructed fiber.
-    \item $G_{\text{skel}} \gets$ the single-pixel-wide skeleton obtained by backtracking each $G_{\text{mst}}$ edge into a pixel path via $(\text{prev}_y, \text{prev}_x)$, dilating the resulting bridge mask by radius $r_d$, taking the union with $A$, and applying Zhang--Suen thinning.
+    \item $G_{\text{skel}} \gets$ the single-pixel-wide skeleton obtained by backtracking each $G_{\text{mst}}$ edge into a pixel path via $(\text{prev}_y, \text{prev}_x)$, dilating the resulting bridge mask by radius $r_d$, taking the union with $P$, and applying Zhang--Suen thinning.
     \item $G_{\text{trim}} \gets$ the topology obtained by splitting $G_{\text{skel}}$ into segments at all boundary nodes and removing dangling stubs shorter than $\ell_{\min}$.
     \item $G_{\text{cov}} \gets$ the subgraph of $G_{\text{trim}}$ retained after discarding fibers whose covered particle count falls below $N_{\min}$, leaving only the trustworthy fibers.
     \item $G_{\text{cov}} \gets$ the same graph with every node labeled as lying above, within, or below the epidermis according to $M$.
-    \item $N_{\text{cross}} \gets$ the number of effective crossings counted on $G_{\text{cov}}$ following the EFNS/PNS counting rules.
+    \item $N_{\text{pred}} \gets$ the number of effective crossings counted on $G_{\text{cov}}$ following the EFNS/PNS counting rules.
   \end{enumerate}
 \end{algorithm}
 
