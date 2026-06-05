@@ -269,7 +269,7 @@
   \end{tabular}
 \end{table}
 
-\paragraph{關於 \texttt{Min Tree Components}：} 此參數對應第~\ref{subsec:coverage-filter}~節之纖維層微粒涵蓋門檻 $N_{\min}$，用以排除子樹所涵蓋之微粒數過少之連通分量。\textbf{本研究將其預設值設為 $N_{\min} = 1$，即不啟用任何微粒涵蓋數量之檢查}，所有經 MST 連結之子樹皆視為有效神經候選。將此參數於 GUI 中獨立暴露之目的，乃是依~\cite{hsueh2026machine} 之臨床操作要求，留予使用者依\textbf{自身之經驗法則}逐切片調整之彈性：染色破碎、雜訊明顯之切片可調高此值以排除由零星微粒拼接而成之偽神經；染色完整、纖維連續性高者則維持預設值即可接納更多微粒。
+\paragraph{關於 \texttt{Min Tree Components}：} 此參數對應第~\ref{subsec:coverage-filter}~節之纖維層微粒涵蓋門檻 $N_{\min}$，用以排除子樹所涵蓋之微粒數過少之連通分量。\textbf{本研究將其預設值設為 $N_{\min} = 1$，即不啟用任何微粒涵蓋數量之檢查}，所有經最小生成森林連結之子樹皆視為有效神經候選。將此參數於 GUI 中獨立暴露之目的，乃是依~\cite{hsueh2026machine} 之臨床操作要求，留予使用者依\textbf{自身之經驗法則}逐切片調整之彈性：染色破碎、雜訊明顯之切片可調高此值以排除由零星微粒拼接而成之偽神經；染色完整、纖維連續性高者則維持預設值即可接納更多微粒。
 
 \section{互動模式}
 \label{sec:tool-modes}

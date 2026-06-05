@@ -62,7 +62,7 @@
   感興趣區域向下膨脹之圓形結構元半徑（預設 $50$ 像素）
 }
 
-\item[$A$]{
+\item[$P$]{
   二值化之纖維微粒標註影像 (Binary particle annotation)
 }
 
@@ -130,6 +130,14 @@
   相鄰元件間相遇成本之裁剪閾值（預設 $20$）
 }
 
+\item[$G_{c}^{\text{pruned}}$]{
+  元件層圖 $G_{c}$ 經閾值 $\tau$ 裁剪高成本偽邊後所得之圖 (Pruned component-level graph)
+}
+
+\item[$d_{\max}$]{
+  基準 MSF 連結時端點配對之最大歐式距離閾值（取 $15$ 像素）
+}
+
 \item[$G_{\text{mst}}$]{
   由 $G_{c}$ 經裁剪後求得之最小生成森林，每棵樹對應一條重建纖維
 }
@@ -158,6 +166,10 @@
   經分段與短樁修剪後之最終像素級拓樸圖 (Trimmed topology graph)
 }
 
+\item[$T_i$]{
+  $G_{\text{trim}}$ 之第 $i$ 個連通分量，對應一條重建之神經纖維 (Connected component of $G_{\text{trim}}$)
+}
+
 \item[$N_{\min}$]{
   一條獨立神經須涵蓋之最小纖維微粒數（預設 $1$）
 }
@@ -166,12 +178,28 @@
   經微粒涵蓋篩選後保留之拓樸圖 (Coverage-filtered graph)
 }
 
-\item[$N_{\text{cross}}$]{
-  AEL 所輸出之有效跨越數 (Effective crossing count)
+\item[$N_{\text{pred}}$]{
+  演算法所輸出之有效跨越數 (Predicted effective crossing count)
 }
 
-\item[$N^{*}_{\text{cross}}$]{
-  專家依 EFNS 規則人工計數所得之有效跨越數真值
+\item[$N_{\text{gt}}$]{
+  有效跨越數真值；由神經病學專家依 EFNS 規則人工計數而得 (Ground-truth crossing count)
+}
+
+\item[$K$]{
+  資料集之切片總數 (Number of slices)
+}
+
+\item[$N_{\text{MAE}}$]{
+  預測與真值有效跨越數之平均絕對誤差 (Mean Absolute Error)
+}
+
+\item[$N_{\text{RMSE}}$]{
+  預測與真值有效跨越數之均方根誤差 (Root-Mean-Square Error)
+}
+
+\item[$\rho$]{
+  預測與真值有效跨越數之 Pearson 相關係數 (Pearson correlation coefficient)
 }
 
 \item[$S_{\text{pred}}$]{
@@ -184,6 +212,18 @@
 
 \item[$r_{v}$]{
   拓樸品質評估時骨架之容忍膨脹半徑（取 $1.28\,\mu\text{m}$）
+}
+
+\item[$\text{Dice}_{\text{cl}}$]{
+  中心線 Dice（clDice），衡量重建骨架與真值骨架於容忍半徑 $r_{v}$ 內之拓樸重合度 (Centerline Dice)
+}
+
+\item[$\text{HD95}$]{
+  預測與真值骨架間雙向距離之 $95$ 百分位豪斯多夫距離 (95th-percentile Hausdorff distance)
+}
+
+\item[$\text{HD}_{\text{avg}}$]{
+  預測與真值骨架間雙向最短距離之平均豪斯多夫距離 (Average Hausdorff distance)
 }
 
 \end{denotation}

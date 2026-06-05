@@ -407,7 +407,7 @@ $\mathcal{B}$ 將分散於各邊之像素路徑整合為單一之像素層遮罩
 \end{equation}
 如圖~\ref{fig:bs-dilated} 所示；再與原標註取聯集
 \begin{equation}
-  \mathcal{U} \;=\; \bigl(\,A > 0\,\bigr) \;\cup\; \tilde{\mathcal{B}}.
+  \mathcal{U} \;=\; \bigl(\,P > 0\,\bigr) \;\cup\; \tilde{\mathcal{B}}.
   \label{eq:union}
 \end{equation}
 所得之 $\mathcal{U}$ \textbf{同時保留既有之可信區段與新增之橋接區段}（圖~\ref{fig:bs-union}），確保重建結果與原標註兼容。最後再以 Zhang--Suen 演算法將 $\mathcal{U}$ 細化為單像素寬之骨架（圖~\ref{fig:bs-skeleton}），並轉換為以 $(x, y)$ 座標為節點、像素間相鄰為邊之\textbf{骨架圖}
