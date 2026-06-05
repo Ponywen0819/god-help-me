@@ -298,11 +298,11 @@
     \caption{}
   \end{subfigure}
 
-  \caption[白色頂帽背景去除於不同結構元尺寸之比較]{白色頂帽背景去除於六種結構元尺寸 $r_{\text{bg}}$ 下之輸出比較（同一局部區域，色階一致）。(a) $r_{\text{bg}} = 0$，未做背景去除，強烈之慢變背景使纖維難以與背景區分；(b) $r_{\text{bg}} = 1$，結構元偏小，背景雖被徹底抑制，纖維響應卻同遭削弱、斷裂成零碎線段；(c) $r_{\text{bg}} = 2$（基準），於背景抑制與纖維保留之間取得平衡；(d)--(f) $r_{\text{bg}} = 3, 4, 5$，結構元偏大，纖維保留完整，但殘餘背景隨半徑增大而逐漸浮現。}
+  \caption[白色頂帽背景去除於不同結構元尺寸之比較]{白色頂帽背景去除於六種結構元尺寸 $r_{\text{bg}}$ 下之輸出比較（同一局部區域，色階一致）。(a) $r_{\text{bg}} = 0$；(b) $r_{\text{bg}} = 1$；(c) $r_{\text{bg}} = 2$（基準）；(d) $r_{\text{bg}} = 3$；(e) $r_{\text{bg}} = 4$；(f) $r_{\text{bg}} = 5$。}
   \label{fig:bg-remove}
 \end{figure}
 
-\paragraph{CLAHE 對比裁剪閾值 $\beta$：} $\beta$ 限制 CLAHE 直方圖之裁剪高度，即局部對比強化之上限。由表~\ref{tab:param-clip}：閾值偏低時對比強化不足，纖維與背景未充分分離——$\beta = 10$ 於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標皆顯著劣於預設，$\beta = 20$ 亦於三項上顯著較差（$\text{Dice}_{\text{cl}}$ $p < 0.001$、HD95 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.05$）。$\beta \ge 30$ 後增益趨於飽和：$\beta = 30, 40, 50$ 三者之三項指標彼此無顯著差異（所有 $p > 0.4$），$\text{Dice}_{\text{cl}}$ 停於約 $90.5\%$ 之平台。$\beta = 40$ 雖於三項指標上較預設略佳，惟差異皆未達顯著；故選擇 $\beta = 30$ 作為達到此飽和平台之最小裁剪閾值。此一飽和現象於圖~\ref{fig:clahe-clip} 之差值視覺化中亦清晰可見。
+\paragraph{CLAHE 對比裁剪閾值 $\beta$：} $\beta$ 限制 CLAHE 直方圖之裁剪高度，即局部對比強化之上限。由表~\ref{tab:param-clip}：閾值偏低時對比強化不足，纖維與背景未充分分離——$\beta = 10$ 於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標皆顯著劣於預設，$\beta = 20$ 亦於三項上顯著較差（$\text{Dice}_{\text{cl}}$ $p < 0.001$、HD95 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.05$）。$\beta \ge 30$ 後增益趨於飽和：$\beta = 30, 40, 50$ 三者之三項指標彼此無顯著差異（所有 $p > 0.4$），$\text{Dice}_{\text{cl}}$ 停於約 $90.5\%$ 之平台。$\beta = 40$ 雖於三項指標上較預設略佳，惟差異皆未達顯著；故選擇 $\beta = 30$ 作為達到此飽和平台之最小裁剪閾值。此一飽和現象於圖~\ref{fig:clahe-clip} 之差值視覺化中亦清晰可見：圖中以基準 $\beta = 30$ 之輸出為參照，$\beta < 30$（$\beta = 10, 20$）時差值為負且集中於纖維本身，顯示對比強化不足、纖維訊號連同背景一併被壓低，與表~\ref{tab:param-clip} 中此二取值顯著較差相互呼應；$\beta > 30$（$\beta = 40, 50$）時差值雖仍存在，卻不再集中於纖維、而是逐漸擴散至背景，意即額外之對比強化已無助於纖維--背景之分離，正對應指標於 $\beta \ge 30$ 之飽和平台。
 
 \begin{table}[htbp]
   \centering
@@ -354,11 +354,11 @@
     \caption{}
   \end{subfigure}
 
-  \caption[CLAHE 對比裁剪閾值 $\beta$ 之差值視覺化]{各 $\beta$ 之 CLAHE 輸出相對基準 $\beta = 30$ 之差值（同一局部區域，色階一致）。(a)--(e) 分別對應 $\beta = 10, 20, 30, 40, 50$，其中 (c) $\beta = 30$ 為基準之原始輸出、其餘為相對 (c) 之差值。$\beta < 30$（(a)、(b)）時差異為負且集中於纖維，顯示對比強化不足、纖維訊號被一併壓低，與表~\ref{tab:param-clip} 中 $\beta = 10, 20$ 顯著較差一致；$\beta > 30$（(d)、(e)）時差異雖持續存在，但已不再集中於纖維、逐漸擴散至背景，故額外之對比強化無助於纖維--背景分離，呼應指標於 $\beta \ge 30$ 之平台。}
+  \caption[CLAHE 對比裁剪閾值 $\beta$ 之差值視覺化]{各 $\beta$ 之 CLAHE 輸出相對基準 $\beta = 30$ 之差值（同一局部區域，色階一致）。(a)--(e) 分別對應 $\beta = 10, 20, 30, 40, 50$，其中 (c) $\beta = 30$ 為基準之原始輸出、其餘為相對 (c) 之差值。}
   \label{fig:clahe-clip}
 \end{figure}
 
-\paragraph{CLAHE 方塊尺度 $n_{\text{tile}}$：} $n_{\text{tile}}$ 決定 CLAHE 局部對比均衡之方塊大小。表~\ref{tab:param-grid} 顯示預設 $n_{\text{tile}} = 768$ 於 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 兩項指標上皆為全表最佳（HD95 於 $n_{\text{tile}} = 704$ 略低，惟差異未達顯著，$p = 0.20$）；鄰近取值雖部分達顯著（$p < 0.05$），但其絕對差距均極小——$\text{Dice}_{\text{cl}}$ 變動不超過 $0.05$ 百分點、HD95 僅約 $0.01$--$0.02\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $< 0.005\,\mu\text{m}$。顯示此參數對最終品質之影響雖可由統計檢定偵出，實務上之差異卻極小，此於圖~\ref{fig:clahe-grid} 之差值視覺化中亦可印證。
+\paragraph{CLAHE 方塊尺度 $n_{\text{tile}}$：} $n_{\text{tile}}$ 決定 CLAHE 局部對比均衡之方塊大小。表~\ref{tab:param-grid} 顯示預設 $n_{\text{tile}} = 768$ 於 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 兩項指標上皆為全表最佳（HD95 於 $n_{\text{tile}} = 704$ 略低，惟差異未達顯著，$p = 0.20$）；鄰近取值雖部分達顯著（$p < 0.05$），但其絕對差距均極小——$\text{Dice}_{\text{cl}}$ 變動不超過 $0.05$ 百分點、HD95 僅約 $0.01$--$0.02\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $< 0.005\,\mu\text{m}$。顯示此參數對最終品質之影響雖可由統計檢定偵出，實務上之差異卻極小，此於圖~\ref{fig:clahe-grid} 之差值視覺化中亦可印證：方塊偏小（$n_{\text{tile}} = 704$）主要減低纖維之響應，方塊偏大（$n_{\text{tile}} = 832$）雖增強纖維響應卻同時增加背景雜訊，惟二者幅度俱小。
 
 \begin{table}[htbp]
   \centering
@@ -397,11 +397,11 @@
     \caption{}
   \end{subfigure}
 
-  \caption[CLAHE 方塊尺度 $n_{\text{tile}}$ 之差值視覺化]{各 $n_{\text{tile}}$ 之 CLAHE 輸出相對基準 $n_{\text{tile}} = 768$ 之差值（同一局部區域，色階一致）。(a)--(c) 分別對應 $n_{\text{tile}} = 704, 768, 832$，其中 (b) $n_{\text{tile}} = 768$ 為基準之原始輸出、其餘為相對 (b) 之差值。(a) $n_{\text{tile}} = 704$ 主要減低了纖維之響應；(c) $n_{\text{tile}} = 832$ 雖增強纖維響應，但同時亦增加背景雜訊。}
+  \caption[CLAHE 方塊尺度 $n_{\text{tile}}$ 之差值視覺化]{各 $n_{\text{tile}}$ 之 CLAHE 輸出相對基準 $n_{\text{tile}} = 768$ 之差值（同一局部區域，色階一致）。(a)--(c) 分別對應 $n_{\text{tile}} = 704, 768, 832$，其中 (b) $n_{\text{tile}} = 768$ 為基準之原始輸出、其餘為相對 (b) 之差值。}
   \label{fig:clahe-grid}
 \end{figure}
 
-\paragraph{Sato 最大尺度 $\sigma_{\max}$：} $\sigma_{\max}$ 對應可被強化之最粗纖維尺度（固定 $\sigma_{\min} = 1$）。由表~\ref{tab:param-sstop}：HD95 於所變動範圍內對 $\sigma_{\max}$ 並不敏感，各取值之差異皆未達顯著（$p > 0.05$）；$\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$ 則於上界過小（$\sigma_{\max} = 2$，粗纖維響應不足）與上界過大（$\sigma_{\max} = 6$，鄰近纖維之響應彼此暈染）兩端皆顯著劣於預設，呈 U 形劣化（$\sigma_{\max} = 5$ 亦於 $\text{HD}_{\text{avg}}$ 達邊際顯著 $p < 0.05$）；$\sigma_{\max} = 3$ 則於 $\text{Dice}_{\text{cl}}$ 與預設並列（$90.53\%$）、$\text{HD}_{\text{avg}}$ 亦無顯著差異。整體而言，預設 $\sigma_{\max} = 4$ 於 HD95 與 $\text{HD}_{\text{avg}}$ 皆為全表最低、於 $\text{Dice}_{\text{cl}}$ 為（與 $\sigma_{\max} = 3$ 並列之）最高，兼顧粗纖維涵蓋與走廊銳利度；此 U 形劣化於圖~\ref{fig:sato-smax} 之差值視覺化中亦清晰可見。
+\paragraph{Sato 最大尺度 $\sigma_{\max}$：} $\sigma_{\max}$ 對應可被強化之最粗纖維尺度（固定 $\sigma_{\min} = 1$）。由表~\ref{tab:param-sstop}：HD95 於所變動範圍內對 $\sigma_{\max}$ 並不敏感，各取值之差異皆未達顯著（$p > 0.05$）；$\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$ 則於上界過小（$\sigma_{\max} = 2$，粗纖維響應不足）與上界過大（$\sigma_{\max} = 6$，鄰近纖維之響應彼此暈染）兩端皆顯著劣於預設，呈 U 形劣化（$\sigma_{\max} = 5$ 亦於 $\text{HD}_{\text{avg}}$ 達邊際顯著 $p < 0.05$）；$\sigma_{\max} = 3$ 則於 $\text{Dice}_{\text{cl}}$ 與預設並列（$90.53\%$）、$\text{HD}_{\text{avg}}$ 亦無顯著差異。整體而言，預設 $\sigma_{\max} = 4$ 於 HD95 與 $\text{HD}_{\text{avg}}$ 皆為全表最低、於 $\text{Dice}_{\text{cl}}$ 為（與 $\sigma_{\max} = 3$ 並列之）最高，兼顧粗纖維涵蓋與走廊銳利度；此 U 形劣化於圖~\ref{fig:sato-smax} 之差值視覺化中亦清晰可見：圖中以基準 $\sigma_{\max} = 4$ 之響應為參照，$\sigma_{\max} = 2$ 時上界過小，差值集中於纖維且為負，意即較粗之神經纖維響應不足、被一併消減；$\sigma_{\max} = 6$ 時上界過大，差值轉為正且向纖維周邊外溢，反映鄰近纖維之響應彼此暈染、走廊邊界趨於模糊；二者皆對應表~\ref{tab:param-sstop} 中兩端之顯著劣化，而 $\sigma_{\max} = 3, 5$ 之差值則相對輕微，與其指標貼近預設一致。
 
 \begin{table}[htbp]
   \centering
@@ -453,11 +453,11 @@
     \caption{}
   \end{subfigure}
 
-  \caption[Sato 最大尺度 $\sigma_{\max}$ 之差值視覺化]{各 $\sigma_{\max}$ 之 Sato 濾波響應相對基準 $\sigma_{\max} = 4$（$\sigma_{\min} = 1$）之差值（同一局部區域，色階一致）。(a)--(e) 分別對應 $\sigma_{\max} = 2, 3, 4, 5, 6$，其中 (c) $\sigma_{\max} = 4$ 為基準之原始輸出、其餘為相對 (c) 之差值。(a) $\sigma_{\max} = 2$ 時上界過小，差值集中於纖維且為負，傾向消減神經纖維之響應；(e) $\sigma_{\max} = 6$ 時上界過大，鄰近纖維之響應彼此暈染；二者皆與表~\ref{tab:param-sstop} 中兩端顯著劣化之 U 形趨勢一致，而 (b)、(d)（$\sigma_{\max} = 3, 5$）與基準之差異則相對輕微。}
+  \caption[Sato 最大尺度 $\sigma_{\max}$ 之差值視覺化]{各 $\sigma_{\max}$ 之 Sato 濾波響應相對基準 $\sigma_{\max} = 4$（$\sigma_{\min} = 1$）之差值（同一局部區域，色階一致）。(a)--(e) 分別對應 $\sigma_{\max} = 2, 3, 4, 5, 6$，其中 (c) $\sigma_{\max} = 4$ 為基準之原始輸出、其餘為相對 (c) 之差值。}
   \label{fig:sato-smax}
 \end{figure}
 
-\paragraph{Sato 最小尺度 $\sigma_{\min}$：} $\sigma_{\min}$ 對應 Sato 濾波器所能強化之最細纖維尺度（掃描時固定 $\sigma_{\max} = 4$）。表~\ref{tab:param-sstart} 中 $\sigma_{\min}$ 自預設之 $1$ 增至 $2$、$3$ 時，HD95 之差異未達顯著、$\text{HD}_{\text{avg}}$ 僅於 $\sigma_{\min} = 3$ 邊際顯著（$p = 0.034$）；$\text{Dice}_{\text{cl}}$ 雖於統計上達顯著（$p < 0.01$），然絕對降幅僅 $0.05$--$0.09$ 百分點，實務尺度極小。三項指標皆以 $\sigma_{\min} = 1$ 為最佳，預設使最細之纖維亦能被偵出，此於圖~\ref{fig:sato-smin} 之差值視覺化中亦可印證。
+\paragraph{Sato 最小尺度 $\sigma_{\min}$：} $\sigma_{\min}$ 對應 Sato 濾波器所能強化之最細纖維尺度（掃描時固定 $\sigma_{\max} = 4$）。表~\ref{tab:param-sstart} 中 $\sigma_{\min}$ 自預設之 $1$ 增至 $2$、$3$ 時，HD95 之差異未達顯著、$\text{HD}_{\text{avg}}$ 僅於 $\sigma_{\min} = 3$ 邊際顯著（$p = 0.034$）；$\text{Dice}_{\text{cl}}$ 雖於統計上達顯著（$p < 0.01$），然絕對降幅僅 $0.05$--$0.09$ 百分點，實務尺度極小。三項指標皆以 $\sigma_{\min} = 1$ 為最佳，預設使最細之纖維亦能被偵出，此於圖~\ref{fig:sato-smin} 之差值視覺化中亦可印證：圖中以基準 $\sigma_{\min} = 1$ 之響應為參照，$\sigma_{\min}$ 自 $1$ 增至 $2$、$3$ 時，差值為負且集中於最細之纖維處，顯示提高最小尺度會使 Sato 濾波器漏掉最細之神經纖維、其響應隨之被捨棄；且 $\sigma_{\min} = 3$ 之負差值較 $\sigma_{\min} = 2$ 更廣，與表~\ref{tab:param-sstart} 中 $\text{Dice}_{\text{cl}}$ 隨 $\sigma_{\min}$ 增大而漸次顯著（惟絕對降幅極小）下降之趨勢一致。
 
 \begin{table}[htbp]
   \centering
@@ -494,11 +494,11 @@
     \caption{}
   \end{subfigure}
 
-  \caption[Sato 最小尺度 $\sigma_{\min}$ 之差值視覺化]{各 $\sigma_{\min}$ 之 Sato 濾波響應相對基準 $\sigma_{\min} = 1$（$\sigma_{\max} = 4$）之差值（同一局部區域，色階一致）。(a)--(c) 分別對應 $\sigma_{\min} = 1, 2, 3$，其中 (a) $\sigma_{\min} = 1$ 為基準之原始輸出、其餘為相對 (a) 之差值。$\sigma_{\min}$ 增大時最細尺度之纖維響應逐漸被捨棄，(b)、(c) 之差值集中於細纖維處，與表~\ref{tab:param-sstart} 中 $\text{Dice}_{\text{cl}}$ 隨 $\sigma_{\min}$ 增大而顯著（惟絕對降幅極小）下降之趨勢一致。}
+  \caption[Sato 最小尺度 $\sigma_{\min}$ 之差值視覺化]{各 $\sigma_{\min}$ 之 Sato 濾波響應相對基準 $\sigma_{\min} = 1$（$\sigma_{\max} = 4$）之差值（同一局部區域，色階一致）。(a)--(c) 分別對應 $\sigma_{\min} = 1, 2, 3$，其中 (a) $\sigma_{\min} = 1$ 為基準之原始輸出、其餘為相對 (a) 之差值。}
   \label{fig:sato-smin}
 \end{figure}
 
-\paragraph{邊裁剪閾值 $\tau$：} $\tau$ 為元件層圖之邊裁剪門檻，是七個參數中影響最劇者。表~\ref{tab:param-prune} 顯示三項指標皆隨 $\tau$ 偏離預設而呈明顯之 U 形劣化——$\text{Dice}_{\text{cl}}$ 自 $90.53\%$ 降至 $88.93\%$（$-1.60$ pp）、HD95 由 $\tau = 20$ 之 $2.45\,\mu\text{m}$ 於 $\tau = 50$ 時惡化至 $3.69\,\mu\text{m}$（$+51\%$）、$\text{HD}_{\text{avg}}$ 自 $0.74$ 上升至 $0.82\,\mu\text{m}$（$+12\%$）；所有非基準取值於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標上\textbf{皆達顯著差異}（除 $\tau = 30$ 之 $\text{HD}_{\text{avg}}$ 為 $p < 0.05$ 外，餘皆 $p < 0.01$，多數 $p < 0.001$）。$\tau$ 過小時連接真實纖維之邊亦被裁去、拓樸破碎，過大則高成本之偽連線重新被納入。預設 $\tau = 20$ 明確位於品質谷底。
+\paragraph{邊裁剪閾值 $\tau$：} $\tau$ 為元件層圖之邊裁剪門檻，是七個參數中影響最劇者。表~\ref{tab:param-prune} 顯示三項指標皆隨 $\tau$ 偏離預設而呈明顯之 U 形劣化——$\text{Dice}_{\text{cl}}$ 自 $90.53\%$ 降至 $88.93\%$（$-1.60$ pp）、HD95 由 $\tau = 20$ 之 $2.45\,\mu\text{m}$ 於 $\tau = 50$ 時惡化至 $3.69\,\mu\text{m}$（$+51\%$）、$\text{HD}_{\text{avg}}$ 自 $0.74$ 上升至 $0.82\,\mu\text{m}$（$+12\%$）；所有非基準取值於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標上\textbf{皆達顯著差異}（除 $\tau = 30$ 之 $\text{HD}_{\text{avg}}$ 為 $p < 0.05$ 外，餘皆 $p < 0.01$，多數 $p < 0.001$）。$\tau$ 過小時連接真實纖維之邊亦被裁去、拓樸破碎，過大則高成本之偽連線重新被納入。預設 $\tau = 20$ 明確位於品質谷底。圖~\ref{fig:prune-tau} 以疊合視覺化對照此兩種失效模式：各列左行均為預設 $\tau = 20$，向右偏離預設後，上列於 $\tau = 10$ 因過度裁剪而將連接真實纖維之邊剪去、出現綠色缺失（拓樸破碎），下列於 $\tau = 30$ 則因高成本之偽連線重新被納入而出現紅色過度連接。
 
 \begin{table}[htbp]
   \centering
@@ -519,7 +519,37 @@
   \end{tabular}
 \end{table}
 
-\paragraph{短樁修剪長度 $\ell_{\min}$：} $\ell_{\min}$ 為骨架化後線段層之短樁修剪門檻——任一邊界節點為端點且總像素長度小於此值之線段即被移除（詳見第~\ref{subsec:stub-prune}~節）。表~\ref{tab:param-stub} 顯示預設 $\ell_{\min} = 3$ 於三項指標上皆為全表最佳。不執行短樁修剪（$\ell_{\min} = 0$）時，$\text{Dice}_{\text{cl}}$ 與 HD95 與預設無顯著差異，僅 $\text{HD}_{\text{avg}}$ 達邊際顯著劣化（$p = 0.038$）——可見資料中雖確有少量短樁，其影響主要反映於整體性之 $\text{HD}_{\text{avg}}$。而 $\ell_{\min}$ 偏大則明顯劣化三項指標：$\ell_{\min} = 5$ 即於 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.001$ 顯著（HD95 達 $p < 0.05$），$\ell_{\min} = 7, 9$ 更全面顯著惡化——HD95 由 $\ell_{\min} = 3$ 之 $2.4512\,\mu\text{m}$ 上升至 $\ell_{\min} = 9$ 之 $2.7766\,\mu\text{m}$（$+13\%$）、$\text{HD}_{\text{avg}}$ 由 $0.7355$ 上升至 $0.7930\,\mu\text{m}$（$+8\%$）、$\text{Dice}_{\text{cl}}$ 自 $90.53\%$ 降至 $89.46\%$（$-1.07$ pp），皆達 $p < 0.001$ 之顯著差異——其原因為過嚴之短樁修剪會誤刪真實之短分支，造成拓樸破碎。預設 $\ell_{\min} = 3$ 為「足以剪除離散化毛刺、又不至誤刪真實短段」之最佳取值。
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.46\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_frag_t20.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.46\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_frag_t10.png}
+    \caption{}
+  \end{subfigure}
+
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.46\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_over_t20.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.46\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_over_t30.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[邊裁剪閾值 $\tau$ 之疊合視覺化]{邊裁剪閾值 $\tau$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接）。左行均為預設 $\tau = 20$：上列 (a) $\tau = 20$、(b) $\tau = 10$；下列 (c) $\tau = 20$、(d) $\tau = 30$。}
+  \label{fig:prune-tau}
+\end{figure}
+
+\paragraph{短樁修剪長度 $\ell_{\min}$：} $\ell_{\min}$ 為骨架化後線段層之短樁修剪門檻——任一邊界節點為端點且總像素長度小於此值之線段即被移除（詳見第~\ref{subsec:stub-prune}~節）。表~\ref{tab:param-stub} 顯示預設 $\ell_{\min} = 3$ 於三項指標上皆為全表最佳。不執行短樁修剪（$\ell_{\min} = 0$）時，$\text{Dice}_{\text{cl}}$ 與 HD95 與預設無顯著差異，僅 $\text{HD}_{\text{avg}}$ 達邊際顯著劣化（$p = 0.038$）——可見資料中雖確有少量短樁，其影響主要反映於整體性之 $\text{HD}_{\text{avg}}$。而 $\ell_{\min}$ 偏大則明顯劣化三項指標：$\ell_{\min} = 5$ 即於 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.001$ 顯著（HD95 達 $p < 0.05$），$\ell_{\min} = 7, 9$ 更全面顯著惡化——HD95 由 $\ell_{\min} = 3$ 之 $2.4512\,\mu\text{m}$ 上升至 $\ell_{\min} = 9$ 之 $2.7766\,\mu\text{m}$（$+13\%$）、$\text{HD}_{\text{avg}}$ 由 $0.7355$ 上升至 $0.7930\,\mu\text{m}$（$+8\%$）、$\text{Dice}_{\text{cl}}$ 自 $90.53\%$ 降至 $89.46\%$（$-1.07$ pp），皆達 $p < 0.001$ 之顯著差異——其原因為過嚴之短樁修剪會誤刪真實之短分支，造成拓樸破碎。預設 $\ell_{\min} = 3$ 為「足以剪除離散化毛刺、又不至誤刪真實短段」之最佳取值。此一權衡於圖~\ref{fig:stub-prune} 之疊合視覺化中清晰可見：未修剪（$\ell_{\min} = 0$）時，骨架邊緣殘留若干以紅色標示之短樁，即離散化所生、未對應真實纖維之毛刺；預設 $\ell_{\min} = 3$ 恰將此類紅色短樁剪除，使重建近乎全為黃色之正確段；而過嚴之 $\ell_{\min} = 9$ 則連真實之短分支亦一併誤刪，於圖中轉為綠色之缺失段、造成拓樸破碎，正對應表中 $\ell_{\min} \ge 5$ 後三項指標之漸次顯著劣化。
 
 \begin{table}[htbp]
   \centering
@@ -539,6 +569,28 @@
     \bottomrule
   \end{tabular}
 \end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/viz_stub_t0.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/viz_stub_t3.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/viz_stub_t9.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[短樁修剪長度 $\ell_{\min}$ 之疊合視覺化]{短樁修剪長度 $\ell_{\min}$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接）。(a) $\ell_{\min} = 0$；(b) $\ell_{\min} = 3$（基準）；(c) $\ell_{\min} = 9$。}
+  \label{fig:stub-prune}
+\end{figure}
 
 綜合七張表，本節之單因子擾動說明表~\ref{tab:hyperparams} 所列之預設配置是經比較鄰近取值後選定，而非任意指定。前處理與 Sato 階段之五個參數於各自掃描範圍內，所有取值之 $\text{Dice}_{\text{cl}}$ 與 HD95 相對於預設之變動幅度皆小（$\text{Dice}_{\text{cl}}$ 在 $1$ 個百分點以內、HD95 多在 $0.05\,\mu\text{m}$ 以內）：偏離預設較遠之取值多顯著劣於預設，鄰近取值縱使部分達統計顯著，其絕對差距亦極微。掃描範圍內並無任一取值能於三項指標上同時明顯且顯著地勝過預設，因此採用此預設值。骨架化階段之短樁修剪長度 $\ell_{\min}$ 則以 $\ell_{\min} = 3$ 為最佳：完全不修剪（$\ell_{\min} = 0$）僅令 $\text{HD}_{\text{avg}}$ 輕微劣化，而 $\ell_{\min} \ge 5$ 則漸次顯著劣化三項指標，故預設取其平衡點 $\ell_{\min} = 3$。連結階段之邊裁剪閾值 $\tau$ 對重建品質之影響則實質而顯著，擾動結果明確指向 $\tau = 20$ 為最佳取值。後續所有實驗即採本節經此分析確立之基準配置（表~\ref{tab:hyperparams}）。
 
@@ -610,53 +662,29 @@
 
   \vspace{0.4em}
 
-  \begin{minipage}{0.31\linewidth}\centering\textbf{綠色通道}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{MST}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{AEL}\end{minipage}
-
-  \vspace{0.3em}
-
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{S558-2_a_crop0_green.png}
-    \caption{}%
-    \label{fig:qual-both-good-c0-green}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S558-2_a_crop0_mst.png}
-    \caption{}%
-    \label{fig:qual-both-good-c0-mst}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S558-2_a_crop0_annotation_grow.png}
-    \caption{}%
-    \label{fig:qual-both-good-c0-ael}
-  \end{subfigure}
-
-  \vspace{0.4em}
-
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
+    \includegraphics[width=\linewidth]{S558-2_a_crop0_green.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S558-2_a_crop1_green.png}
     \caption{}%
-    \label{fig:qual-both-good-c1-green}
+    \label{fig:qual-both-good-green}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S558-2_a_crop0_mst.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S558-2_a_crop1_mst.png}
     \caption{}%
-    \label{fig:qual-both-good-c1-mst}
+    \label{fig:qual-both-good-mst}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S558-2_a_crop0_annotation_grow.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S558-2_a_crop1_annotation_grow.png}
     \caption{}%
-    \label{fig:qual-both-good-c1-ael}
+    \label{fig:qual-both-good-ael}
   \end{subfigure}
 
-  \caption[纖維微粒群集內聚度高之切片（樣本一）]{纖維微粒群集內聚度高之代表切片——樣本一（切片 S558-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(g) 局部放大對照，每列三圖由左至右依序為綠色通道影像、MST 與 AEL 之重建結果，上列 (b)--(d) 為區域 a、下列 (e)--(g) 為區域 b；重建疊合圖之黃／綠／紅配色見第~\ref{sec:qual}~節之說明。}
+  \caption[纖維微粒群集內聚度高之切片（樣本一）]{纖維微粒群集內聚度高之代表切片——樣本一（切片 S558-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MST 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-both-good}
 \end{figure}
 
@@ -673,53 +701,29 @@
 
   \vspace{0.4em}
 
-  \begin{minipage}{0.31\linewidth}\centering\textbf{綠色通道}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{MST}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{AEL}\end{minipage}
-
-  \vspace{0.3em}
-
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{S487-2_a_crop0_green.png}
-    \caption{}%
-    \label{fig:qual-dense-s2-c0-green}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S487-2_a_crop0_mst.png}
-    \caption{}%
-    \label{fig:qual-dense-s2-c0-mst}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S487-2_a_crop0_annotation_grow.png}
-    \caption{}%
-    \label{fig:qual-dense-s2-c0-ael}
-  \end{subfigure}
-
-  \vspace{0.4em}
-
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
+    \includegraphics[width=\linewidth]{S487-2_a_crop0_green.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S487-2_a_crop1_green.png}
     \caption{}%
-    \label{fig:qual-dense-s2-c1-green}
+    \label{fig:qual-dense-s2-green}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S487-2_a_crop0_mst.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S487-2_a_crop1_mst.png}
     \caption{}%
-    \label{fig:qual-dense-s2-c1-mst}
+    \label{fig:qual-dense-s2-mst}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S487-2_a_crop0_annotation_grow.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S487-2_a_crop1_annotation_grow.png}
     \caption{}%
-    \label{fig:qual-dense-s2-c1-ael}
+    \label{fig:qual-dense-s2-ael}
   \end{subfigure}
 
-  \caption[纖維微粒群集內聚度高之切片（樣本二）]{纖維微粒群集內聚度高之代表切片——樣本二（切片 S487-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(g) 局部放大對照，每列三圖由左至右依序為綠色通道影像、MST 與 AEL 之重建結果，上列 (b)--(d) 為區域 a、下列 (e)--(g) 為區域 b；重建疊合圖之黃／綠／紅配色見第~\ref{sec:qual}~節之說明。}
+  \caption[纖維微粒群集內聚度高之切片（樣本二）]{纖維微粒群集內聚度高之代表切片——樣本二（切片 S487-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MST 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-dense-s2}
 \end{figure}
 
@@ -736,53 +740,29 @@
 
   \vspace{0.4em}
 
-  \begin{minipage}{0.31\linewidth}\centering\textbf{綠色通道}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{MST}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{AEL}\end{minipage}
-
-  \vspace{0.3em}
-
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{S1196-2_b_crop0_green.png}
-    \caption{}%
-    \label{fig:qual-ael-wins-c0-green}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S1196-2_b_crop0_mst.png}
-    \caption{}%
-    \label{fig:qual-ael-wins-c0-mst}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S1196-2_b_crop0_annotation_grow.png}
-    \caption{}%
-    \label{fig:qual-ael-wins-c0-ael}
-  \end{subfigure}
-
-  \vspace{0.4em}
-
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
+    \includegraphics[width=\linewidth]{S1196-2_b_crop0_green.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1196-2_b_crop1_green.png}
     \caption{}%
-    \label{fig:qual-ael-wins-c1-green}
+    \label{fig:qual-ael-wins-green}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S1196-2_b_crop0_mst.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1196-2_b_crop1_mst.png}
     \caption{}%
-    \label{fig:qual-ael-wins-c1-mst}
+    \label{fig:qual-ael-wins-mst}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S1196-2_b_crop0_annotation_grow.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1196-2_b_crop1_annotation_grow.png}
     \caption{}%
-    \label{fig:qual-ael-wins-c1-ael}
+    \label{fig:qual-ael-wins-ael}
   \end{subfigure}
 
-  \caption[纖維微粒密集但內聚性低之切片（樣本一）]{纖維微粒密集但內聚性低之代表切片——樣本一（切片 S1196-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(g) 局部放大對照，每列三圖由左至右依序為綠色通道影像、MST 與 AEL 之重建結果，上列 (b)--(d) 為區域 a、下列 (e)--(g) 為區域 b；重建疊合圖之黃／綠／紅配色見第~\ref{sec:qual}~節之說明。}
+  \caption[纖維微粒密集但內聚性低之切片（樣本一）]{纖維微粒密集但內聚性低之代表切片——樣本一（切片 S1196-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MST 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-ael-wins}
 \end{figure}
 
@@ -799,53 +779,29 @@
 
   \vspace{0.4em}
 
-  \begin{minipage}{0.31\linewidth}\centering\textbf{綠色通道}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{MST}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{AEL}\end{minipage}
-
-  \vspace{0.3em}
-
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{S1571-2_b_crop0_green.png}
-    \caption{}%
-    \label{fig:qual-sparse-s2-c0-green}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S1571-2_b_crop0_mst.png}
-    \caption{}%
-    \label{fig:qual-sparse-s2-c0-mst}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S1571-2_b_crop0_annotation_grow.png}
-    \caption{}%
-    \label{fig:qual-sparse-s2-c0-ael}
-  \end{subfigure}
-
-  \vspace{0.4em}
-
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
+    \includegraphics[width=\linewidth]{S1571-2_b_crop0_green.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1571-2_b_crop1_green.png}
     \caption{}%
-    \label{fig:qual-sparse-s2-c1-green}
+    \label{fig:qual-sparse-s2-green}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S1571-2_b_crop0_mst.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1571-2_b_crop1_mst.png}
     \caption{}%
-    \label{fig:qual-sparse-s2-c1-mst}
+    \label{fig:qual-sparse-s2-mst}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S1571-2_b_crop0_annotation_grow.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1571-2_b_crop1_annotation_grow.png}
     \caption{}%
-    \label{fig:qual-sparse-s2-c1-ael}
+    \label{fig:qual-sparse-s2-ael}
   \end{subfigure}
 
-  \caption[纖維微粒密集但內聚性低之切片（樣本二）]{纖維微粒密集但內聚性低之代表切片——樣本二（切片 S1571-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(g) 局部放大對照，每列三圖由左至右依序為綠色通道影像、MST 與 AEL 之重建結果，上列 (b)--(d) 為區域 a、下列 (e)--(g) 為區域 b；重建疊合圖之黃／綠／紅配色見第~\ref{sec:qual}~節之說明。}
+  \caption[纖維微粒密集但內聚性低之切片（樣本二）]{纖維微粒密集但內聚性低之代表切片——樣本二（切片 S1571-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MST 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-sparse-s2}
 \end{figure}
 
@@ -862,57 +818,33 @@
 
   \vspace{0.4em}
 
-  \begin{minipage}{0.31\linewidth}\centering\textbf{綠色通道}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{MST}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{AEL}\end{minipage}
-
-  \vspace{0.3em}
-
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{S2266-2_b_crop0_green.png}
-    \caption{}%
-    \label{fig:qual-sparse-s3-c0-green}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S2266-2_b_crop0_mst.png}
-    \caption{}%
-    \label{fig:qual-sparse-s3-c0-mst}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S2266-2_b_crop0_annotation_grow.png}
-    \caption{}%
-    \label{fig:qual-sparse-s3-c0-ael}
-  \end{subfigure}
-
-  \vspace{0.4em}
-
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
+    \includegraphics[width=\linewidth]{S2266-2_b_crop0_green.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S2266-2_b_crop1_green.png}
     \caption{}%
-    \label{fig:qual-sparse-s3-c1-green}
+    \label{fig:qual-sparse-s3-green}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S2266-2_b_crop0_mst.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S2266-2_b_crop1_mst.png}
     \caption{}%
-    \label{fig:qual-sparse-s3-c1-mst}
+    \label{fig:qual-sparse-s3-mst}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S2266-2_b_crop0_annotation_grow.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S2266-2_b_crop1_annotation_grow.png}
     \caption{}%
-    \label{fig:qual-sparse-s3-c1-ael}
+    \label{fig:qual-sparse-s3-ael}
   \end{subfigure}
 
-  \caption[纖維微粒密集但內聚性低之切片（樣本三）]{纖維微粒密集但內聚性低之代表切片——樣本三（切片 S2266-2\_b）。(a) 綠色通道之全切片影像，紅框與標號 a、b 標示兩處放大區域（區域 a 位於中段、區域 b 位於左側）。(b)--(g) 局部放大對照，每列三圖由左至右依序為綠色通道影像、MST 與 AEL 之重建結果，上列 (b)--(d) 為區域 a、下列 (e)--(g) 為區域 b；重建疊合圖之黃／綠／紅配色見第~\ref{sec:qual}~節之說明。}
+  \caption[纖維微粒密集但內聚性低之切片（樣本三）]{纖維微粒密集但內聚性低之代表切片——樣本三（切片 S2266-2\_b）。(a) 綠色通道之全切片影像，紅框與標號 a、b 標示兩處放大區域（區域 a 位於中段、區域 b 位於左側）。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MST 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-sparse-s3}
 \end{figure}
 
-\paragraph{染色品質不佳之切片：} 本類別針對\textbf{染色品質不佳}之切片——無論是局部過度染色之飽和亮塊、或染色瀰漫不勻所形成之塊狀亮區，皆會在成本圖上產生與真實纖維成本相近之非纖維區塊，使成本圖於該區\textbf{失去鑑別度}。此時兩種方法皆受限，重建普遍出現\textbf{多斷點、小段紅色多餘與綠色漏連}，整體拓樸品質明顯低於前兩類；惟 AEL 受成本走廊約束、較不易被塊狀結構大幅帶偏，指標上仍優於 MST（程度因切片而異）。本類別選取兩張代表性切片分別說明。\textbf{樣本一}（切片 S1585-2\_b）：此切片之問題源於局部\textbf{強烈染色之飽和亮帶}，如圖~\ref{fig:qual-both-bad} 所示。區域 a 有一道飽和亮帶緊鄰纖維：MST 之端點對最短路徑被此低成本帶吸引而\textbf{繞道}，補出大幅偏離 $S_{\text{gt}}$ 之路徑，疊合圖上留下大量紅色多餘段；AEL 之成本走廊擴張雖未發生同等程度之繞道，卻因走廊遭亮結構截斷而使重建\textbf{破碎}為數段，疊合圖上則表現為多處 $S_{\text{gt}}$ 未被連及之綠色漏連段。區域 b 兩法雖能大致追出主幹網路，仍沿線散見紅綠誤差，重建皆與 $S_{\text{gt}}$ 有可見落差。此切片兩法之誤差形態雖異（繞道對破碎），三項指標卻「皆差且接近」——$\text{Dice}_{\text{cl}}$ 為 $87.38\%$（MST）對 $87.42\%$（AEL）幾乎無差、HD95 自 $5.2771$ 降至 $4.6592\,\mu\text{m}$（$-12\%$）、$\text{HD}_{\text{avg}}$ 自 $1.2482$ 降至 $1.2324\,\mu\text{m}$（$-1\%$），AEL 雖微幅優於 MST，但改善幅度遠小於前兩類。
+\paragraph{染色品質不佳之切片：} 本類別針對\textbf{染色品質不佳}之切片——無論是局部過度染色之飽和亮塊、或染色瀰漫不勻所形成之塊狀亮區，皆會形成與真實纖維亮度相近之非纖維結構，使該區之纖維線索\textbf{失去鑑別度}。此時兩種方法皆受限，重建普遍出現\textbf{多斷點、小段紅色多餘與綠色漏連}，整體拓樸品質明顯低於前兩類；惟 AEL 受成本走廊約束、較不易被塊狀結構大幅帶偏，指標上仍優於 MST（程度因切片而異）。本類別選取兩張代表性切片分別說明。\textbf{樣本一}（切片 S1585-2\_b）：此切片之問題源於局部\textbf{強烈染色之飽和亮帶}，如圖~\ref{fig:qual-both-bad} 所示。區域 a 有一道飽和亮帶緊鄰纖維：MST 之端點對最短路徑被此飽和亮帶吸引而\textbf{繞道}，補出大幅偏離 $S_{\text{gt}}$ 之路徑，疊合圖上留下大量紅色多餘段；AEL 之成本走廊擴張雖未發生同等程度之繞道，卻因走廊遭亮結構截斷而使重建\textbf{破碎}為數段，疊合圖上則表現為多處 $S_{\text{gt}}$ 未被連及之綠色漏連段。區域 b 兩法雖能大致追出主幹網路，仍沿線散見紅綠誤差，重建皆與 $S_{\text{gt}}$ 有可見落差。此切片兩法之誤差形態雖異（繞道對破碎），三項指標卻「皆差且接近」——$\text{Dice}_{\text{cl}}$ 為 $87.38\%$（MST）對 $87.42\%$（AEL）幾乎無差、HD95 自 $5.2771$ 降至 $4.6592\,\mu\text{m}$（$-12\%$）、$\text{HD}_{\text{avg}}$ 自 $1.2482$ 降至 $1.2324\,\mu\text{m}$（$-1\%$），AEL 雖微幅優於 MST，但改善幅度遠小於前兩類。
 
 \begin{figure}[htbp]
   \centering
@@ -925,53 +857,29 @@
 
   \vspace{0.4em}
 
-  \begin{minipage}{0.31\linewidth}\centering\textbf{綠色通道}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{MST}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{AEL}\end{minipage}
-
-  \vspace{0.3em}
-
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{S1585-2_b_crop0_green.png}
-    \caption{}%
-    \label{fig:qual-both-bad-c0-green}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S1585-2_b_crop0_mst.png}
-    \caption{}%
-    \label{fig:qual-both-bad-c0-mst}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S1585-2_b_crop0_annotation_grow.png}
-    \caption{}%
-    \label{fig:qual-both-bad-c0-ael}
-  \end{subfigure}
-
-  \vspace{0.4em}
-
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
+    \includegraphics[width=\linewidth]{S1585-2_b_crop0_green.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1585-2_b_crop1_green.png}
     \caption{}%
-    \label{fig:qual-both-bad-c1-green}
+    \label{fig:qual-both-bad-green}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S1585-2_b_crop0_mst.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1585-2_b_crop1_mst.png}
     \caption{}%
-    \label{fig:qual-both-bad-c1-mst}
+    \label{fig:qual-both-bad-mst}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S1585-2_b_crop0_annotation_grow.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S1585-2_b_crop1_annotation_grow.png}
     \caption{}%
-    \label{fig:qual-both-bad-c1-ael}
+    \label{fig:qual-both-bad-ael}
   \end{subfigure}
 
-  \caption[染色品質不佳之切片（樣本一）]{染色品質不佳之代表切片——樣本一（切片 S1585-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(g) 局部放大對照，每列三圖由左至右依序為綠色通道影像、MST 與 AEL 之重建結果，上列 (b)--(d) 為區域 a、下列 (e)--(g) 為區域 b；重建疊合圖之黃／綠／紅配色見第~\ref{sec:qual}~節之說明。}
+  \caption[染色品質不佳之切片（樣本一）]{染色品質不佳之代表切片——樣本一（切片 S1585-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MST 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-both-bad}
 \end{figure}
 
@@ -988,57 +896,33 @@
 
   \vspace{0.4em}
 
-  \begin{minipage}{0.31\linewidth}\centering\textbf{綠色通道}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{MST}\end{minipage}\hfill
-  \begin{minipage}{0.31\linewidth}\centering\textbf{AEL}\end{minipage}
-
-  \vspace{0.3em}
-
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{S2745-2_a_crop0_green.png}
-    \caption{}%
-    \label{fig:qual-poor-s2-c0-green}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S2745-2_a_crop0_mst.png}
-    \caption{}%
-    \label{fig:qual-poor-s2-c0-mst}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S2745-2_a_crop0_annotation_grow.png}
-    \caption{}%
-    \label{fig:qual-poor-s2-c0-ael}
-  \end{subfigure}
-
-  \vspace{0.4em}
-
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
+    \includegraphics[width=\linewidth]{S2745-2_a_crop0_green.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S2745-2_a_crop1_green.png}
     \caption{}%
-    \label{fig:qual-poor-s2-c1-green}
+    \label{fig:qual-poor-s2-green}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S2745-2_a_crop0_mst.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S2745-2_a_crop1_mst.png}
     \caption{}%
-    \label{fig:qual-poor-s2-c1-mst}
+    \label{fig:qual-poor-s2-mst}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
+    \includegraphics[width=\linewidth]{S2745-2_a_crop0_annotation_grow.png}\\[0.4em]
     \includegraphics[width=\linewidth]{S2745-2_a_crop1_annotation_grow.png}
     \caption{}%
-    \label{fig:qual-poor-s2-c1-ael}
+    \label{fig:qual-poor-s2-ael}
   \end{subfigure}
 
-  \caption[染色品質不佳之切片（樣本二）]{染色品質不佳之代表切片——樣本二（切片 S2745-2\_a）。(a) 綠色通道之全切片影像，紅框與標號 a、b 標示兩處放大區域（區域 a 位於中段、區域 b 位於左側）。(b)--(g) 局部放大對照，每列三圖由左至右依序為綠色通道影像、MST 與 AEL 之重建結果，上列 (b)--(d) 為區域 a、下列 (e)--(g) 為區域 b；重建疊合圖之黃／綠／紅配色見第~\ref{sec:qual}~節之說明。}
+  \caption[染色品質不佳之切片（樣本二）]{染色品質不佳之代表切片——樣本二（切片 S2745-2\_a）。(a) 綠色通道之全切片影像，紅框與標號 a、b 標示兩處放大區域（區域 a 位於中段、區域 b 位於左側）。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MST 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-poor-s2}
 \end{figure}
 
-此類切片界定了 AEL 之適用前提——當成本圖無法將染色品質不佳所致之非纖維塊狀結構與真實纖維區分時，任何僅依賴成本圖之連結方法都面臨同樣限制；後續若要穩健處理此類切片，必須回到前處理階段尋求改善（例如使用對非管狀亮結構更具鑑別力之線狀結構濾波，或結合學習式纖維增強），不能只在連結策略上著手。
+此類切片界定了 AEL 之適用前提——當影像增強無法將染色品質不佳所致之非纖維塊狀結構與真實纖維區分時，任何僅依賴影像響應之連結方法都面臨同樣限制；後續若要穩健處理此類切片，必須回到前處理階段尋求改善（例如使用對非管狀亮結構更具鑑別力之線狀結構濾波，或結合學習式纖維增強），不能只在連結策略上著手。
 
 \section{統計分析}
 \label{sec:quant}
