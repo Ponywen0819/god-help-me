@@ -3,42 +3,40 @@
 \chapter{文獻回顧}
 \label{chap:related}
 
-本章回顧與本論文研究直接相關之四類文獻：第~\ref{sec:ienf-related}~節說明 IENFD 量化之臨床背景與既有自動化嘗試；第~\ref{sec:vesselness}~節整理影像增強與線狀結構濾波之理論基礎；第~\ref{sec:segmentation}~節討論既有 IENF 切分方法之兩條路徑，及其與拓樸層計數之間之轉換缺口；第~\ref{sec:graph-tracing}~節回顧圖論式纖維追蹤，特別是最短路徑、最小生成樹與骨架化方法在生醫影像重建中的應用。
+本章回顧與本論文研究相關之四類文獻：第~\ref{sec:ienf-related}~節說明 IENFD 量化之臨床背景與既有自動化嘗試；第~\ref{sec:vesselness}~節整理影像增強與線狀結構濾波之理論基礎；第~\ref{sec:segmentation}~節討論既有 IENF 切分方法之兩條路徑，及其與拓樸層計數之間之轉換缺口；第~\ref{sec:graph-tracing}~節回顧圖論式纖維追蹤，特別是最短路徑、最小生成樹與骨架化方法在生醫影像重建中的應用。
 
 \section{表皮內神經纖維密度量化}
 \label{sec:ienf-related}
 
-如第~\ref{sec:background}~節所述，EFNS 量測指引~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy} 將 IENFD 之計數規則明確定義於 PGP 9.5 染色之皮膚垂直切片上，並奉為小纖維神經病變診斷之參考標準。值得注意的是，此規則同時隱含兩項子任務：其一為「拓樸連續性判定」，即辨識一條由真皮穿越進入表皮之纖維；其二為「跨越事件去重」，即同一條纖維無論如何分支皆僅計為一次。然而代表性之早期自動化工作~\cite{vanacker2016automated, dabbah2011automatic} 多集中於第一步之影像增強與分割，並未真正觸及拓樸層面之推理。
+如第~\ref{sec:background}~節所述，EFNS 量測指引~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy} 將 IENFD 之計數規則明確定義於 PGP 9.5 染色之皮膚垂直切片上，並奉為小纖維神經病變診斷之參考標準。值得注意的是，此規則同時隱含兩項子任務：其一為「拓樸連續性判定」，即辨識一條由真皮穿越進入表皮之纖維；其二為「重複跨越之排除」，即同一條纖維無論如何分支皆僅計為一次。然而代表性之早期自動化工作~\cite{vanacker2016automated, dabbah2011automatic} 多集中於第一步之影像增強與分割，並未真正觸及拓樸層面之推理。
 
-Vanacker 等人 (2016)~\cite{vanacker2016automated} 提出以形態學閉運算配合 Otsu 閾值對 PGP 9.5 影像進行二值化，再以連通元件數粗略估計纖維數，但由於缺乏跨越去重機制，容易高估密度，亦無法處理表皮內分支；類似以閾值化加連通元件統計之策略亦見於角膜共軛焦顯微 (CCM) 影像之糖尿病周邊神經病變評估~\cite{dabbah2011automatic}。較晚近之工作則進一步將皮膚切片之 IENFD 量化流程自動化：Corr{\`a} 等人 (2021)~\cite{corra2021advantages} 以自動描繪表皮／真皮交界並自動計數纖維，於量測之可重複性與效率上較人工判讀具優勢；Burgess 等人 (2024)~\cite{burgess2024automated} 則提出自動化免疫組織化學染色之概念驗證。然而此類方法之輸出仍以密度數值為主，並未產生可供逐條纖維稽核之拓樸中介產物。上述工作皆顯示，從分割結果到可計數之拓樸結構之間存在結構性缺口，而此缺口正是本研究所欲處理之核心。
+Vanacker 等人 (2016)~\cite{vanacker2016automated} 針對糖尿病 (Diabetes Mellitus, DM) 患者之皮膚切片，提出以形態學閉運算配合 Otsu 閾值對 PGP 9.5 影像進行二值化，再以連通元件數粗略估計纖維數，但由於缺乏排除重複跨越之機制，容易高估密度，亦無法處理表皮內分支；類似以閾值化加連通元件統計之策略亦見於角膜共軛焦顯微 (Corneal Confocal Microscopy, CCM) 影像之糖尿病周邊神經病變評估~\cite{dabbah2011automatic}。較晚近之工作則進一步將皮膚切片之 IENFD 量化流程自動化：Corr{\`a} 等人 (2021)~\cite{corra2021advantages} 針對 PGP 9.5 染色之皮膚切片影像，自動描繪表皮／真皮交界並自動計數纖維，於量測之可重複性與效率上較人工判讀具優勢；Burgess 等人 (2024)~\cite{burgess2024automated} 則針對纖維肌痛症 (Fibromyalgia Syndrome, FMS) 與特發性小纖維神經病變 (idiopathic small fiber neuropathy, ISFN) 病患之 PGP 9.5 免疫組織化學染色影像，提出自動化 IENFD 量化之概念驗證。然而此類方法之輸出仍以密度數值為主，並未產生可供逐條纖維稽核之拓樸中介產物。上述顯示，從分割結果到可計數之拓樸結構之間存在結構性缺口，而此缺口正是本研究所欲處理之核心。
 
-\section{影像增強與線狀結構濾波}
+\section{曲線狀結構濾波}
 \label{sec:vesselness}
 
-PGP 9.5 染色呈現之神經纖維在影像上為細長之線狀結構 (curvilinear structure)，其灰階變化在局部呈現「一個方向強變化、另一方向弱變化」的二階微分特徵。Frangi 等人 (1998)~\cite{frangi1998multiscale} 將此觀察形式化為基於 Hessian 矩陣特徵值之血管性 (vesselness) 量測：設 $\lambda_1, \lambda_2$ 為影像於多尺度 Gaussian 平滑後之 Hessian 特徵值且 $|\lambda_1| \le |\lambda_2|$，則沿血管方向 $\lambda_1 \approx 0$、橫向 $|\lambda_2|$ 大，可據此設計出對線狀結構具高響應、對團塊或雜訊具低響應之濾波。
+PGP 9.5 染色呈現之神經纖維在影像上為細長之曲線狀結構 (curvilinear structure)，其灰階變化在局部呈現「一個方向強變化、另一方向弱變化」的特徵。Frangi 等人 (1998)~\cite{frangi1998multiscale} 將此觀察形式化為基於 Hessian 矩陣特徵值 (eigenvalue) 之血管性 (vesselness) 量測：設 $\lambda_1, \lambda_2$ 為影像於多尺度 Gaussian 平滑後之 Hessian 特徵值且 $|\lambda_1| \le |\lambda_2|$，則沿血管方向 $\lambda_1 \approx 0$、橫向 $|\lambda_2|$ 大，可據此設計出對線狀結構具高響應、對團塊或雜訊具低響應之濾波。此一血管性量測最初於二維之數位減影血管造影 (Digital Subtraction Angiography, DSA)，以及三維之磁振血管造影 (Magnetic Resonance Angiography, MRA) 與電腦斷層血管造影 (Computed Tomography Angiography, CTA) 影像上驗證，後者涵蓋主動脈—髂動脈 (aortoiliac) 與腦部 (cerebral) 之血管結構。
 
-Sato 等人 (1998)~\cite{sato1998three} 進一步提出以不同權重加總 $\lambda_2$ 並對黑／白線同時處理之變體，其輸出對多尺度結構（粗細不一之纖維）具有良好之穩定性，並廣泛實作於 \texttt{scikit-image}~\cite{vanderwalt2014scikit} 之 \texttt{sato} 函式中。Hessian 矩陣並非偵測曲線狀結構之唯一形式化方式：Türetken 等人 (2013)~\cite{turetken2013detecting} 提出基於\textbf{多方向定向通量} (multi-directional oriented flux) 之偵測器，於每個尺度沿多個方向積分影像之梯度通量，相較於 Hessian 假設「沿單一方向之強對比」之理想管狀模型，對形態不規則、分支頻繁或局部斷裂之曲線狀結構亦能穩定響應。
-
-線狀結構濾波之效果亦仰賴良好之前處理，以消除 PGP 9.5 染色常見之背景不均。研究上常以形態學開運算 (morphological opening)~\cite{soille1999morphological} 估計影像之慢變背景，再以原影像減去背景得到對比一致之結果；之後再以對比受限直方圖均衡化 (CLAHE)~\cite{zuiderveld1994contrast} 進一步提升局部對比。相較於對整張影像共用同一灰階重映射之全域直方圖均衡化，CLAHE 透過分塊適應與每塊裁剪閾值機制，可在強化細小纖維對比之同時抑制近均勻區域中之雜訊過度放大。本論文之前處理鏈即沿用此策略。
+Sato 等人 (1998)~\cite{sato1998three} 進一步提出以不同權重加總 $\lambda_2$ 並對黑／白線同時處理之變體，其輸出對多尺度結構（粗細不一之纖維）具有良好之穩定性；其原始工作於三維醫學影像之曲線狀結構分割與視覺化上驗證，涵蓋磁振造影 (Magnetic Resonance Imaging, MRI) 與 MRA 之腦血管樹、胸部電腦斷層 (chest CT) 之支氣管 (bronchi) 分支，以及腹部電腦斷層 (abdominal CT) 之肝門靜脈血管網路。Hessian 矩陣並非偵測曲線狀結構之唯一形式化方式：Türetken 等人 (2013)~\cite{turetken2013detecting} 提出基於\textbf{多方向定向通量} (multi-directional oriented flux) 之偵測器，藉由多個方向之通量分量判斷局部是否為線狀結構，相較於 Hessian 假設「沿單一方向之強對比」之理想管狀模型，對形態不規則、分支頻繁或局部斷裂之曲線狀結構亦能穩定響應。其驗證對象正是此類具不規則橫截面之曲線狀結構，包含於 MRA、CTA 中因病變或造影雜訊而呈鋸齒狀 (jagged) 之血管，以及光學與電子顯微鏡下細微而橫截面不規則之神經元樹突與軸突 (dendritic arbors)。
 
 \section{神經纖維之語意分割與其破碎化問題}
 \label{sec:segmentation}
 
 於自動化 IENFD 量化之文獻中，現有切分方法可依其與拓樸資訊之關係粗分為兩條路徑，差異在於拓樸是於切分中內化處理，抑或延後至切分之後處理。
 
-第一條路徑透過深度學習從原始影像端到端切分出神經纖維結構，已應用於 PGP 9.5 皮膚切片~\cite{chan2022automated} 與角膜共軛焦顯微影像~\cite{zhang2020automatic}，其輸出旨在直接還原一條條完整之纖維。此類方法將拓樸資訊內化於模型之中：是否跨越染色空隙、是否屬於同一條纖維等判定皆隱含於切分結果，而非以顯式步驟處理。如第~\ref{sec:motivation}~節所述，此設計之代價是訓練監督門檻較高，須於像素層提供已解析至「纖維」層級之金標準；Chan 等人~\cite{chan2022automated} 之工作標題即點出其須在標註有限 (limited data) 之情境下進行。除監督成本外，端到端之切分失誤亦難以拆解為像素響應不足或拓樸連接錯誤，使各階段之優化難以獨立進行。
+第一條路徑透過深度學習從原始影像端到端切分出神經纖維結構，已應用於人類免疫缺乏病毒 (Human Immunodeficiency Virus, HIV) 感染患者之 PGP 9.5 皮膚切片~\cite{chan2022automated}，以及糖尿病患者之角膜共軛焦顯微影像~\cite{zhang2020automatic}，其輸出旨在直接還原一條條完整之纖維。此類方法將拓樸資訊內化於模型之中：是否跨越染色空隙、是否屬於同一條纖維等判定皆隱含於切分結果，而非以顯式步驟處理。如第~\ref{sec:motivation}~節所述，此設計之代價是訓練監督門檻較高，須於像素層提供已解析至「纖維」層級之黃金標準；Chan 等人~\cite{chan2022automated} 之工作標題即點出其須在標註有限 (limited data) 之情境下進行。除監督成本外，端到端之切分失誤亦難以拆解為像素響應不足或拓樸連接錯誤，使各階段之優化難以獨立進行。
 
-第二條路徑則聚焦於更基礎之 \textbf{IENF profile 切分}，僅切分出 PGP 9.5 染色於切片上實際呈現之\textbf{纖維微粒} (particle)，而不嘗試於切分階段還原其拓樸，從而避開拓樸層金標準之需求；Huang~\cite{huang2026automated} 即以分塊輪廓模型 (block-wise contour model) 切分螢光影像中之 IENF profile。在此基礎上，Hsueh 等人~\cite{hsueh2026machine} 進一步指出，微粒層級之形態統計量與臨床 IENFD 之間具有可觀之相關性，顯示像素層證據本身已足以做為病程嚴重程度之代理指標。然而如第~\ref{sec:motivation}~節所述，IENF profile 本即由多段不連續之纖維微粒組成，並不直接對應「一條神經纖維」之拓樸實體。因此，以微粒統計代理 IENFD 雖具臨床效度，其輸出仍停留於像素層：既無法被還原為 EFNS 計數所針對之纖維對象，亦不具備可供跨方法、跨實驗室稽核之拓樸中介產物。此一缺口致使不同自動化方法之結果難以與 EFNS 規範下之人工計數做統一比對與重驗。
+第二條路徑則聚焦於更基礎之 \textbf{IENF 片段切分}，僅切分出 PGP 9.5 染色於切片上實際呈現之纖維微粒，而不嘗試於切分階段還原其拓樸，從而避開拓樸層黃金標準之需求；Huang~\cite{huang2026automated} 即以分塊輪廓模型 (block-wise contour model) 切分家族性澱粉樣多發性神經病變 (Familial Amyloidotic Polyneuropathy, FAP) 與糖尿病患者染色影像中之纖維微粒。在此基礎上，Hsueh 等人~\cite{hsueh2026machine} 進一步指出，微粒層級之形態統計量與臨床 IENFD 之間具有可觀之相關性，顯示像素層證據本身已足以做為病情嚴重程度之代理指標。然而如第~\ref{sec:motivation}~節所述，IENF 片段本即由多段不連續之纖維微粒組成，並不直接對應「一條神經纖維」之拓樸實體。因此，以微粒統計代理 IENFD 雖具臨床效度，其輸出仍停留於像素層：既無法被還原為 EFNS 計數所針對之纖維目標，亦不具備可供跨方法、跨實驗室稽核之拓樸中介產物。此一缺口致使不同自動化方法之結果難以與 EFNS 規範下之人工計數做統一比對與重驗。
 
-本研究即聚焦於從切分到拓樸之轉換缺口，將 IENF profile 之切分結果視為可信但不完整之標註，並以圖論方法在保留可信微粒之前提下，補足微粒間缺失之拓樸連接，將像素級切分結果整合為可直接套用臨床計數規則之神經纖維結構。此設計與第一條路徑（端到端 DL 直接輸出纖維）具本質上的差異：本研究將「切分」與「拓樸重建」明確分離，使每一階段之失敗模式與設計取捨皆可獨立分析與優化。
+本研究即聚焦於從切分到拓樸之轉換缺口，將 IENF 片段之切分結果視為可信但不完整之標註，並以圖論方法在保留可信微粒之前提下，補足微粒間缺失之拓樸連接，將像素級切分結果整合為可直接套用臨床計數規則之神經纖維結構。此設計與第一條路徑（端到端直接輸出纖維）具本質上的差異：本研究將「切分」與「拓樸重建」明確分離，使每一階段之失敗模式與設計取捨皆可獨立分析與優化。
 
 \section{圖論方法於纖維重建}
 \label{sec:graph-tracing}
 
-圖論式纖維追蹤可追溯至血管與神經影像之最短路徑分析。Cohen 與 Kimmel 於 1997 年~\cite{cohen1997global} 提出以最小作用量原則 (minimal action principle) 從影像成本圖抽取最短路徑之方法，此後該框架經後續改良（如結合各向異性增強之管狀結構分割~\cite{benmansour2011tubular}）廣泛應用於視網膜血管等曲線狀結構之重建。其核心想法是：將影像依據「是否屬於目標結構」轉換為「成本」，使沿目標行進成本低、橫跨背景成本高，則任兩點之最小成本路徑即為最可能之生物連接。
+圖論式纖維追蹤可追溯至血管與神經影像之最短路徑分析。Cohen 與 Kimmel 於 1997 年~\cite{cohen1997global} 提出以最小作用量原則 (minimal action principle) 從影像成本圖抽取最短路徑之方法，此後該框架經後續改良（如結合各向異性增強之管狀結構分割~\cite{benmansour2011tubular}）廣泛應用於視網膜血管等曲線狀結構之重建。其核心想法是：將影像依據「是否屬於目標結構」轉換為「成本」，使沿目標行進成本低、橫跨背景成本高，則任兩點之最小成本路徑即為最可能之連接。
 
-當此框架由單一來源推廣至多個來源時，可形成\textbf{多源區域擴張}並產生影像加權之類沃羅諾伊場 (Voronoi-like field)~\cite{felzenszwalb2012distance}，使每個像素同時記錄最近之來源與抵達該像素之最小成本，兩來源之擴張前線相遇位置即構成兩者之最佳連接點。Chen 等人 (2016)~\cite{chen2016automatic} 於 CCM 影像之神經纖維量化中即採用類似策略，以既有纖維段為來源同步擴張並於相遇處抽取段間連結。Türetken 等人 (2016)~\cite{turetken2016reconstructing} 則將「候選邊 + 全域最佳化」之範式推廣為通用框架，以路徑分類器評估候選邊之可信度後，再以整數規劃求得無環之最小成本支撐結構 (minimum arborescence)，並於血管、神經元與道路網等曲線狀網絡之重建中展現一致之效能。然而此類研究之目標皆為「於低訊號區補回一般性拓樸」，並未針對 IENF 場景特有之「微粒標註已可信、需在保留可信標註之前提下整合 EFNS 跨越判定」設計專屬之連結與裁剪機制。
+當此框架由單一來源推廣至多個來源時，可形成\textbf{多源區域擴張}並產生影像加權之類沃羅諾伊場 (Voronoi-like field)~\cite{felzenszwalb2012distance}，使每個像素同時記錄最近之來源與抵達該像素之最小成本，兩來源之擴張前線相遇位置即構成兩者之最佳連接點。Chen 等人 (2016)~\cite{chen2016automatic} 於 CCM 影像之神經纖維量化中即採用類似策略，以既有纖維段為來源同步擴張並於相遇處抽取段間連結。Türetken 等人 (2016)~\cite{turetken2016reconstructing} 則將「候選邊 + 全域最佳化」之範式推廣為通用框架，以路徑分類器評估候選邊之可信度後，再以整數規劃求得無封閉路徑之最小成本支撐結構 (minimum arborescence)，並於血管、神經元與道路網等曲線狀網絡之重建中展現一致之效能。然而此類研究之目標皆為「於低訊號區補回一般性拓樸」，並未針對 IENF 場景特有之「微粒標註已可信、需在保留可信標註之前提下整合 EFNS 跨越判定」設計專屬之連結與裁剪機制。
 
-另一類方法則以\textbf{最小生成樹 (MST)} 連結既有微粒，利用其無環、全域邊權總和最小之性質，將分散之微粒整合為連通骨架。Tagliasacchi 等人 (2016)~\cite{tagliasacchi20163d} 在三維骨架抽取中即以 MST 將點雲連接為樹狀結構；於神經元重建領域，MST 亦被廣泛用於連結纖維片段：Yang 等人 (2019)~\cite{yang2019fmst} 之 FMST 以快速行進 (fast marching) 之測地距離取代單純歐式距離作為邊權，並輔以基於內切球半徑之剪枝以接回斷裂之分支；Wan 等人 (2017)~\cite{wan2017mamst} 之 M-AMST 則以均值漂移與旋轉球模型改良邊權之計算。此類方法之表現高度依賴邊權所編碼之資訊與後續之邊裁剪策略，亦因此構成本論文於 MST 之上整合影像導引邊權之動機。
+另一類方法則以\textbf{最小生成樹 (Minimum Spanning Tree, MST)} 連結既有微粒，利用其無環、全域邊權總和最小之性質，將分散之微粒整合為連通骨架。Tagliasacchi 等人 (2016)~\cite{tagliasacchi20163d} 之回顧即指出，於三維骨架抽取中 MST 常被用以將點雲連接為樹狀骨架，將分散之結構整合為連通骨架；於神經元重建領域，MST 亦被廣泛用於連結纖維片段：Yang 等人 (2019)~\cite{yang2019fmst} 之 FMST (Fast Marching Spanning Tree) 以快速行進之測地距離取代單純歐式距離作為權重，並輔以基於內切球半徑之剪枝以接回斷裂之分支；Wan 等人 (2017)~\cite{wan2017mamst} 之 M-AMST (Mean shift Adapted Minimum Spanning Tree) 則以均值漂移與旋轉球模型改良邊權之計算。此類方法之表現高度依賴邊權所編碼之資訊與後續之邊裁剪策略，亦因此構成本論文於 MST 之上整合影像導引邊權之動機。
 
 本論文之 AEL 即立基於上述兩條技術脈絡：以影像導引之多源區域擴張取得元件間之最佳連接候選，再以 MST 之全域成本最小性整合為無冗餘之纖維拓樸，使方法同時具備像素層之影像感知性與纖維層之結構一致性。完整之演算法流程、超參數設定與實作細節將於第~\ref{chap:method}~章詳述。

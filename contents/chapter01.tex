@@ -8,7 +8,7 @@
 
 表皮內神經纖維 (Intraepidermal Nerve Fiber, IENF) 為末梢感覺神經由真皮穿越表皮／真皮交界並伸入表皮層之無髓鞘小纖維，其密度 (Intraepidermal Nerve Fiber Density, IENFD) 在近二十年間已被多項國際臨床指引認可為診斷\textbf{小纖維神經病變} (Small Fiber Neuropathy, SFN) 之黃金標準~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}。SFN 常見於糖尿病周邊神經病變 (Diabetic Peripheral Neuropathy)、澱粉樣變性神經病變 (Amyloid Neuropathy)、遺傳性感覺神經病變 (Hereditary Sensory Neuropathy) 等臨床族群~\cite{furia2025small}。由於傳統之神經傳導檢查 (Nerve Conduction Study, NCS) 僅能反映有髓鞘之粗纖維功能，無法偵測小纖維的受損，因此以皮膚切片量測 IENFD 在臨床上具有難以取代之角色~\cite{raicher2022investigation}。
 
-取得 IENFD 的標準流程係於病人小腿遠端以直徑 $3\,\text{mm}$ 之組織切片打孔器 (biopsy punch) 採取皮膚檢體，經免疫組織螢光染色後，製成 $50\,\mu\text{m}$ 之垂直切片~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。病理醫師於顯微鏡或影像上以人工方式計算「跨越表皮／真皮交界 (dermal–epidermal junction, DEJ) 之神經纖維數量」，再除以該切片之表皮長度，以每毫米之纖維數 (fibers/mm) 呈現 IENFD~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。該計數遵循 European Federation of Neurological Societies (EFNS) 所提之規則~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}：一條纖維無論於表皮內如何分支，皆僅計為一次；僅計算由真皮穿越 DEJ 進入表皮之纖維，而不計算完全位於表皮內或真皮內之線段。上述流程確立了 IENFD 之臨床量測標準，然其執行迄今仍高度倚賴人工判讀，於效率、一致性與可稽核性上皆存有改進空間。
+取得 IENFD 的標準流程係於病人小腿遠端以直徑 $3\,\text{mm}$ 之組織切片打孔器 (biopsy punch) 採取皮膚檢體，經免疫組織化學染色後，製成 $50\,\mu\text{m}$ 之垂直切片~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。病理醫師於顯微鏡或影像上以人工方式計算「跨越表皮／真皮交界 (dermal–epidermal junction, DEJ) 之神經纖維數量」，再除以該切片之表皮長度，以每毫米之纖維數 (fibers/mm) 呈現 IENFD~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。該計數遵循 European Federation of Neurological Societies (EFNS) 所提之規則~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}：一條纖維無論於表皮內如何分支，皆僅計為一次；僅計算由真皮穿越 DEJ 進入表皮之纖維，而不計算完全位於表皮內或真皮內之線段。上述流程確立了 IENFD 之臨床量測標準，然其執行迄今仍高度倚賴人工判讀，於效率、一致性與可稽核性上皆存有改進空間。
 
 \section{研究動機與問題描述}
 \label{sec:motivation}
@@ -21,7 +21,7 @@
   \item \textbf{缺乏客觀中介產物}：人工計數僅產生「數字」，不產生可重複稽核的纖維拓樸結構，使得後續演算法比較與結果重現困難。
 \end{enumerate}
 
-近年之自動化嘗試大致可分為兩條路徑。其一以深度學習端到端直接還原完整之纖維結構，將拓樸資訊內化於模型輸出之中；此類方法在訓練監督充分時具備良好之效能~\cite{chan2022automated, zhang2020automatic}，惟要直接輸出「拓樸完整之纖維」需於像素層提供已解析至「一條纖維」層級之金標準，而螢光染色之 IENF 影像目前並無公開且具足夠規模之此類資料，使該路徑在實務上難以推廣。
+近年之自動化嘗試大致可分為兩條路徑。其一以深度學習端到端直接還原完整之纖維結構，將拓樸資訊內化於模型輸出之中；此類方法在訓練監督充分時具備良好之效能~\cite{chan2022automated, zhang2020automatic}，惟要直接輸出「拓樸完整之纖維」需於像素層提供已解析至「一條纖維」層級之金標準，而免疫組織化學染色之 IENF 影像目前並無公開且具足夠規模之此類資料，使該路徑在實務上難以推廣。
 
 另一條路徑則聚焦於更基礎之 \textbf{IENF 片段（profile）切分}~\cite{huang2026automated}，僅切分出染色於切片上實際呈現之\textbf{纖維微粒} (particle)~\cite{hsueh2026machine}，而不於切分階段還原其拓樸；此設計避開了拓樸層級黃金標準之需求，但其輸出本即由多段不連續之纖維微粒組成，並不直接對應「一條神經纖維」之拓樸實體。同一條神經在影像上常因表皮內染色訊號微弱、纖維細至接近像素尺度、或鄰近纖維交錯等因素，呈現為不連續的纖維微粒與斷點，增加了人工與自動化計數的識別難度~\cite{corra2021advantages}。若僅以此切分結果骨架化並計數跨越，將因纖維中斷而漏計合理之跨越，亦因相鄰之短微粒而誤計多餘分支。
 
