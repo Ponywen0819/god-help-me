@@ -50,3 +50,34 @@
 % --------------------------------------------------
 % 套件設定（Packages Settings）
 % --------------------------------------------------
+
+
+% --------------------------------------------------
+% 縮寫列表環境（List of Abbreviations）
+% 鏡像 class 之 denotation 環境，僅替換標題；專放英文縮寫，與符號列表分離
+% --------------------------------------------------
+\makeatletter
+\newcommand{\ntu@abbreviation@zh}{縮寫列表}
+\newcommand{\ntu@abbreviation@en}{List of Abbreviations}
+\ifthenelse{\equal{\ntu@language}{english}}
+  {\newcommand{\ntu@abbreviation}{\ntu@abbreviation@en}}
+  {\newcommand{\ntu@abbreviation}{\ntu@abbreviation@zh}}
+
+\newenvironment{abbreviations}[1][2.5cm]{%
+  \chapter*{\centering \ntu@abbreviation}%
+  \addcontentsline{toc}{chapter}{\ntu@abbreviation}%
+  \noindent
+  \begin{list}{}{%
+    \renewcommand\makelabel[1]{##1\hfill}%
+    \setlength{\labelwidth}{#1}%                  % 縮寫欄寬度
+    \setlength{\labelsep}{0.5cm}%                 % 標籤與列表文字距離
+    \setlength{\itemindent}{0cm}%                 % 標籤縮進
+    \setlength{\leftmargin}{\labelwidth+\labelsep}% % 標籤左邊界
+    \setlength{\rightmargin}{0cm}%                % 標籤右邊界
+    \setlength{\parsep}{0cm}%                     % 段落間距
+    \setlength{\itemsep}{18pt}%                   % 標籤間距
+    \setlength{\listparindent}{0cm}%             % 段落縮進
+    \setlength{\topsep}{0pt}%                     % 標籤與上文距離
+  }%
+}{\end{list}}
+\makeatother
