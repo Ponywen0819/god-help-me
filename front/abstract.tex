@@ -2,24 +2,11 @@
 
 \begin{abstract}
 
-表皮內神經纖維密度 (Intraepidermal Nerve Fiber Density, IENFD) 是診斷小纖維神經病變 (Small Fiber Neuropathy) 的關鍵臨床指標，然臨床上仍仰賴人工計數，耗時且高度依賴判讀者之主觀經驗。近年雖有深度學習嘗試自動化此流程，但皮膚切片之神經纖維常因染色不均、訊雜比低及橫跨表皮與真皮時之斷裂，使語意分割結果破碎化——同一條纖維被拆解為多個不連通之元件，無法直接轉為可計數的纖維拓樸結構。
-
-本研究提出\textbf{標註擴張連結}（Annotation Expansion Linker, AEL），將此「線段重組」問題建模為基於像素成本圖之多源最短路徑擴張與圖論重建：先以綠色通道影像經形態學背景消除、對比受限直方圖均衡化 (CLAHE) 與 Sato 線狀結構濾波建構成本圖，再以各標註元件為種子執行多源區域擴張，於相鄰元件之最小成本相遇點構建元件層圖，經成本閾值裁剪後求最小生成森林 (Minimum Spanning Forest)，最後合併回溯路徑與原標註並骨架化，依表皮／真皮區域統計有效的神經纖維跨越數。此設計在保留可靠標註的同時，以影像成本所導引之最短路徑補足斷裂區段，避免純幾何連結所產生之非生物合理連線。
-
-在台大醫院提供之 $77$ 張皮膚切片上，AEL 重建之纖維拓樸與專家標註高度相符（中心線重合度 $\text{Dice}_{\text{cl}}$ $90.53\%$、HD95 $2.45\,\mu\text{m}$、平均豪斯多夫距離 $\text{HD}_{\text{avg}}$ $0.74\,\mu\text{m}$）；有效跨越數相對於人工計數之平均絕對誤差 (MAE) 為 $5.05$、均方根誤差 (RMSE) 為 $6.77$、Pearson 相關係數達 $0.87$。
-
-\textbf{關鍵字：} 表皮內神經纖維密度、小纖維神經病變、神經纖維重建、多源最短路徑、最小生成森林、線狀結構濾波、骨架化。
-
+表皮內神經纖維密度 (Intraepidermal Nerve Fiber Density, IENFD) 是診斷小纖維神經病變的關鍵臨床指標，然臨床上仍仰賴人工計數，耗時且高度依賴判讀者之主觀經驗。本研究提出標註擴張連結（Annotation Expansion Linker, AEL），將此「線段重組」問題建模為基於像素成本圖之多源最短路徑擴張與圖論重建：先以綠色通道影像經形態學背景消除、對比受限直方圖均衡化 (CLAHE) 與 Sato 線狀結構濾波建構成本圖，再以各標註元件為種子執行多源區域擴張，於相鄰元件之最小成本相遇點構建元件層圖，經成本閾值裁剪後求最小生成森林，最後合併回溯路徑與原標註並骨架化，依表皮／真皮區域統計有效的神經纖維跨越數。在內部資料集中，AEL 重建之纖維拓樸與專家標註高度相符，中心線戴斯係數 $\text{Dice}_{\text{cl}}$ 達 $90.53\%$、第 95 百分位豪斯多夫距離 HD95 為 $2.45\,\mu\text{m}$、平均豪斯多夫距離 $\text{HD}_{\text{avg}}$ 為 $0.74\,\mu\text{m}$；有效跨越數相對於人工計數之平均絕對誤差 (MAE) 為 $5.05$、均方根誤差 (RMSE) 為 $6.77$、Pearson 相關係數達 $0.87$。
 \end{abstract}
 
 \begin{abstract*}
 
-Intraepidermal Nerve Fiber Density (IENFD) is a key clinical marker for diagnosing small fiber neuropathy, yet it is still measured by manual counting, which is labor intensive and subjective. Recent deep semantic segmentation models can highlight nerve fibers, but uneven staining, low signal-to-noise ratio, and fiber interruption across the epidermal/dermal boundary fragment the masks---splitting a single fiber into disconnected components---so a countable topology cannot be obtained by skeletonizing the raw segmentation.
-
-This thesis proposes the \textbf{Annotation Expansion Linker (AEL)}, which formulates fragment reassembly as a multi-source shortest-path expansion on a pixel-level cost map followed by a graph-theoretic reconstruction. An enhanced cost map is built from the green channel via morphological background removal, Contrast Limited Adaptive Histogram Equalization (CLAHE), and the Sato vesselness filter; each annotation component then seeds a multi-source expansion, minimum-cost meeting points between adjacent components form a component-level graph, edges are pruned by a cost threshold, and a minimum spanning forest is computed; finally the back-tracked paths are merged with the original annotation and skeletonized to count effective crossings across the epidermal/dermal boundary. By completing broken fragments along image-guided shortest paths, AEL preserves the reliable annotation while avoiding the non-biologically plausible links of purely distance-based linkers.
-
-On an internal dataset of 77 skin sections, the reconstructed topology agrees closely with the expert annotation (centerline Dice $\text{Dice}_{\text{cl}}$ of 90.53\%, HD95 of 2.45\,$\mu$m, average Hausdorff distance $\text{HD}_{\text{avg}}$ of 0.74\,$\mu$m), and the effective crossing counts reach a mean absolute error (MAE) of 5.05, a root-mean-square error (RMSE) of 6.77, and a Pearson correlation of 0.87 against expert counts.
-
-\textbf{Keywords:} Intraepidermal Nerve Fiber Density, Small Fiber Neuropathy, Neural Fiber Reconstruction, Multi-source Dijkstra, Minimum Spanning Forest, Vesselness Filter, Skeletonization.
+Intraepidermal Nerve Fiber Density (IENFD) is a key clinical marker for diagnosing small fiber neuropathy, yet it is still measured by manual counting, which is labor intensive and highly dependent on the reader's subjective experience. This thesis proposes the Annotation Expansion Linker (AEL), which formulates this segment-reassembly problem as a multi-source shortest-path expansion on a pixel-level cost map followed by a graph-theoretic reconstruction. An enhanced cost map is built from the green channel via morphological background removal,the Contrast Limited Adaptive Histogram Equalization (CLAHE) and Sato vesselness filter.each annotation component then seeds a multi-source expansion, minimum-cost meeting points between adjacent components form a component-level graph, edges are pruned by a cost threshold, and a minimum spanning forest is computed; finally the back-tracked paths are merged with the original annotation and skeletonized to count effective crossings across the epidermal/dermal boundary. On the in-house dataset, the reconstructed topology agrees closely with the expert annotation, with a centerline Dice $\text{Dice}_{\text{cl}}$ of 90.53\%, a 95th-percentile Hausdorff distance HD95 of 2.45\,$\mu$m, and an average Hausdorff distance $\text{HD}_{\text{avg}}$ of 0.74\,$\mu$m; the effective crossing counts reach a mean absolute error (MAE) of 5.05, a root-mean-square error (RMSE) of 6.77, and a Pearson correlation of 0.87 against expert counts.
 
 \end{abstract*}

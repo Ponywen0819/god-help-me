@@ -18,7 +18,7 @@
   \label{eq:roi}
 \end{equation}
 
-\noindent 其中 $K_{\text{offset}}$ 為半徑 $\text{offset}\,\text{像素}$ 之圓形結構元；$M_{\downarrow}$ 為輔助遮罩（如圖~\ref{fig:roi-auxmask} 所示），對每個 $x$ 行 (column)，其值在 $y \le y_{\max}(x)$ 處為 1、其他為 0，其中 $y_{\max}(x) = \max\{\,y : M(y, x) > 0\,\}$ 為該行表皮遮罩內最高之 $y$ 座標。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」，藉由與等向性膨脹結果（圖~\ref{fig:roi-unrestricted}）取交集可避免膨脹向表皮上方溢出，從而確保感興趣區域僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號，最終所得之 $M_{\text{ROI}}$ 如圖~\ref{fig:roi-restricted} 所示。本研究預設 $\text{offset} = 50\,\text{像素}$。
+\noindent 其中 $K_{\text{offset}}$ 為半徑 $\text{offset}\,\text{像素}$ 之圓形結構元；$M_{\downarrow}$ 為輔助遮罩（如圖~\ref{fig:roi-auxmask} 所示），對每個 $x$ 行 (column)，其值在 $y \le y_{\max}(x)$ 處為 1、其他為 0，其中 $y_{\max}(x) = \max\{\,y : M(y, x) > 0\,\}$ 為該行表皮遮罩內最高之 $y$ 座標；圖中紅色虛線即為某一 $x$ 座標所對應之垂直掃描線，紅色箭頭所指之位置即為該行之最高點 $y_{\max}(x)$。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」；若僅對 $M$ 作等向性膨脹，分析範圍會向表皮上方之背景溢出（圖~\ref{fig:roi-unrestricted}），故藉由與 $M_{\downarrow}$ 取交集即可避免此溢出，使膨脹範圍嚴格限制於表皮下方深度 $\text{offset}$ 之真皮帶內，從而確保感興趣區域僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號，最終所得之 $M_{\text{ROI}}$ 如圖~\ref{fig:roi-restricted} 所示（三張子圖中之洋紅色邊框皆為原始表皮遮罩 $M$ 之輪廓）。本研究預設 $\text{offset} = 50\,\text{像素}$。
 
 \begin{figure}[htbp]
   \centering
@@ -47,7 +47,7 @@
     \caption{}%
     \label{fig:roi-restricted}
   \end{subfigure}
-  \caption[感興趣區域之建立]{感興趣區域之建立。三張子圖中之洋紅色邊框皆為原始表皮遮罩 $M$ 之輪廓。(a) 僅向下延伸之輔助遮罩 $M_{\downarrow}$，定義「不高於表皮頂部之像素」，圖中紅色虛線代表某一特定 $x$ 座標所對應之垂直掃描線，紅色箭頭所指之位置即為該行於表皮遮罩內之最高點 $y_{\max}(x)$；(b) 對 $M$ 等向性膨脹 $\text{offset}\,\text{像素}$ 後之結果，可見分析範圍向表皮上方之背景溢出；(c) 將 (b) 與 (a) 取交集後所得之 $M_{\text{ROI}}$，膨脹範圍被嚴格限制於表皮下方深度 $\text{offset}$ 之真皮帶內，避免納入表皮以上之背景。}
+  \caption[感興趣區域之建立]{感興趣區域之建立。(a) 輔助遮罩 $M_{\downarrow}$；(b) 等向性膨脹之結果；(c) 取交集後所得之 $M_{\text{ROI}}$。}
   \label{fig:roi}
 \end{figure}
 
@@ -102,7 +102,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
     \caption{}%
     \label{fig:enhance-sato}
   \end{subfigure}
-  \caption[影像增強流水線之逐步視覺化]{影像增強流水線之逐步視覺化。(a) 原始綠色通道 $I_g$，可見染色仍受背景不均勻影響；(b) 形態學白色頂帽 $I_{\text{th}}$，緩變背景已被消除；(c) CLAHE 後之 $I_{\text{eq}}$，局部對比顯著提升，但同時放大背景中之細微雜訊；(d) 多尺度 Sato 響應 $I_{\text{enhanced}}$，依 Hessian 結構強化線狀結構，使纖維響應接近飽和、非纖維區域近乎為零，為後續成本圖建構提供良好之輸入訊號。}
+  \caption[影像增強流水線之逐步視覺化]{影像增強流水線之逐步視覺化。(a) 原始綠色通道 $I_g$；(b) 白色頂帽 $I_{\text{th}}$；(c) CLAHE 後之 $I_{\text{eq}}$；(d) 多尺度 Sato 響應 $I_{\text{enhanced}}$。}
   \label{fig:enhance}
 \end{figure}
 
@@ -160,7 +160,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
     \caption{}%
     \label{fig:cost-zoom}
   \end{subfigure}
-  \caption[像素成本圖之視覺化]{像素成本圖之視覺化。(a) 整張切片於感興趣區域內之 $C(x, y)$；感興趣區域外之區域以黑色標示，表示其不納入考慮。(b) 局部放大可見纖維響應區之成本明顯低於周圍背景，形成沿纖維之低成本走廊，符合式~\eqref{eq:cost} 之對比放大性質。}
+  \caption[像素成本圖之視覺化]{像素成本圖之視覺化。(a) 整張切片於感興趣區域內之 $C(x, y)$；(b) 局部放大。}
   \label{fig:cost}
 \end{figure}
 
@@ -215,7 +215,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
     \caption{}%
     \label{fig:rg-voronoi}
   \end{subfigure}
-  \caption[多源區域擴張之視覺化]{多源區域擴張之視覺化。(a) 各連通元件以不同顏色標示，分別作為獨立來源；(b) 擴張結束後，每個像素之累積成本 $D(x, y)$ 顯示自最近來源沿低成本路徑抵達之成本；(c) 將每個像素指派給所屬來源 $O(x, y)$ 後，影像被劃分為以成本為度量之沃羅諾伊區塊，相鄰區塊之邊界即為後續相遇點搜尋之依據。}
+  \caption[多源區域擴張之視覺化]{多源區域擴張之視覺化。(a) 各連通元件以不同顏色標示，分別作為獨立來源；(b) 累積成本 $D(x, y)$；(c) 所屬來源 $O(x, y)$ 之沃羅諾伊分割。}
   \label{fig:region-grow}
 \end{figure}
 
@@ -276,7 +276,7 @@ $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.7\linewidth]{viz_meet_point.png}
-  \caption[相遇點偵測與元件層圖之建構]{相遇點偵測與元件層圖之建構。多源區域擴張完成後，影像被劃分為各元件之成本-沃羅諾伊 領域；於相鄰但屬不同元件之像素對中取累積成本和最低者為該元件對之相遇點 $\bigl((x_a, y_a), (x_b, y_b)\bigr)$，並以其成本 $w_{ab}$ 作為元件層圖 $G_c$ 中對應邊之權重。}
+  \caption[相遇點偵測與元件層圖之建構]{相遇點偵測與元件層圖之建構。相鄰但屬不同元件之像素對中，取累積成本和最低者為相遇點 $\bigl((x_a, y_a), (x_b, y_b)\bigr)$，其成本 $w_{ab}$ 即元件層圖 $G_c$ 對應邊之權重。}
   \label{fig:meet-point}
 \end{figure}
 
@@ -316,7 +316,7 @@ $G_c$ 之邊集在實務上常同時包含兩類連線：(i) 成本較低、代�
     \caption{}%
     \label{fig:graph-mst}
   \end{subfigure}
-  \caption[元件層圖之裁剪與最小生成森林]{元件層圖之裁剪與最小生成森林。(a) 未裁剪之 $G_c$，所有擴張領域相鄰之元件對皆以邊相連，其中含大量橫跨真皮之高成本偽邊；(b) 以閾值 $\tau$ 移除 $w_{ab} > \tau$ 之邊後所得之 $G_c^{\text{pruned}}$，明顯偏高之偽連線已被排除；(c) 於 $G_c^{\text{pruned}}$ 上以 Kruskal 演算法求得之最小生成森林 $G_{\text{mst}}$，冗餘連線被進一步去除，每棵樹對應一條重建之纖維。}
+  \caption[元件層圖之裁剪與最小生成森林]{元件層圖之裁剪與最小生成森林。(a) 未裁剪之 $G_c$；(b) 閾值 $\tau$ 裁剪後之 $G_c^{\text{pruned}}$；(c) 最小生成森林 $G_{\text{mst}}$。}
   \label{fig:graph}
 \end{figure}
 
@@ -382,7 +382,7 @@ $G_c$ 之邊集在實務上常同時包含兩類連線：(i) 成本較低、代�
     \caption{}%
     \label{fig:bs-pruned}
   \end{subfigure}
-  \caption[橋接遮罩與骨架化之逐步視覺化]{橋接遮罩與骨架化之逐步視覺化。(a) 沿前驅指標回溯所得之最小生成森林邊像素路徑 $\Pi_{(a, b)}$；(b) 將所有回溯路徑彙整為橋接遮罩 $\mathcal{B}$；(c) 以半徑 $r_d$ 之圓形結構元膨脹後之路徑遮罩 $\tilde{\mathcal{B}}$；(d) 膨脹後之路徑遮罩與原纖維微粒標註取聯集所得之 $\mathcal{U}$；(e) 將 $\mathcal{U}$ 經 Zhang--Suen 細化所得之單像素寬骨架，紅色圓圈標示待修剪之懸掛短樁；(f) 移除短樁並完成分段後之最終像素級拓樸圖 $G_{\text{trim}}$，圖中紅色圓點代表端點、藍色圓點代表分支點、黃色圓點代表中繼節點（為避免視覺擁擠，黃色僅標示部分代表性中繼節點，並非全部）。}
+  \caption[橋接遮罩與骨架化之逐步視覺化]{橋接遮罩與骨架化之逐步視覺化。(a) 最小生成森林邊像素路徑 $\Pi_{(a, b)}$；(b) 橋接遮罩 $\mathcal{B}$；(c) 膨脹後之路徑遮罩 $\tilde{\mathcal{B}}$；(d) 與原標註聯集所得之 $\mathcal{U}$；(e) 細化所得之單像素寬骨架（紅色圓圈標示待修剪之短樁）；(f) 短樁修剪並完成分段後之 $G_{\text{trim}}$。}
   \label{fig:bridge-skeleton}
 \end{figure}
 
@@ -405,9 +405,9 @@ $\mathcal{B}$ 將分散於各邊之像素路徑整合為單一之像素層遮罩
   \tilde{\mathcal{B}} \;=\; \mathcal{B} \oplus K_{r_d},
   \label{eq:bridge-dilated}
 \end{equation}
-如圖~\ref{fig:bs-dilated} 所示；再與原標註取聯集
+如圖~\ref{fig:bs-dilated} 所示；再與限制於感興趣區域內之原標註 $P_{\text{ROI}}$ 取聯集
 \begin{equation}
-  \mathcal{U} \;=\; \bigl(\,P > 0\,\bigr) \;\cup\; \tilde{\mathcal{B}}.
+  \mathcal{U} \;=\; \bigl(\,P_{\text{ROI}} > 127\,\bigr) \;\cup\; \tilde{\mathcal{B}}.
   \label{eq:union}
 \end{equation}
 所得之 $\mathcal{U}$ \textbf{同時保留既有之可信區段與新增之橋接區段}（圖~\ref{fig:bs-union}），確保重建結果與原標註兼容。最後再以 Zhang--Suen 演算法將 $\mathcal{U}$ 細化為單像素寬之骨架（圖~\ref{fig:bs-skeleton}），並轉換為以 $(x, y)$ 座標為節點、像素間相鄰為邊之\textbf{骨架圖}
@@ -420,7 +420,7 @@ $\mathcal{B}$ 將分散於各邊之像素路徑整合為單一之像素層遮罩
 \subsection{分段偵測}
 \label{subsec:segment}
 
-骨架圖 $G_{\text{skel}}$ 仍為像素級之節點—邊結構，尚需進一步切分為具拓樸意義之單位。首先依節點之度數（degree）將 $V_{\text{skel}}$ 分為三類：度為 $1$ 之\textbf{端點} (endpoint)、度 $\ge 3$ 之\textbf{分支點} (branchpoint)、以及度為 $2$ 之\textbf{中繼節點}(如圖~\ref{fig:bs-pruned} 所示)；其中端點與分支點合稱\textbf{邊界節點}。一條\textbf{線段} (segment) 即定義為兩端皆為邊界節點、而中間僅由中繼節點串接之路徑。如此切分使任兩條線段不共用任何邊，且全部線段之邊之聯集恰為 $E_{\text{skel}}$，故線段集合構成 $E_{\text{skel}}$ 之一個分割；而每一線段對應一段\textbf{無分支之纖維弧}。
+骨架圖 $G_{\text{skel}}$ 仍為像素級之節點—邊結構，尚需進一步切分為具拓樸意義之單位。首先依節點之度數（degree）將 $V_{\text{skel}}$ 分為三類：度為 $1$ 之\textbf{端點} (endpoint)、度 $\ge 3$ 之\textbf{分支點} (branchpoint)、以及度為 $2$ 之\textbf{中繼節點}（如圖~\ref{fig:bs-pruned}，紅色圓點為端點、藍色圓點為分支點、黃色圓點為中繼節點，其中黃色為避免視覺擁擠僅標示部分代表性節點）；其中端點與分支點合稱\textbf{邊界節點}。一條\textbf{線段} (segment) 即定義為兩端皆為邊界節點、而中間僅由中繼節點串接之路徑。如此切分使任兩條線段不共用任何邊，且全部線段之邊之聯集恰為 $E_{\text{skel}}$，故線段集合構成 $E_{\text{skel}}$ 之一個分割；而每一線段對應一段\textbf{無分支之纖維弧}。
 
 \subsection{短樁線段之修剪}
 \label{subsec:stub-prune}
@@ -470,7 +470,7 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
     \end{cases}
   \label{eq:region-label}
 \end{equation}
-\noindent 其中 $R(\mathbf{v}) = 0$ 表示節點 $\mathbf{v}$ 落於\textbf{表皮}內、$R(\mathbf{v}) = 1$ 表示落於\textbf{真皮}內。任一於 $E_{\text{cov}}$ 之邊 $(\mathbf{u}, \mathbf{v})$，若其兩端節點分屬不同區域，即 $R(\mathbf{u}) \ne R(\mathbf{v})$，則稱該邊為一條\textbf{跨越邊} (crossing edge)。圖~\ref{fig:crossing-point} 視覺化所偵測之跨越邊位置。
+\noindent 其中 $R(\mathbf{v}) = 0$ 表示節點 $\mathbf{v}$ 落於\textbf{表皮}內、$R(\mathbf{v}) = 1$ 表示落於\textbf{真皮}內。任一於 $E_{\text{cov}}$ 之邊 $(\mathbf{u}, \mathbf{v})$，若其兩端節點分屬不同區域，即 $R(\mathbf{u}) \ne R(\mathbf{v})$，則稱該邊為一條\textbf{跨越邊} (crossing edge)。圖~\ref{fig:crossing-point} 視覺化所偵測之跨越邊位置（圖~\ref{fig:crossing} 各子圖中之黃色虛線皆為表皮遮罩 $M$ 之下邊緣，作為區分表皮側與真皮側之參考）。
 
 \subsection{有效跨越計數}
 \label{subsec:effective-count}
@@ -501,7 +501,7 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
     \caption{}%
     \label{fig:crossing-effective}
   \end{subfigure}
-  \caption[交叉點分析三步驟之視覺化]{交叉點分析三步驟之視覺化。三張子圖中之黃色虛線皆為表皮遮罩 $M$ 之下邊緣，作為區分表皮側與真皮側之參考。(a) 經微粒涵蓋篩選後保留之 $G_{\text{cov}}$，僅保留 $n_{\text{cov}}(T_i) \ge N_{\min}$ 之連通分量；(b) 於 $G_{\text{cov}}$ 上之節點區域標記與跨越邊偵測結果；(c) 將跨越邊以所屬線段為單位彙整後最終計入 $N_{\text{pred}}$ 之有效跨越線段。}
+  \caption[交叉點分析三步驟之視覺化]{交叉點分析三步驟之視覺化。(a) 微粒涵蓋篩選後保留之 $G_{\text{cov}}$；(b) 節點區域標記與跨越邊偵測；(c) 最終計入 $N_{\text{pred}}$ 之有效跨越線段。}
   \label{fig:crossing}
 \end{figure}
 
@@ -526,7 +526,7 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
     \item $G_c \gets$ the component-level graph built from $\mathcal{P}$, with one node per component and one edge per adjacent component pair.
     \item $G_c^{\text{pruned}} \gets$ the same graph after removing edges whose weight exceeds the threshold $\tau$.
     \item $G_{\text{mst}} \gets$ the minimum spanning forest of $G_c^{\text{pruned}}$, in which each tree corresponds to one reconstructed fiber.
-    \item $G_{\text{skel}} \gets$ the single-pixel-wide skeleton obtained by backtracking each $G_{\text{mst}}$ edge into a pixel path via $(\text{prev}_y, \text{prev}_x)$, dilating the resulting bridge mask by radius $r_d$, taking the union with $P$, and applying Zhang--Suen thinning.
+    \item $G_{\text{skel}} \gets$ the single-pixel-wide skeleton obtained by backtracking each $G_{\text{mst}}$ edge into a pixel path via $(\text{prev}_y, \text{prev}_x)$, dilating the resulting bridge mask by radius $r_d$, taking the union with $P_{\text{ROI}}$, and applying Zhang--Suen thinning.
     \item $G_{\text{trim}} \gets$ the topology obtained by splitting $G_{\text{skel}}$ into segments at all boundary nodes and removing dangling stubs shorter than $\ell_{\min}$.
     \item $G_{\text{cov}} \gets$ the subgraph of $G_{\text{trim}}$ retained after discarding fibers whose covered particle count falls below $N_{\min}$, leaving only the trustworthy fibers.
     \item $G_{\text{cov}} \gets$ the same graph with every node labeled as lying above, within, or below the epidermis according to $M$.

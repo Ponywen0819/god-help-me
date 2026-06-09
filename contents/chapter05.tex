@@ -120,7 +120,7 @@
 
 為評估重建拓樸之品質，本研究使用下列三項以\textbf{中心線 (centerline)} 為對象之指標。令 $S_{\text{pred}}$、$S_{\text{gt}}$ 分別為演算法輸出之骨架與專家標註之纖維骨架（皆為像素集合）：$S_{\text{pred}}$ 即第~\ref{chap:method}~章中 AEL 所輸出之像素級拓樸圖 $G_{\text{trim}} = (V_{\text{trim}}, E_{\text{trim}})$ 之節點集合 $V_{\text{trim}}$；$S_{\text{gt}}$ 則直接取自第~\ref{sec:dataset}~節所述之專家神經纖維骨架遮罩。
 
-\paragraph{$\text{Dice}_{\text{cl}}$：} 中心線 Dice \citep{shit2021cldice} 同時衡量兩個骨架之重合程度與拓樸完整性，其定義為中心線之拓樸精確度 (topology precision, $\text{Tprec}$) 與拓樸敏感度 (topology sensitivity, $\text{Tsens}$) 之調和平均：
+\paragraph{$\text{Dice}_{\text{cl}}$：} 中心線戴斯係數（centerline Dice） \citep{shit2021cldice} 同時衡量兩個骨架之重合程度與拓樸完整性，其定義為中心線之拓樸精確度 (topology precision, $\text{Tprec}$) 與拓樸敏感度 (topology sensitivity, $\text{Tsens}$) 之調和平均：
 
 \begin{equation}
   \text{Dice}_{\text{cl}} = \frac{2 \cdot \text{Tprec} \cdot \text{Tsens}}{\text{Tprec} + \text{Tsens}} \in [0, 1].
