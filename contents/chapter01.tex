@@ -8,7 +8,7 @@
 
 表皮內神經纖維 (Intraepidermal Nerve Fiber, IENF) 為末梢感覺神經由真皮穿越表皮／真皮交界並伸入表皮層之無髓鞘小纖維，其密度 (Intraepidermal Nerve Fiber Density, IENFD) 在近二十年間已被多項國際臨床指引認可為診斷\textbf{小纖維神經病變} (Small Fiber Neuropathy, SFN) 之黃金標準~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}。SFN 常見於糖尿病周邊神經病變 (Diabetic Peripheral Neuropathy)、澱粉樣變性神經病變 (Amyloid Neuropathy)、遺傳性感覺神經病變 (Hereditary Sensory Neuropathy) 等臨床族群~\cite{furia2025small}。由於傳統之神經傳導檢查 (Nerve Conduction Study, NCS) 僅能反映有髓鞘之粗纖維功能，無法偵測小纖維的受損，因此以皮膚切片量測 IENFD 在臨床上具有難以取代之角色~\cite{raicher2022investigation}。
 
-取得 IENFD 的標準流程係於病人小腿遠端以直徑 $3\,\text{mm}$ 之組織切片打孔器 (biopsy punch) 採取皮膚檢體，經免疫組織化學染色後，製成 $50\,\mu\text{m}$ 之垂直切片~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。病理醫師於顯微鏡或影像上以人工方式計算「跨越表皮／真皮交界 (dermal–epidermal junction, DEJ) 之神經纖維數量」，再除以該切片之表皮長度，以每毫米之纖維數 (fibers/mm) 呈現 IENFD~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。該計數遵循 European Federation of Neurological Societies (EFNS) 所提之規則~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}：一條纖維無論於表皮內如何分支，皆僅計為一次；僅計算由真皮穿越 DEJ 進入表皮之纖維，而不計算完全位於表皮內或真皮內之線段。上述流程確立了 IENFD 之臨床量測標準，然其執行迄今仍高度倚賴人工判讀，於效率、一致性與可稽核性上皆存有改進空間。
+取得 IENFD 的標準流程係於病人小腿遠端以直徑 $3\,\text{mm}$ 之組織切片打孔器 (biopsy punch) 採取皮膚檢體，經免疫組織化學染色後，製成 $50\,\mu\text{m}$ 之垂直切片~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。病理醫師於顯微鏡或影像上以人工方式計算「跨越表皮／真皮交界 (dermal–epidermal junction, DEJ) 之神經纖維數量」，再除以該切片之表皮長度，以每毫米之纖維數 (fibers/mm) 呈現 IENFD~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy, raicher2022investigation}。該計數遵循 European Federation of Neurological Societies/Peripheral Nerve Society (EFNS/PNS) 所提之規則~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy}：一條纖維無論於表皮內如何分支，皆僅計為一次；僅計算由真皮穿越 DEJ 進入表皮之纖維，而不計算完全位於表皮內或真皮內之線段。上述流程確立了 IENFD 之臨床量測標準，然其執行迄今仍高度倚賴人工判讀，於效率、一致性與可稽核性上皆存有改進空間。
 
 \section{研究動機與問題描述}
 \label{sec:motivation}
@@ -25,7 +25,7 @@
 
 另一條路徑則聚焦於更基礎之 \textbf{IENF 片段（profile）切分}~\cite{huang2026automated}，僅切分出染色於切片上實際呈現之\textbf{纖維微粒} (particle)~\cite{hsueh2026machine}，而不於切分階段還原其拓樸；此設計避開了拓樸層級黃金標準之需求，但其輸出本即由多段不連續之纖維微粒組成，並不直接對應「一條神經纖維」之拓樸實體。同一條神經在影像上常因表皮內染色訊號微弱、纖維細至接近像素尺度、或鄰近纖維交錯等因素，呈現為不連續的纖維微粒與斷點，增加了人工與自動化計數的識別難度~\cite{corra2021advantages}。若僅以此切分結果骨架化並計數跨越，將因纖維中斷而漏計合理之跨越，亦因相鄰之短微粒而誤計多餘分支。
 
-由 IENF 片段切分所輸出之纖維微粒到可供 EFNS 計數之完整纖維拓樸之間，存在一個\textbf{中介重建步驟之空缺}：此步驟需於像素空間之微粒之間補回缺失之連結，使結果能直接對接到「一條進入後分支者僅計為一次」之臨床計數規則。此問題可形式化為一個圖上之受約束連結任務：\textbf{給定一組像素空間中之纖維微粒，補回原屬同一條纖維之微粒間缺失之拓樸連結。} 其難點在於連結準則須同時尊守兩項約束——其一為\textbf{影像中之纖維線索}，即接續之路徑應沿染色訊號延伸，而非穿越空白背景或鄰近之異質結構；其二為\textbf{拓樸之全域節制性}，即在訊號中斷處應僅補回必要之連結，而不能因鄰近而產生過度連結，以免於纖維密集區產生橫向錯接或過度分支。如何在像素層之局部證據與纖維層之全域結構之間取得平衡，正是此中介重建步驟所需解決之核心問題。
+由 IENF 片段切分所輸出之纖維微粒到可供 EFNS/PNS 計數之完整纖維拓樸之間，存在一個\textbf{中介重建步驟之空缺}：此步驟需於像素空間之微粒之間補回缺失之連結，使結果能直接對接到「一條進入後分支者僅計為一次」之臨床計數規則。此問題可形式化為一個圖上之受約束連結任務：\textbf{給定一組像素空間中之纖維微粒，補回原屬同一條纖維之微粒間缺失之拓樸連結。} 其難點在於連結準則須同時尊守兩項約束——其一為\textbf{影像中之纖維線索}，即接續之路徑應沿染色訊號延伸，而非穿越空白背景或鄰近之異質結構；其二為\textbf{拓樸之全域節制性}，即在訊號中斷處應僅補回必要之連結，而不能因鄰近而產生過度連結，以免於纖維密集區產生橫向錯接或過度分支。如何在像素層之局部證據與纖維層之全域結構之間取得平衡，正是此中介重建步驟所需解決之核心問題。
 
 \section{研究目標與貢獻}
 \label{sec:contributions}
