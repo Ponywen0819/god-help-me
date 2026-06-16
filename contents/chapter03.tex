@@ -18,7 +18,7 @@
   \label{eq:roi}
 \end{equation}
 
-\noindent 其中 $K_{\text{offset}}$ 為半徑 $\text{offset}\,\text{像素}$ 之圓形結構元，$M_{\downarrow}$ 為輔助遮罩（如圖~\ref{fig:roi-auxmask} 所示），對每個 $x$ 行 (column)，其值在 $y \le y_{\max}(x)$ 處為 1、其他為 0，其中 $y_{\max}(x) = \max\{\,y : M(y, x) > 0\,\}$ 為該行表皮遮罩內最高之 $y$ 座標；圖中紅色虛線即為某一 $x$ 座標所對應之垂直掃描線，紅色箭頭所指之位置即為該行之最高點 $y_{\max}(x)$。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」；若僅對 $M$ 作等向性膨脹，分析範圍會向表皮上方之背景溢出（圖~\ref{fig:roi-unrestricted}），故藉由與 $M_{\downarrow}$ 取交集即可避免此溢出，使膨脹範圍嚴格限制於表皮下方深度 $\text{offset}$ 之真皮帶內，從而確保感興趣區域僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號，最終所得之 $M_{\text{ROI}}$ 如圖~\ref{fig:roi-restricted} 所示（三張子圖中之洋紅色邊框皆為原始表皮遮罩 $M$ 之輪廓）。本研究預設 $\text{offset} = 50\,\text{像素}$。
+\noindent 其中 $K_{\text{offset}}$ 為半徑 $\text{offset}\,\text{像素}$ 之圓形結構元，$M_{\downarrow}$ 為輔助遮罩（如圖~\ref{fig:roi-auxmask} 所示），對每個 $x$ 行 (column)，其值在 $y \le y_{\max}(x)$ 處為 1、其他為 0，其中 $y_{\max}(x) = \max\{\,y : M(y, x) > 0\,\}$ 為該行表皮遮罩內最高之 $y$ 座標；圖中紅色虛線即為某一 $x$ 座標所對應之垂直掃描線，紅色箭頭線段的長度即為該行之 $y_{\max}(x)$。直觀上 $M_{\downarrow}$ 代表「不高於表皮頂部之像素」；若僅對 $M$ 作等向性膨脹，分析範圍會向表皮上方之背景溢出（圖~\ref{fig:roi-unrestricted}），故藉由與 $M_{\downarrow}$ 取交集即可避免此溢出，使膨脹範圍嚴格限制於表皮下方深度 $\text{offset}$ 之真皮帶內，從而確保感興趣區域僅包含表皮本身與其下方一段深度之真皮，並抑制切片邊緣之偽訊號，最終所得之 $M_{\text{ROI}}$ 如圖~\ref{fig:roi-restricted} 所示（三張子圖中之洋紅色邊框皆為原始表皮遮罩 $M$ 之輪廓）。本研究預設 $\text{offset} = 50\,\text{像素}$。
 
 \begin{figure}[htbp]
   \centering

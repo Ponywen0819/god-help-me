@@ -44,7 +44,7 @@
 \section{典型工作流程}
 \label{sec:tool-workflow}
 
-第一次使用本工具者，可依下列五步完成「載入 → 自動計數 → 人工修整 → 重新計數」之完整流程（各步驟之畫面如圖~\ref{fig:tool-workflow-steps} 所示）：
+第一次使用本工具者，可依下列五步完成「載入 → 自動計數 → 人工修整 → 重新計數」之完整流程：
 
 \begin{enumerate}
   \item \textbf{上傳三張影像：}於左側邊欄上半之圖層管理區，依序點擊\textbf{原始影像}、\textbf{表皮遮罩}、\textbf{纖維微粒遮罩}三層之上傳按鈕（\textbf{Upload Original / Mask / Annotation}），分別載入該切片之 RGB 原始影像、表皮二值遮罩與纖維微粒標註遮罩。
@@ -53,50 +53,6 @@
   \item \textbf{人工修整（非必要）：}若自動重建之結果與專家判讀有出入，可切換至\textbf{編輯圖}模式（頂部工具列），於畫布上新增、刪除節點與邊以修整圖（第~\ref{sec:tool-edit}~節）。
   \item \textbf{重新計數：}修整完畢後，於管線區塊單獨點擊\textbf{計數}按鈕，即可將當前修整後之圖送回後端重新計數，左上角資訊框與綠色有效跨越邊會同步更新（詳見第~\ref{subsec:count-current}~節）。
 \end{enumerate}
-
-\begin{figure}[htbp]
-  \centering
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/classic_step_1.png}
-    \caption{}%
-    \label{fig:workflow-step1}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/classic_step_2.png}
-    \caption{}%
-    \label{fig:workflow-step2}
-  \end{subfigure}
-
-  \vspace{0.5em}
-
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/classic_step_3.png}
-    \caption{}%
-    \label{fig:workflow-step3}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/classic_step_4.png}
-    \caption{}%
-    \label{fig:workflow-step4}
-  \end{subfigure}
-
-  \vspace{0.5em}
-
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/classic_step_5.png}
-    \caption{}%
-    \label{fig:workflow-step5}
-  \end{subfigure}
-  \caption[典型工作流程之逐步畫面]{典型工作流程之逐步畫面。(a) 上傳原始影像、表皮遮罩與纖維微粒遮罩三張影像；(b) 開啟參數視窗檢視預設值；(c) 點擊\textbf{全部執行}後自動完成重建與計數；(d) 切換至\textbf{編輯圖}模式進行人工修整；(e) 修整後重新計數並更新有效跨越數。}
-  \label{fig:tool-workflow-steps}
-\end{figure}
 
 後續各節依介面元素之分類詳述其全部選項與行為。
 
@@ -315,7 +271,7 @@
 \subsection{全部執行按鈕}
 \label{subsec:run-all}
 
-\textbf{全部執行}為一鍵串接執行「感興趣區域 $\to$ 前處理 $\to$ 重建 $\to$ 計數」四階段之按鈕（如圖~\ref{fig:tool-workflow-steps}(c) 所示）；任一階段失敗即停止後續執行，並於管線區塊下方之紅色錯誤框中顯示錯誤訊息。全部執行之啟用條件為：三張輸入影像皆已上傳、且管線目前無任何階段處於執行中狀態。
+\textbf{全部執行}為一鍵串接執行「感興趣區域 $\to$ 前處理 $\to$ 重建 $\to$ 計數」四階段之按鈕；任一階段失敗即停止後續執行，並於管線區塊下方之紅色錯誤框中顯示錯誤訊息。全部執行之啟用條件為：三張輸入影像皆已上傳、且管線目前無任何階段處於執行中狀態。
 
 \section{演算法參數設定}
 \label{sec:tool-params}
