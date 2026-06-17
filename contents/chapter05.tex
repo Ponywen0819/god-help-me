@@ -3,12 +3,12 @@
 \chapter{實驗結果與討論}
 \label{chap:experiment}
 
-本章對本研究提出之 AEL 進行系統性之實驗評估。第~\ref{sec:dataset}~節說明資料集與前置流程；第~\ref{sec:metrics}~節定義評估指標；第~\ref{sec:param-analysis}~節分析各超參數之影響並確立預設值；第~\ref{sec:baselines}~節介紹用以比較之基準方法；第~\ref{sec:qual}~節呈現定性分析與失效案例；第~\ref{sec:quant}~節報告定量結果；第~\ref{sec:discussion}~節討論結果之意涵、與臨床實務之銜接，以及方法於不同場景之敏感度與可遷移性。
+本章對本研究提出之 AEL 進行系統性之實驗評估。第~\ref{sec:dataset}~節說明資料集與前置流程；第~\ref{sec:metrics}~節定義評估指標；第~\ref{sec:param-analysis}~節分析各超參數之影響並確立預設值；第~\ref{sec:ablation}~節透過結構性消融檢視各設計模組之必要性；第~\ref{sec:qual}~節使用基準方法呈現定性分析與失效案例；第~\ref{sec:quant}~節報告定量結果；第~\ref{sec:discussion}~節討論結果之意涵、與臨床實務之銜接，以及方法於不同場景之敏感度與可遷移性。
 
 \section{資料集}
 \label{sec:dataset}
 
-本研究所使用之資料集由台大醫院謝松蒼教授團隊提供，樣本來源為受試者腿部外側之皮膚活體切片。影像採用免疫螢光 (Immunofluorescence) 染色技術，以特定標誌蛋白標記表皮內神經纖維 (IENF)，並以 Zeiss LSM 780 共軛焦雷射掃描顯微鏡 (Confocal Laser Scanning Microscope) 搭配 $20\times$ 物鏡進行拍攝。完整資料集共包含 $77$ 張 tif 格式之影像。因掃描取樣設定之不同，各切片之像素物理標度分為兩種：$77$ 張中有 $48$ 張為 $0.32\,\mu\text{m/像素}$、$29$ 張為 $0.64\,\mu\text{m/像素}$。各切片之影像尺寸亦不一，整體寬度介於 $2867$ 至 $11312\,\text{像素}$、高度介於 $1024$ 至 $3928\,\text{像素}$，反映不同切片於視野大小與裁切位置上之差異；依像素標度分組之詳細尺寸統計（最小、最大、平均、中位數）列於表~\ref{tab:dataset-dims}。為確保跨解析度之指標可比，本研究所有具空間意義之量（如 HD95、$\text{Dice}_{\text{cl}}$ 之容忍半徑）皆\textbf{逐樣本依其像素物理標度換算至物理尺度後再行統計}，相關細節詳見~第~\ref{sec:metrics}~節。
+本研究所使用之資料集由台大醫院謝松蒼教授團隊提供，樣本來源為受試者腿部外側之皮膚活體切片。影像採用免疫螢光染色技術，以特定標誌蛋白標記表皮內神經纖維 (IENF)，並以 Zeiss LSM 780 共軛焦雷射掃描顯微鏡 (Confocal Laser Scanning Microscope) 搭配 $20\times$ 物鏡進行拍攝。完整資料集共包含 $77$ 張 tif 格式之影像。因掃描取樣設定之不同，各切片之像素物理標度分為兩種：$77$ 張中有 $48$ 張為 $0.32\,\mu\text{m/像素}$、$29$ 張為 $0.64\,\mu\text{m/像素}$。各切片之影像尺寸亦不一，整體寬度介於 $2867$ 至 $11312\,\text{像素}$、高度介於 $1024$ 至 $3928\,\text{像素}$，反映不同切片於視野大小與裁切位置上之差異；依像素標度分組之詳細尺寸統計（最小、最大、平均、中位數）列於表~\ref{tab:dataset-dims}。
 
 \begin{table}[htbp]
   \centering
@@ -32,9 +32,9 @@
 \begin{enumerate}
   \item \textbf{原始影像} $I$：經免疫螢光染色後拍攝之 RGB 影像，後續處理以其綠色通道 $I_g$ 為主要輸入。
   \item \textbf{表皮遮罩} $M$：以多邊形標註表皮區域。
-  \item \textbf{纖維微粒} (particle) 標註 $P$：由人工標註之纖維微粒遮罩。
-  \item \textbf{神經纖維骨架遮罩} $S_{\text{gt}}$：由神經病學專家於原影像上人工標註之纖維骨架二值遮罩，作為拓樸品質評估之真值。
-  \item \textbf{有效跨越數真值} $N_{\text{gt}}$：由神經病學專家於原影像上依 EFNS 規則~\cite{jointtaskforce2010skinbiopsy} 人工計數而得。
+  \item \textbf{纖維微粒}標註 $P$：由人工標註之纖維微粒遮罩。
+  \item \textbf{神經纖維骨架遮罩} $S_{\text{gt}}$：由神經學專家於原影像上人工標註之纖維骨架二值遮罩，作為拓樸品質評估之真值。
+  \item \textbf{有效跨越數真值} $N_{\text{gt}}$：由神經病專家於原影像上依 EFNS 規則~\cite{jointtaskforce2010skinbiopsy} 人工計數而得。
 \end{enumerate}
 
 上述前四項具影像形式之資料，其內容與外觀示意於圖~\ref{fig:dataset-inputs}。
@@ -116,28 +116,30 @@
 \section{評估指標}
 \label{sec:metrics}
 
+為確保跨解析度之指標可比，本研究所有具空間意義之量（如 HD95、$\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$ 之容忍半徑）皆\textbf{逐樣本依其像素物理標度換算至物理尺度後再行統計}。
+
 \subsection{拓樸品質指標}
 
 為評估重建拓樸之品質，本研究使用下列三項以\textbf{中心線 (centerline)} 為對象之指標。令 $S_{\text{pred}}$、$S_{\text{gt}}$ 分別為演算法輸出之骨架與專家標註之纖維骨架（皆為像素集合）：$S_{\text{pred}}$ 即第~\ref{chap:method}~章中 AEL 所輸出之像素級拓樸圖 $G_{\text{trim}} = (V_{\text{trim}}, E_{\text{trim}})$ 之節點集合 $V_{\text{trim}}$；$S_{\text{gt}}$ 則直接取自第~\ref{sec:dataset}~節所述之專家神經纖維骨架遮罩。
 
-\paragraph{$\text{Dice}_{\text{cl}}$：} 中心線戴斯係數（centerline Dice） \citep{shit2021cldice} 同時衡量兩個骨架之重合程度與拓樸完整性，其定義為中心線之拓樸精確度 (topology precision, $\text{Tprec}$) 與拓樸敏感度 (topology sensitivity, $\text{Tsens}$) 之調和平均：
+\paragraph{$\text{Dice}_{\text{cl}}$：} 中心線戴斯係數（centerline Dice） \citep{shit2021cldice} 同時衡量兩個骨架之重合程度與拓樸完整性，其定義為中心線之拓樸精確度 (topology precision, $T_{\text{prec}}$) 與拓樸敏感度 (topology sensitivity, $T_{\text{sens}}$) 之調和平均：
 
 \begin{equation}
-  \text{Dice}_{\text{cl}} = \frac{2 \cdot \text{Tprec} \cdot \text{Tsens}}{\text{Tprec} + \text{Tsens}} \in [0, 1].
+  \text{Dice}_{\text{cl}} = \frac{2 \cdot T_{\text{prec}} \cdot T_{\text{sens}}}{T_{\text{prec}} + T_{\text{sens}}} \in [0, 1].
   \label{eq:cldice}
 \end{equation}
 
-\noindent 其中 $\text{Tprec}$ 與 $\text{Tsens}$ 分別定義為
+\noindent 其中 $T_{\text{prec}}$ 與 $T_{\text{sens}}$ 分別定義為
 \begin{equation}
-  \text{Tprec}(S_{\text{pred}}, S_{\text{gt}}) = \frac{|S_{\text{pred}} \cap V_{\text{gt}}|}{|S_{\text{pred}}|},
+  T_{\text{prec}}(S_{\text{pred}}, S_{\text{gt}}) = \frac{|S_{\text{pred}} \cap V_{\text{gt}}|}{|S_{\text{pred}}|},
   \label{eq:clprec}
 \end{equation}
 \begin{equation}
-  \text{Tsens}(S_{\text{gt}}, S_{\text{pred}}) = \frac{|S_{\text{gt}} \cap V_{\text{pred}}|}{|S_{\text{gt}}|},
+  T_{\text{sens}}(S_{\text{gt}}, S_{\text{pred}}) = \frac{|S_{\text{gt}} \cap V_{\text{pred}}|}{|S_{\text{gt}}|},
   \label{eq:clsens}
 \end{equation}
 
-\noindent 式中 $\text{Tprec}$ 衡量預測骨架 $S_{\text{pred}}$ 落於真值\textbf{容忍範圍}內之像素比例、$\text{Tsens}$ 則衡量真值骨架 $S_{\text{gt}}$ 落於預測容忍範圍內之像素比例；$V_{\text{gt}}$ 與 $V_{\text{pred}}$ 即為該容忍範圍，分別由真值與預測骨架膨脹而得。引入容忍範圍之原因在於：$S_{\text{gt}}$ 與 $S_{\text{pred}}$ 皆為僅一像素寬之中心線，兩者之像素位置幾乎不可能逐一重合，若直接取兩中心線之交集，數值將對離散化與標註之微小偏移極為敏感，難以反映實質之拓樸相符程度。本研究因此以半徑 $r_v\,\text{像素}$ 之\textbf{圓形} (disk) 結構元 $K_{r_v}$ 對兩骨架分別執行形態學膨脹，得其區域形式，
+\noindent 式中 $T_{\text{prec}}$ 衡量預測骨架 $S_{\text{pred}}$ 落於真值\textbf{容忍範圍}內之像素比例、$T_{\text{sens}}$ 則衡量真值骨架 $S_{\text{gt}}$ 落於預測容忍範圍內之像素比例；$V_{\text{gt}}$ 與 $V_{\text{pred}}$ 即為該容忍範圍，分別由真值與預測骨架膨脹而得。引入容忍範圍之原因在於：$S_{\text{gt}}$ 與 $S_{\text{pred}}$ 皆為僅一像素寬之中心線，兩者之像素位置幾乎不可能逐一重合，若直接取兩中心線之交集，數值將對離散化與標註之微小偏移極為敏感，難以反映實質之拓樸相符程度。本研究因此以半徑 $r_v\,\text{像素}$ 之\textbf{圓形} (disk) 結構元 $K_{r_v}$ 對兩骨架分別執行形態學膨脹，得其區域形式，
 \begin{equation}
   V_{\text{gt}} \;=\; S_{\text{gt}} \oplus K_{r_v},
   \label{eq:vgt}
@@ -152,7 +154,7 @@
 
 \noindent 相較於一般 Dice，$\text{Dice}_{\text{cl}}$針對\textbf{拓樸中斷}較為敏感，因此適合評估本研究所關注之微粒重建品質。
 
-\paragraph{HD95：} 95\% 分位數之豪斯多夫距離 (Hausdorff distance)~\cite{huttenlocher2002comparing} 描述兩骨架間最遠像素對之空間偏差，並以取 95\% 分位數之方式抑制離群值之影響：
+\paragraph{HD95：} 豪斯多夫距離 (Hausdorff distance)之95\% 分位數~\cite{huttenlocher2002comparing}描述兩骨架間最遠像素對之空間偏差，並以取 95\% 分位數之方式抑制離群值之影響：
 
 \begin{equation}
   \text{HD95}(S_{\text{pred}}, S_{\text{gt}}) = \max\!\Bigl(\, Q_{95}\!\bigl\{d(p, S_{\text{gt}}) : p \in S_{\text{pred}}\bigr\},\; Q_{95}\!\bigl\{d(q, S_{\text{pred}}) : q \in S_{\text{gt}}\bigr\}\,\Bigr),
@@ -168,29 +170,29 @@
   \label{eq:avghd}
 \end{equation}
 
-\noindent 式中 $d(\cdot, S)$ 之意義同式~\eqref{eq:hd95}、$\operatorname{mean}\{\cdot\}$ 為對集合內所有元素取算術平均 (arithmetic mean) 之運算子；外層之 $\tfrac{1}{2}(\cdot + \cdot)$ 則對兩個方向之平均距離再取算術平均，使 $\text{HD}_{\text{avg}}$ 成為對稱之雙向距離。$\text{HD}_{\text{avg}}$ 與 HD95 之差異有二：其一，逐方向以\textbf{算術平均}取代 $95\%$ 分位數，使骨架上每一像素之偏差均納入計算；其二，兩方向之彙整以\textbf{平均}取代 $\max$，反映整體而非單側之貼合程度。$\text{HD}_{\text{avg}}$ 因此刻畫的是\textbf{典型}而非\textbf{極端}之距離誤差，單位同為微米 ($\mu$m)，越低越好。三項指標因此各有分工：$\text{Dice}_{\text{cl}}$ 自\textbf{重疊與拓樸連通}之角度評估重建品質、HD95 自\textbf{距離}角度刻畫抑制離群後之最壞偏差、$\text{HD}_{\text{avg}}$ 則自\textbf{距離}角度刻畫平均偏差；三者並用，才能兼顧重建結果之拓樸完整性與幾何精確度。
+\noindent 式中 $d(\cdot, S)$ 之意義同式~\eqref{eq:hd95}、$\operatorname{mean}\{\cdot\}$ 為對集合內所有元素取算術平均 (arithmetic mean) 之運算子；外層之 $\tfrac{1}{2}(\cdot + \cdot)$ 則對兩個方向之平均距離再取算術平均，使 $\text{HD}_{\text{avg}}$ 成為對稱之雙向距離。$\text{HD}_{\text{avg}}$ 與 HD95 之差異有二：其一，逐方向以\textbf{算術平均}取代 $95\%$ 分位數，使骨架上每一像素之偏差均納入計算；其二，兩方向之彙整以\textbf{平均}取代 $\max$，反映整體而非單側之貼合程度。$\text{HD}_{\text{avg}}$ 因此刻畫的是\textbf{典型}而非\textbf{極端}之距離誤差，單位同為微米 ($\mu$m)，越低越好。三項指標因此各有分工：$\text{Dice}_{\text{cl}}$ 自\textbf{重疊與拓樸連通}之角度評估重建品質、HD95 自\textbf{距離}角度刻畫抑制離群後之最壞偏差、$\text{HD}_{\text{avg}}$ 則自\textbf{距離}角度刻畫平均偏差；三者並用，較能兼顧重建結果之拓樸完整性與幾何精確度。
 
 \subsection{跨越計數指標}
 
 令 $N_{\text{pred}}$ 為演算法輸出之有效跨越數、$N_{\text{gt}}$ 為其真值，並以上標 $(k)$ 標示第 $k$ 張切片、$K$ 為切片總數；本研究定義以下三項\textbf{切片層級}之指標：
 
 \begin{itemize}
-  \item \textbf{平均絕對誤差 (MAE)} $N_{\text{MAE}}$：
+  \item \textbf{平均絕對誤差 (Mean Absolute Error, MAE)} $N_{\text{MAE}}$：
     \begin{equation}
       N_{\text{MAE}} = \frac{1}{K} \sum_{k=1}^{K} \bigl| N^{(k)}_{\text{pred}} - N^{(k)}_{\text{gt}} \bigr|.
       \label{eq:mae}
     \end{equation}
-  \item \textbf{均方根誤差 (RMSE)} $N_{\text{RMSE}}$：
+  \item \textbf{均方根誤差 (Root Mean Square Error, RMSE)} $N_{\text{RMSE}}$：
     \begin{equation}
       N_{\text{RMSE}} = \sqrt{\dfrac{1}{K} \sum_{k=1}^{K} \bigl( N^{(k)}_{\text{pred}} - N^{(k)}_{\text{gt}} \bigr)^2}.
       \label{eq:rmse}
     \end{equation}
   \item \textbf{Pearson 相關係數}~\cite{pearson1896mathematical} $\rho$：衡量預測值與真值於各切片間之線性相關強度，定義為兩者之共變異數除以各自標準差之積：
     \begin{equation}
-      \rho = \frac{\displaystyle\sum_{k=1}^{K} \bigl( N^{(k)}_{\text{pred}} - \bar{N}_{\text{pred}} \bigr)\bigl( N^{(k)}_{\text{gt}} - \bar{N}_{\text{gt}} \bigr)}{\sqrt{\displaystyle\sum_{k=1}^{K} \bigl( N^{(k)}_{\text{pred}} - \bar{N}_{\text{pred}} \bigr)^2}\;\sqrt{\displaystyle\sum_{k=1}^{K} \bigl( N^{(k)}_{\text{gt}} - \bar{N}_{\text{gt}} \bigr)^2}} \in [-1, 1],
+      \rho = \frac{\displaystyle\sum_{k=1}^{K} \bigl( N^{(k)}_{\text{pred}} - \bar{N}_{\text{pred}} \bigr)\bigl( N^{(k)}_{\text{gt}} - \bar{N}_{\text{gt}} \bigr)}{\sqrt{\displaystyle\sum_{k=1}^{K} \bigl( N^{(k)}_{\text{pred}} - \bar{N}_{\text{pred}} \bigr)^2}\;\sqrt{\displaystyle\sum_{k=1}^{K} \bigl( N^{(k)}_{\text{gt}} - \bar{N}_{\text{gt}} \bigr)^2}},
       \label{eq:pearson}
     \end{equation}
-    其中 $\bar{N}_{\text{pred}}$ 與 $\bar{N}_{\text{gt}}$ 分別為預測值與真值於全部 $K$ 張切片上之算術平均；$\rho$ 越接近 $1$ 表示兩者之線性關係越強。
+    其中 $\bar{N}_{\text{pred}}$ 與 $\bar{N}_{\text{gt}}$ 分別為預測值與真值於全部 $K$ 張切片上之算術平均；$\rho \in [-1, 1]$ 越接近 $1$ 表示兩者之線性關係越強。
 \end{itemize}
 
 \subsection{顯著性檢定}
@@ -199,8 +201,8 @@
 為評估各項比較之差異是否具統計意義，本研究依指標性質採用兩種不同之顯著性檢定：
 
 \begin{itemize}
-  \item \textbf{單尾 Wilcoxon 符號秩檢定} (one-sided signed-rank test)~\cite{wilcoxon1945individual}：適用於 MAE、RMSE、$\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 五項指標——五者皆可於\textbf{切片層級}逐張取得，故對待比較之兩者之逐切片配對差值執行此檢定。對立假設設為「所主張之一方較佳」，即其 MAE、RMSE、HD95 與 $\text{HD}_{\text{avg}}$ 較低、且 $\text{Dice}_{\text{cl}}$ 較高（主實驗中所主張者為 AEL、相對於各基準方法；參數分析中則為各參數之基準取值、相對於其鄰近取值；結構性消融中則為完整 AEL、相對於各消融變體）。
-  \item \textbf{$t$ 檢定} (t-test)~\cite{student1908correlation}：適用於 Pearson 相關係數 $\rho$。$\rho$ 為將整個資料集之 $(N_{\text{pred}}, N_{\text{gt}})$ 點對聚合後再計算之單一統計量，無法於切片層級與 AEL 配對比較；因此 $\rho$ 欄改以該方法自身之顯著性 $t$ 檢定（檢定 $\rho \ne 0$ 之雙尾 $t$ 檢定）。
+  \item \textbf{單尾 Wilcoxon 符號秩檢定} (one-sided signed-rank test)~\cite{wilcoxon1945individual}：適用於 $N_{\text{MAE}}$、$N_{\text{RMSE}}$、$\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 五項指標——五者皆可於\textbf{切片層級}逐張取得，故對待比較兩者之逐切片配對差值執行此檢定。對立假設為「所主張之一方較佳」，即其 $N_{\text{MAE}}$、$N_{\text{RMSE}}$、HD95 與 $\text{HD}_{\text{avg}}$ 較低、且 $\text{Dice}_{\text{cl}}$ 較高（主實驗中所主張者為 AEL、相對於各基準方法；參數分析中則為各參數之基準取值、相對於其鄰近取值；結構性消融中則為完整 AEL、相對於各消融變體）。
+  \item \textbf{$t$ 檢定} (t-test)~\cite{student1908correlation}：適用於 $\rho$。$\rho$ 為將整個資料集之 $(N_{\text{pred}}, N_{\text{gt}})$ 點對聚合後再計算之單一統計量，無法於切片層級與 AEL 配對比較；因此 $\rho$ 欄改以該方法自身之顯著性 $t$ 檢定（檢定 $\rho \ne 0$ 之雙尾 $t$ 檢定）。
 \end{itemize}
 
 \noindent 上述各項檢定所得之 $p$ 值，於各結果表中均以星號標示其顯著程度：以 $*$ 表示 $p < 0.05$、以 $**$ 表示 $p < 0.01$。本研究中 $p < 0.05$ 代表所比較之兩者差異達\textbf{統計顯著}（即在 $5\%$ 之顯著水準下可拒絕兩者無差異之虛無假設），$p < 0.01$ 則代表差異達\textbf{高度統計顯著}；未標記星號者則表示差異未達 $p < 0.05$ 之顯著水準，視為兩者無顯著差異。
@@ -626,13 +628,13 @@
   \end{tabular}
 \end{table}
 
-由表~\ref{tab:ablation}，所有消融變體於三項指標上相對完整 AEL 之差異\textbf{除移除頂帽去背景於 HD95 一項外，餘皆達顯著}（多數 $p < 0.001$），印證 AEL 各設計模組均有實質貢獻。其中以\textbf{連結策略}之消融最為關鍵。最極端者為\textbf{完全不連結}（直接對 $P$ 骨架化、即移除整個連結階段）：此時骨架嚴重碎片化，$\text{Dice}_{\text{cl}}$ 跌至全表最低之 $71.17\%$，且因無法形成穿越表皮之連續路徑，各切片之跨越計數恆為 $0$、MAE 高達 $21.95$（對照完整 AEL 之 $5.05$），凸顯連結重組之不可或缺。在仍保留部分連結機制之兩項消融中：略過 $\tau$ 閾值裁剪時，遠距離元件之高成本偽相遇被悉數納入最小生成森林，造成橫跨真皮之嚴重錯接，HD95 自 $2.451\,\mu\text{m}$ 暴增至 $31.328\,\mu\text{m}$（逾 $12$ 倍）、$\text{Dice}_{\text{cl}}$ 崩落至 $75.87\%$——其 HD95 甚至高於完全不連結之 $15.239\,\mu\text{m}$，顯示不加裁剪地連結比完全不連結更易產生遠離真值之長距離錯接；略過最小生成森林時，雖已先經 $\tau$ 裁剪，冗餘連線仍使拓樸顯著劣化（HD95 $3.086\,\mu\text{m}$、$\text{Dice}_{\text{cl}}$ $83.93\%$）。三者共同驗證第~\ref{sec:prune-mst}~節「閾值裁剪抑制偽連線、最小生成森林抑制冗餘連線」之設計分工，以及連結階段整體確為 AEL 拓樸品質之核心。
+由表~\ref{tab:ablation}，所有消融變體於三項指標上相對完整 AEL 之差異\textbf{除移除頂帽去背景於 HD95 一項外，餘皆達顯著}（多數 $p < 0.001$），印證 AEL 各設計模組均有實質貢獻。其中以\textbf{連結策略}之消融最為關鍵。最極端者為\textbf{完全不連結}（直接對 $P$ 骨架化、即移除整個連結階段）：此時骨架嚴重碎片化，$\text{Dice}_{\text{cl}}$ 跌至全表最低之 $71.17\%$，且因無法形成穿越表皮之連續路徑，各切片之跨越計數恆為 $0$、MAE 高達 $21.95$（對照完整 AEL 之 $5.05$），凸顯連結重組之不可或缺。在仍保留部分連結機制之兩項消融中：略過 $\tau$ 閾值裁剪時，遠距離元件之高成本偽相遇皆被納入最小生成森林，造成橫跨真皮之嚴重錯接，HD95 自 $2.451\,\mu\text{m}$ 暴增至 $31.328\,\mu\text{m}$（逾 $12$ 倍）、$\text{Dice}_{\text{cl}}$ 崩落至 $75.87\%$——其 HD95 甚至高於完全不連結之 $15.239\,\mu\text{m}$，顯示不加裁剪地連結比完全不連結更易產生遠離真值之長距離錯接；略過最小生成森林時，雖已先經 $\tau$ 裁剪，冗餘連線仍使拓樸顯著劣化（HD95 $3.086\,\mu\text{m}$、$\text{Dice}_{\text{cl}}$ $83.93\%$）。三者共同驗證第~\ref{sec:prune-mst}~節「閾值裁剪抑制偽連線、最小生成森林抑制冗餘連線」之設計分工，以及連結階段整體確為 AEL 拓樸品質之核心。
 
 \textbf{成本設計}方面，改用均勻常數成本使區域擴張喪失纖維響應之引導、退化為由幾何距離主導之連結，於三項指標上皆為前處理與成本各項消融中最差者（$\text{Dice}_{\text{cl}}$ $88.07\%$、$\text{HD}_{\text{avg}}$ $0.8170\,\mu\text{m}$），凸顯以纖維響應建構低成本走廊之必要；改用線性成本雖仍保有單調性，惟失去式~\eqref{eq:cost} 指數函數對強弱響應之對比放大，HD95 劣化至 $2.736\,\mu\text{m}$，顯示指數成本之凸性確有助於路徑沿高響應纖維前進。\textbf{前處理}方面，逐一移除頂帽、CLAHE 或 Sato 皆使 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 顯著劣化，完全不做增強（移除全部前處理）則為前處理各項中最差（$\text{Dice}_{\text{cl}}$ $89.72\%$、$\text{HD}_{\text{avg}}$ $0.7667\,\mu\text{m}$）；值得注意的是，移除頂帽去背景於 HD95 並未達顯著（$p = 0.239$），其劣化僅反映於 $\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$——此與第~\ref{sec:param-analysis}~節中 $r_{\text{bg}} = 0$（即不做背景去除）之觀察完全一致，再次顯示背景去除所致之整體性輕微劣化主要由 $\text{HD}_{\text{avg}}$ 而非 HD95 捕捉。整體而言，本節證實 AEL 自前處理、成本設計至連結策略之各模組皆對最終拓樸品質有正向且多數顯著之貢獻。
 
-為直觀呈現上述各模組之作用，圖~\ref{fig:abl-preproc-cost} 至圖~\ref{fig:abl-connect} 以單一代表切片（S3091-2\_b）之兩處放大區域，逐一視覺化各消融設定之效果。前處理之影響最直接地反映於\textbf{成本圖}（圖~\ref{fig:abl-preproc-cost}）：完整前處理下，纖維於成本圖上呈現清晰、連續且與背景明確區隔之高響應走廊；移除頂帽去背景後，原應抑制之網狀背景紋理大量殘留、與纖維競爭，使低成本走廊之邊界趨於模糊；移除 CLAHE 後全域響應整體偏暗，較弱之纖維段近乎沒入背景；移除 Sato 線狀濾波後影像失去線狀結構之增強而退化為顆粒狀雜訊，纖維走廊不再連貫；完全不做增強則近乎原始綠色通道，纖維微弱而背景偏亮。值得注意的是，於此內聚度尚佳之切片上，前述成本圖之劣化尚不足以扭轉重建結果——四種前處理消融之重建疊合與完整 AEL 僅有極細微差異（對應表~\ref{tab:ablation} 中各前處理項 $\text{Dice}_{\text{cl}}$ 不足 $1$ 個百分點之差距），故此處改以成本圖揭示其作用機制；前處理之真正價值在於對染色較弱、背景較雜之困難切片提供更穩健之低成本走廊。
+為直觀呈現上述各模組之作用，圖~\ref{fig:abl-preproc-cost} 至圖~\ref{fig:abl-connect} 以單一代表切片（S3091-2\_b）之兩處放大區域，逐一視覺化各消融設定之效果。前處理之影響最直接地反映於\textbf{成本圖}（圖~\ref{fig:abl-preproc-cost}）：完整前處理下，纖維於成本圖上呈現清晰、連續且與背景明確區隔之高響應走廊；移除頂帽去背景後，原應抑制之網狀背景紋理大量殘留、與纖維競爭，使低成本走廊之邊界趨於模糊；移除 CLAHE 後全域響應整體偏暗，較弱之纖維段近乎沒入背景；移除 Sato 線狀濾波後影像失去線狀結構之增強而退化為顆粒狀雜訊，纖維走廊不再連貫；完全不做增強則近乎原始綠色通道，纖維微弱而背景偏亮。
 
-成本設計與連結策略之影響則直接顯現於\textbf{重建疊合圖}。成本設計方面（圖~\ref{fig:abl-cost}），完整 AEL 之指數成本使重建幾乎全為黃色命中段；改用線性成本後，因失去對強弱響應之對比放大，於區域 a 補出一段橫越纖維間隙之\textbf{紅色多餘段}；改用均勻成本使連結退化為由幾何距離主導，紅色多餘段更為明顯。連結策略方面（圖~\ref{fig:abl-connect}），略過 $\tau$ 裁剪時可見一條橫貫區域之\textbf{紅色長距離錯接}（對應表中 HD95 自 $2.451$ 暴增至 $31.328\,\mu\text{m}$）；略過最小生成森林時則出現多處紅綠交雜之冗餘連線與漏連；完全不連結時骨架嚴重碎片化，大量本應連通之纖維段轉為\textbf{綠色漏連段}，直觀印證其 $\text{Dice}_{\text{cl}}$ 跌至全表最低之 $71.17\%$。三圖共同自影像層面佐證表~\ref{tab:ablation} 之量化結論。
+成本設計與連結策略之影響則直接顯現於\textbf{重建疊合圖}。成本設計方面（圖~\ref{fig:abl-cost}），完整 AEL 之指數成本使重建幾乎全為黃色命中段；改用線性成本後，因失去對強弱響應之對比放大，於區域 a 補出一段橫越纖維間隙之\textbf{紅色多餘段}；改用均勻成本使連結退化為由幾何距離主導，紅色多餘段更為明顯。連結策略方面（圖~\ref{fig:abl-connect}），略過 $\tau$ 裁剪時可見一條橫貫區域之\textbf{紅色長距離錯接}（對應表中 HD95 自 $2.451$ 暴增至 $31.328\,\mu\text{m}$）；略過最小生成森林時則出現多處紅綠交雜之冗餘連線與漏連；完全不連結時骨架嚴重碎片化，大量本應連通之纖維段轉為\textbf{綠色漏連段}。該結果與表~\ref{tab:ablation} 之量化結論相符。
 
 \begin{figure}[htbp]
   \centering
@@ -645,13 +647,6 @@
 
   \vspace{0.4em}
 
-  \begin{subfigure}[b]{0.19\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full_costmap.png}\\[0.4em]
-    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full_costmap.png}
-    \caption{}%
-    \label{fig:abl-cost-full}
-  \end{subfigure}\hfill
   \begin{subfigure}[b]{0.19\linewidth}
     \centering
     \includegraphics[width=\linewidth]{S3091-2_b_crop0_no_wth_costmap.png}\\[0.4em]
@@ -679,21 +674,21 @@
     \includegraphics[width=\linewidth]{S3091-2_b_crop1_no_costmap.png}
     \caption{}%
     \label{fig:abl-cost-no}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.19\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full_costmap.png}\\[0.4em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full_costmap.png}
+    \caption{}%
+    \label{fig:abl-cost-full}
   \end{subfigure}
 
-  \caption[前處理消融對成本圖之影響]{前處理消融對成本圖之影響（代表切片 S3091-2\_b）。(a) 綠色通道全切片影像，紅框標示兩處放大區域（區域 a 位於右側、區域 b 位於中段）。(b)--(f) 各設定之成本圖，上下兩列分別為區域 a（上）與區域 b（下）；(b) 完整前處理、(c) 移除頂帽去背景、(d) 移除 CLAHE、(e) 移除 Sato 濾波、(f) 移除全部前處理。}
+  \caption[前處理消融對成本圖之影響]{前處理消融對成本圖之影響（代表切片 S3091-2\_b）。(a) 綠色通道全切片影像，紅框標示兩處放大區域（區域 a 位於右側、區域 b 位於中段）。(b)--(f) 各設定之成本圖，上下兩列分別為區域 a（上）與區域 b（下）；(b) 移除頂帽去背景、(c) 移除 CLAHE、(d) 移除 Sato 濾波、(e) 移除全部前處理、(f) 完整前處理。}
   \label{fig:abl-preproc-cost}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}[b]{0.31\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full.png}\\[0.4em]
-    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full.png}
-    \caption{}%
-    \label{fig:abl-cost-recon-full}
-  \end{subfigure}\hfill
   \begin{subfigure}[b]{0.31\linewidth}
     \centering
     \includegraphics[width=\linewidth]{S3091-2_b_crop0_linear_cost.png}\\[0.4em]
@@ -707,21 +702,21 @@
     \includegraphics[width=\linewidth]{S3091-2_b_crop1_uniform_cost.png}
     \caption{}%
     \label{fig:abl-cost-recon-uniform}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full.png}\\[0.4em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full.png}
+    \caption{}%
+    \label{fig:abl-cost-recon-full}
   \end{subfigure}
 
-  \caption[成本設計消融之重建疊合對照]{成本設計消融之重建疊合對照（代表切片 S3091-2\_b；黃色為命中段、綠色為漏連段、紅色為多餘段；放大區域同圖~\ref{fig:abl-preproc-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 完整 AEL（指數成本）、(b) 線性成本、(c) 均勻成本。}
+  \caption[成本設計消融之重建疊合對照]{成本設計消融之重建疊合對照（代表切片 S3091-2\_b；黃色為命中段、綠色為漏連段、紅色為多餘段；放大區域同圖~\ref{fig:abl-preproc-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 線性成本、(b) 均勻成本、(c) 完整 AEL（指數成本）。}
   \label{fig:abl-cost}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}[b]{0.24\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full.png}\\[0.4em]
-    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full.png}
-    \caption{}%
-    \label{fig:abl-connect-full}
-  \end{subfigure}\hfill
   \begin{subfigure}[b]{0.24\linewidth}
     \centering
     \includegraphics[width=\linewidth]{S3091-2_b_crop0_no_prune.png}\\[0.4em]
@@ -742,27 +737,23 @@
     \includegraphics[width=\linewidth]{S3091-2_b_crop1_no_connect.png}
     \caption{}%
     \label{fig:abl-connect-noconnect}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.24\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full.png}\\[0.4em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full.png}
+    \caption{}%
+    \label{fig:abl-connect-full}
   \end{subfigure}
 
-  \caption[連結策略消融之重建疊合對照]{連結策略消融之重建疊合對照（代表切片 S3091-2\_b；配色與放大區域同圖~\ref{fig:abl-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 完整 AEL、(b) 不裁剪邊（$\tau$）、(c) 不取最小生成森林、(d) 完全不連結。}
+  \caption[連結策略消融之重建疊合對照]{連結策略消融之重建疊合對照（代表切片 S3091-2\_b；配色與放大區域同圖~\ref{fig:abl-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 不裁剪邊（$\tau$）、(b) 不取最小生成森林、(c) 完全不連結、(d) 完整 AEL。}
   \label{fig:abl-connect}
 \end{figure}
-
-\section{基準方法}
-\label{sec:baselines}
-
-為隔離\textbf{連結策略}此一單一變因，本研究以最樸素之\textbf{最小生成森林}（Minimum Spanning Forest, 以下簡稱 MSF）連結作為基準（並非文獻既有方法），與 AEL 比較。其前處理流程（感興趣區域建立、影像增強、成本圖 $C$ 之建構）與 AEL 完全相同，僅於連結階段以\textbf{端點對端點之最短路徑成本}取代 AEL 之多源擴張；於跨越計數之程序上（分段偵測、區域標記、有效跨越判定）亦與 AEL 完全一致，唯一差異即在連結策略。連結之具體步驟分為圖建構、連結與骨架化、計數程序三部分。
-
-\textbf{(a) 圖建構：} 元件層圖之節點為各纖維微粒元件 $\{P_i\}$；對任意元件對 $(P_i, P_j)$，若其端點間之最小歐式直線距離不超過閾值 $d_{\max}$（本研究取 $d_{\max} = 15\,\text{像素}$），則自 $P_i$ 之端點於 $C$ 上以 Dijkstra 擴張至 $P_j$ 之端點，取所有端點對中最短路徑成本之最小值作為邊權；否則不建邊（排除明顯過遠之配對、亦使圖稀疏化）。
-
-\textbf{(b) 連結與骨架化：} 於所得之圖上取最小生成森林後，將每條樹邊以其對應之 Dijkstra 路徑於像素層級實體化、與原始元件骨架取聯集，即得 MSF 之預測骨架 $S_{\text{pred}}^{\text{MSF}}$。MSF 不套用 AEL 之形態學剪枝。
-
-\textbf{(c) 計數程序：} 於 $S_{\text{pred}}^{\text{MSF}}$ 上採用與 AEL 相同之分段、區域標記與有效跨越判定，代表「以成對最短路徑取代多源擴張」之基準。
 
 \section{個案分析}
 \label{sec:qual}
 
-本節以具體案例之\textbf{重建視覺化}，逐一檢視 MSF 與 AEL 於不同切片條件下之連結行為差異——由於兩者於分段、區域標記與跨越判定皆採同一段程式，計數差異完全來自連結策略造成之骨架差異，因此觀察重建即可直接解釋方法行為。
+本節以具體案例之\textbf{重建視覺化}，逐一檢視切片個案，並將 AEL 與基準方法 MSF 進行比較。為隔離\textbf{連結策略}此一單一變因，本研究以最小生成森林連結（以下簡稱 MSF）作為基準（並非文獻既有方法），其具體實作步驟詳見附錄~A。正因兩者於分段、區域標記與跨越判定皆採同一段程式，計數差異完全來自連結策略造成之骨架差異，因此觀察重建即可直接解釋方法行為。
 
 每個案例皆先以一張綠色通道之全切片影像標示放大位置（紅框），再就框選之每個局部區域並列呈現三張圖：該區之綠色通道影像、MSF 與 AEL 之重建結果。重建結果以\textbf{骨架疊合圖}呈現——將演算法重建骨架與專家標註骨架 $S_{\text{gt}}$ 逐像素比對後以三色標示：\textbf{黃色}為兩者重合之命中段、\textbf{綠色}為 $S_{\text{gt}}$ 存在而重建未連及之漏連段、\textbf{紅色}為重建獨有而無 $S_{\text{gt}}$ 對應之多餘段。
 
@@ -1106,7 +1097,7 @@ AEL 於 MAE、RMSE 兩項誤差指標上皆低於 MSF，$\rho$ 亦較 MSF 為高
 
 \subsection{與臨床實務之銜接}
 
-AEL 之輸出為可視化之拓樸圖：演算法以成本走廊將原本破碎之神經微粒填補連結為連續之神經纖維，每一條被計為跨越之線段皆對應影像上具體之像素路徑。此一由微粒至纖維之中介重建結果對臨床人員具備\textbf{可稽核性}，專家可逐條複核重建之纖維，而非僅取得一個純量計數，有助於降低導入臨床之信任門檻。
+AEL 之輸出為可視化之拓樸圖：演算法以成本走廊將原本破碎之神經微粒填補連結為連續之神經纖維，每一條被計為跨越之線段皆對應影像上具體之像素路徑。此一由微粒至纖維之中介重建結果對臨床人員具備\textbf{可稽核性}，專家可逐條複核重建之纖維，而非僅取得一個純量計數，有助於降低導入臨床之信任門檻。為將此可稽核性落實為實際可操作之流程，本研究另開發一視覺化神經纖維分析工具（詳見第~\ref{chap:tool}~章）：該工具將 AEL 之重建結果以可互動之圖層疊合於原始影像上，使專家得以逐條檢視、並於介面上直接新增、刪除節點與邊以修正重建，再即時重新計數，形成「自動重建—人工複核—修正」之半自動工作流程。
 
 \subsection{敏感度與可遷移性}
 

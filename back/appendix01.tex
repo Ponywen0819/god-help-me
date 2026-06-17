@@ -1,5 +1,12 @@
 % !TeX root = ../main.tex
 
-\appendix{A}{Introduction}
-\section{Introduction}
-\section{Further Introduction}
+\appendix{A}{基準方法之實作細節}
+\label{app:msf}
+
+本附錄補充第~\ref{sec:qual}~節所述 MSF 連結基準之具體實作步驟。此基準之前處理與跨越計數程序均與 AEL 相同，唯一差異在於連結階段；其連結之具體步驟分為圖建構、連結與骨架化、計數程序三部分。
+
+\textbf{(a) 圖建構：} 元件層圖之節點為各纖維微粒元件 $\{P_i\}$；對任意元件對 $(P_i, P_j)$，若其端點間之最小歐式直線距離不超過閾值 $d_{\max}$（本研究取 $d_{\max} = 15\,\text{像素}$），則自 $P_i$ 之端點於 $C$ 上以 Dijkstra 擴張至 $P_j$ 之端點，取所有端點對中最短路徑成本之最小值作為邊權；否則不建邊（排除明顯過遠之配對、亦使圖稀疏化）。
+
+\textbf{(b) 連結與骨架化：} 於所得之圖上取最小生成森林後，將每條樹邊以其對應之 Dijkstra 路徑於像素層級實體化、與原始元件骨架取聯集，即得 MSF 之預測骨架 $S_{\text{pred}}^{\text{MSF}}$。MSF 不套用 AEL 之形態學剪枝。
+
+\textbf{(c) 計數程序：} 於 $S_{\text{pred}}^{\text{MSF}}$ 上採用與 AEL 相同之分段、區域標記與有效跨越判定，代表「以成對最短路徑取代多源擴張」之基準。
