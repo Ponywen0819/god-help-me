@@ -246,7 +246,7 @@
 
 \begin{table}[htbp]
   \centering
-  \caption{白色頂帽結構元尺寸 $r_{\text{bg}}$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
+  \caption{白色頂帽結構元尺寸 $r_{\text{bg}}$ 之擾動結果。}
   \label{tab:param-bg}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -304,11 +304,11 @@
   \label{fig:bg-remove}
 \end{figure}
 
-\paragraph{CLAHE 對比裁剪閾值 $\beta$：} $\beta$ 限制 CLAHE 直方圖之裁剪高度，即局部對比強化之上限。由表~\ref{tab:param-clip}：裁剪閾值偏低（$\beta = 30, 35$）時對比強化略顯不足，$\text{Dice}_{\text{cl}}$ 顯著劣於預設（$\beta = 30$、$\beta = 35$ 皆 $p < 0.01$，$\beta = 35$ 於 HD95、$\text{HD}_{\text{avg}}$ 亦達顯著），惟絕對差距極小（$\text{Dice}_{\text{cl}}$ 僅約 $0.03$--$0.04$ 百分點）。$\beta \ge 40$ 後增益趨於飽和：$\beta = 45, 50, 55$ 之三項指標與預設皆無顯著差異（所有 $p > 0.05$），$\text{Dice}_{\text{cl}}$ 停於約 $90.55\%$ 之平台。預設 $\beta = 40$ 於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標上皆取得全表最佳值（$\text{Dice}_{\text{cl}}$ $= 90.57\%$、HD95 $= 2.4496\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $= 0.7340\,\mu\text{m}$），為達到此飽和平台之最小裁剪閾值。各 $\beta$ 之 CLAHE 原始輸出見圖~\ref{fig:clahe-clip-raw}，其相對白色頂帽去背景影像 $I_{\text{th}}$ 之對比增益（差值）則見圖~\ref{fig:clahe-clip-diff}：$\beta$ 偏低（$\beta = 30, 35$）時纖維處之對比增益明顯偏弱，與表~\ref{tab:param-clip} 中此二取值顯著較差相互呼應；$\beta$ 增大後纖維處之增益逐漸飽和，額外之強化轉而擴及背景而無助於纖維--背景之分離，正對應指標於 $\beta \ge 40$ 之飽和平台。
+\paragraph{CLAHE 對比裁剪閾值 $\beta$：} $\beta$ 限制 CLAHE 直方圖之裁剪高度，即局部對比強化之上限。由表~\ref{tab:param-clip}：裁剪閾值偏低（$\beta = 30, 35$）時對比強化略顯不足，$\text{Dice}_{\text{cl}}$ 顯著劣於預設（$\beta = 30$、$\beta = 35$ 皆 $p < 0.01$，$\beta = 35$ 於 HD95、$\text{HD}_{\text{avg}}$ 亦達顯著），惟絕對差距極小（$\text{Dice}_{\text{cl}}$ 僅約 $0.03$--$0.04$ 百分點）。$\beta \ge 40$ 後增益趨於飽和：$\beta = 45, 50, 55$ 之三項指標與預設皆無顯著差異（所有 $p > 0.05$），$\text{Dice}_{\text{cl}}$ 停於約 $90.55\%$ 之平台。預設 $\beta = 40$ 於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標上皆取得全表最佳值（$\text{Dice}_{\text{cl}}$ $= 90.57\%$、HD95 $= 2.4496\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $= 0.7340\,\mu\text{m}$），為達到此飽和平台之最小裁剪閾值。各 $\beta$ 之 CLAHE 原始輸出見圖~\ref{fig:clahe-clip-raw}，其相對白色頂帽去背景影像 $I_{\text{th}}$ 之對比增益（差值）則見圖~\ref{fig:clahe-clip-diff}：由差異圖可看出 $\beta$ 越高、纖維處所獲得之對比增益越佳，惟 $\beta = 45, 50, 55$ 三者之差異已不明顯，與表~\ref{tab:param-clip} 中 $\beta \ge 40$ 後指標趨於飽和之結果相同。
 
 \begin{table}[htbp]
   \centering
-  \caption{CLAHE 對比裁剪閾值 $\beta$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
+  \caption{CLAHE 對比裁剪閾值 $\beta$ 之擾動結果。}
   \label{tab:param-clip}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -406,11 +406,11 @@
   \label{fig:clahe-clip-diff}
 \end{figure}
 
-\paragraph{CLAHE 方塊尺度 $n_{\text{tile}}$：} $n_{\text{tile}}$ 決定 CLAHE 局部對比均衡之方塊大小。表~\ref{tab:param-grid} 顯示此參數於所掃描範圍內對重建品質之絕對影響均小——各取值之 $\text{Dice}_{\text{cl}}$ 變動不超過 $0.07$ 百分點、HD95 不及 $0.02\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $< 0.005\,\mu\text{m}$。預設 $n_{\text{tile}} = 768$ 於 $\text{Dice}_{\text{cl}}$ 與 HD95 兩項皆為全表最佳（$90.57\%$、$2.4496\,\mu\text{m}$），$\text{HD}_{\text{avg}}$ 亦為次低（$0.7340\,\mu\text{m}$，僅較最低之 $n_{\text{tile}} = 832$ 高 $0.0002\,\mu\text{m}$，差異未達顯著）。方塊過小時品質明顯下降：最小之 $n_{\text{tile}} = 672$ 於三項指標上皆顯著劣於預設（$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.001$、HD95 達 $p < 0.05$）；$n_{\text{tile}} = 704$ 及高端之 $n_{\text{tile}} = 832$ 則僅於 $\text{Dice}_{\text{cl}}$ 顯著略低於預設（$p < 0.05$，絕對降幅約 $0.03$--$0.05$ 百分點），於 HD95 與 $\text{HD}_{\text{avg}}$ 未達顯著；介於其間之 $n_{\text{tile}} = 736, 800$ 於三項指標上與預設皆無顯著差異。顯示除方塊過小之極端外，此參數對最終品質之影響雖可由統計檢定偵出，實務上之差異卻極小，此於圖~\ref{fig:clahe-grid-raw} 之原始輸出與圖~\ref{fig:clahe-grid-diff} 之差值視覺化中亦可印證：$n_{\text{tile}} = 704$ 至 $832$ 之差值圖彼此十分相近，纖維走廊之強化幾無肉眼可辨之差異，與表中此區間三項指標相近且多未達顯著之表現一致；唯獨方塊過小之 $n_{\text{tile}} = 672$ 明顯不同——其增益更為瀰漫，纖維周邊與背景出現較多被一併放大之雜訊，正對應其於表中三項指標皆顯著劣化。
+\paragraph{CLAHE 方塊尺度 $n_{\text{tile}}$：} $n_{\text{tile}}$ 決定 CLAHE 局部對比均衡之方塊大小。表~\ref{tab:param-grid} 顯示此參數於所掃描範圍內對重建品質之絕對影響均小——各取值之 $\text{Dice}_{\text{cl}}$ 變動不超過 $0.07$ 百分點、HD95 不及 $0.02\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $< 0.005\,\mu\text{m}$。預設 $n_{\text{tile}} = 768$ 於 $\text{Dice}_{\text{cl}}$ 與 HD95 兩項皆為全表最佳（$90.57\%$、$2.4496\,\mu\text{m}$），$\text{HD}_{\text{avg}}$ 亦為次低（$0.7340\,\mu\text{m}$，僅較最低之 $n_{\text{tile}} = 832$ 高 $0.0002\,\mu\text{m}$，差異未達顯著）。方塊過小時品質明顯下降：最小之 $n_{\text{tile}} = 672$ 於三項指標上皆顯著劣於預設（$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.001$、HD95 達 $p < 0.05$）；$n_{\text{tile}} = 704$ 及高端之 $n_{\text{tile}} = 832$ 則僅於 $\text{Dice}_{\text{cl}}$ 顯著略低於預設（$p < 0.05$，絕對降幅約 $0.03$--$0.05$ 百分點），於 HD95 與 $\text{HD}_{\text{avg}}$ 未達顯著；介於其間之 $n_{\text{tile}} = 736, 800$ 於三項指標上與預設皆無顯著差異。顯示除方塊過小之極端外，此參數對最終品質之影響雖可由統計檢定偵出，實務上之差異卻極小，此於圖~\ref{fig:clahe-grid-raw} 之原始輸出與圖~\ref{fig:clahe-grid-diff} 之差值視覺化中亦可印證：$n_{\text{tile}} = 704$ 至 $832$ 之差值圖彼此十分相近，纖維之強化幾無肉眼可辨之差異，與表中此區間三項指標相近且多未達顯著之表現一致；唯獨方塊過小之 $n_{\text{tile}} = 672$ 明顯不同——其增益微弱，正對應其於表中三項指標皆顯著劣化。
 
 \begin{table}[htbp]
   \centering
-  \caption{CLAHE 方塊尺度 $n_{\text{tile}}$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
+  \caption{CLAHE 方塊尺度 $n_{\text{tile}}$ 之擾動結果。}
   \label{tab:param-grid}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -464,7 +464,7 @@
     \caption{}
   \end{subfigure}
 
-  \caption[CLAHE 方塊尺度 $n_{\text{tile}}$ 之原始輸出]{各 $n_{\text{tile}}$ 之 CLAHE 原始輸出（灰階，同一局部區域）。(a)--(f) 分別對應 $n_{\text{tile}} = 672, 704, 736, 768, 800, 832$，其中 (d) $n_{\text{tile}} = 768$ 為預設值。}
+  \caption[CLAHE 方塊尺度 $n_{\text{tile}}$ 之輸出]{各 $n_{\text{tile}}$ 之 CLAHE 原始輸出（灰階，同一局部區域）。(a)--(f) 分別對應 $n_{\text{tile}} = 672, 704, 736, 768, 800, 832$，其中 (d) $n_{\text{tile}} = 768$ 為預設值。}
   \label{fig:clahe-grid-raw}
 \end{figure}
 
@@ -508,7 +508,7 @@
   \label{fig:clahe-grid-diff}
 \end{figure}
 
-\paragraph{Sato 最大尺度 $\sigma_{\max}$：} $\sigma_{\max}$ 對應可被強化之最粗纖維尺度（固定 $\sigma_{\min} = 1$）。由表~\ref{tab:param-sstop}：HD95 於所變動範圍內對 $\sigma_{\max}$ 並不敏感，各取值與預設之差異皆未達顯著（$p > 0.05$）；$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 則以預設 $\sigma_{\max} = 3$ 為全表最佳，且於上界過小（$\sigma_{\max} = 1$，粗纖維響應不足）與上界過大（$\sigma_{\max} = 4, 5$，鄰近纖維之響應彼此暈染）兩端皆顯著劣於預設，呈輕微之 U 形劣化（惟絕對差距極小，$\text{Dice}_{\text{cl}}$ 不及 $0.05$ 百分點、$\text{HD}_{\text{avg}}$ 不及 $0.002\,\mu\text{m}$）；其中僅最接近預設之 $\sigma_{\max} = 2$ 於 $\text{Dice}_{\text{cl}}$ 未達顯著差異。整體而言，預設 $\sigma_{\max} = 3$ 於 $\text{Dice}_{\text{cl}}$ 為全表最高、於 $\text{HD}_{\text{avg}}$ 為全表最低，兼顧粗纖維涵蓋與走廊銳利度。各 $\sigma_{\max}$ 之原始響應輸出見圖~\ref{fig:sato-smax}；其相對 CLAHE 強化輸入影像 $I_{\text{eq}}$ 之差值則見圖~\ref{fig:sato-smax-diff}，可清楚對照兩端劣化之成因：$\sigma_{\max}$ 較小時（如 $\sigma_{\max} = 1, 2$），差值主要侷限於纖維本身，反映濾波器僅對細尺度之纖維結構作出響應、增益侷限於纖維走廊之內；而隨 $\sigma_{\max}$ 增大至 $4, 5$，相鄰兩條纖維之間隙開始出現明顯之暈染——大尺度核同時涵蓋鄰近之兩條纖維，於其中間區域產生虛假之連續響應，使走廊邊界趨於模糊，正對應表中此區間 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 之顯著劣化。
+\paragraph{Sato 最大尺度 $\sigma_{\max}$：} $\sigma_{\max}$ 對應可被強化之最粗纖維尺度（固定 $\sigma_{\min} = 1$）。由表~\ref{tab:param-sstop}：HD95 於所變動範圍內對 $\sigma_{\max}$ 並不敏感，各取值與預設之差異皆未達顯著（$p > 0.05$）；$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 則以預設 $\sigma_{\max} = 3$ 為全表最佳，且於上界過小（$\sigma_{\max} = 1$，粗纖維響應不足）與上界過大（$\sigma_{\max} = 4, 5$，鄰近纖維之響應彼此暈染）兩端皆顯著劣於預設，呈輕微之 U 形劣化（惟絕對差距極小，$\text{Dice}_{\text{cl}}$ 不及 $0.05$ 百分點、$\text{HD}_{\text{avg}}$ 不及 $0.002\,\mu\text{m}$）；其中僅最接近預設之 $\sigma_{\max} = 2$ 於 $\text{Dice}_{\text{cl}}$ 未達顯著差異。整體而言，預設 $\sigma_{\max} = 3$ 於 $\text{Dice}_{\text{cl}}$ 為全表最高、於 $\text{HD}_{\text{avg}}$ 為全表最低，兼顧粗纖維涵蓋與走廊銳利度。各 $\sigma_{\max}$ 之原始響應輸出見圖~\ref{fig:sato-smax}；其相對 CLAHE 強化輸入影像 $I_{\text{eq}}$ 之差值則見圖~\ref{fig:sato-smax-diff}，可清楚對照兩端劣化之成因：$\sigma_{\max}$ 較小時（如 $\sigma_{\max} = 1, 2$），差值主要侷限於纖維本身，反映濾波器僅對細尺度之纖維結構作出響應、增益侷限於細小纖維結構之內；而隨 $\sigma_{\max}$ 增大至 $4, 5$，相鄰兩條纖維之間隙開始出現明顯之暈染——大尺度核同時涵蓋鄰近之兩條纖維，於其中間區域產生虛假之連續響應，使走廊邊界趨於模糊，正對應表中此區間 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 之顯著劣化。
 
 \begin{table}[htbp]
   \centering
@@ -608,7 +608,7 @@
 
 \begin{table}[htbp]
   \centering
-  \caption{Sato 最小尺度 $\sigma_{\min}$（$\sigma_{\max}$ 固定為 $3$）之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
+  \caption{Sato 最小尺度 $\sigma_{\min}$之擾動結果。}
   \label{tab:param-sstart}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -657,7 +657,7 @@
 
 \begin{table}[htbp]
   \centering
-  \caption{邊裁剪閾值 $\tau$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
+  \caption{邊裁剪閾值 $\tau$ 之擾動結果。}
   \label{tab:param-prune}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -711,7 +711,7 @@
     \caption{}
   \end{subfigure}
 
-  \caption[邊裁剪閾值 $\tau$ 之疊合視覺化]{邊裁剪閾值 $\tau$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接；同一局部區域）。(a)--(f) 分別對應 $\tau = 10, 15, 20, 25, 30, 40$，其中 (c) $\tau = 20$ 為預設值。}
+  \caption[邊裁剪閾值 $\tau$ 之疊合視覺化]{邊裁剪閾值 $\tau$ 之疊合視覺化——將重建骨架與專家標註骨架 $S_{\text{gt}}$ 逐像素比對後以三色標示：\textbf{黃色}為兩者重合之正確命中、\textbf{綠色}為 $S_{\text{gt}}$ 存在而重建未連及之缺失、\textbf{紅色}為重建獨有而無 $S_{\text{gt}}$ 對應之過度連接（本章其後各同類疊合圖之配色均依此定義；同一局部區域）。(a)--(f) 分別對應 $\tau = 10, 15, 20, 25, 30, 40$，其中 (c) $\tau = 20$ 為預設值。}
   \label{fig:prune-tau}
 \end{figure}
 
@@ -719,7 +719,7 @@
 
 \begin{table}[htbp]
   \centering
-  \caption{短樁修剪長度 $\ell_{\min}$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
+  \caption{短樁修剪長度 $\ell_{\min}$ 之擾動結果。}
   \label{tab:param-stub}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -773,7 +773,7 @@
     \caption{}
   \end{subfigure}
 
-  \caption[短樁修剪長度 $\ell_{\min}$ 之疊合視覺化]{短樁修剪長度 $\ell_{\min}$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接；同一局部區域）。(a)--(f) 分別對應 $\ell_{\min} = 0, 1, 3, 5, 7, 9$，其中 (c) $\ell_{\min} = 3$ 為預設值。}
+  \caption[短樁修剪長度 $\ell_{\min}$ 之疊合視覺化]{短樁修剪長度 $\ell_{\min}$ 之疊合視覺化（三色疊合圖之配色定義見圖~\ref{fig:prune-tau}；同一局部區域）。(a)--(f) 分別對應 $\ell_{\min} = 0, 1, 3, 5, 7, 9$，其中 (c) $\ell_{\min} = 3$ 為預設值。}
   \label{fig:stub-prune}
 \end{figure}
 
@@ -786,7 +786,7 @@
 
 \begin{table}[htbp]
   \centering
-  \caption{結構性消融之結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
+  \caption{結構性消融之結果。}
   \label{tab:ablation}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -868,7 +868,7 @@
     \label{fig:abl-cost-full}
   \end{subfigure}
 
-  \caption[前處理消融對成本圖之影響]{前處理消融對成本圖之影響（代表切片 S3091-2\_b）。(a) 綠色通道全切片影像，紅框標示兩處放大區域（區域 a 位於右側、區域 b 位於中段）。(b)--(f) 各設定之成本圖，上下兩列分別為區域 a（上）與區域 b（下）；(b) 移除頂帽去背景、(c) 移除 CLAHE、(d) 移除 Sato 濾波、(e) 移除全部前處理、(f) 完整前處理。}
+  \caption[前處理消融對成本圖之影響]{前處理消融對成本圖之影響（代表切片 S3091-2\_b）。(a) 綠色通道全切片影像，紅框標示兩處放大區域。(b)--(f) 各設定之成本圖，上下兩列分別為區域 a（上）與區域 b（下）；(b) 移除頂帽去背景、(c) 移除 CLAHE、(d) 移除 Sato 濾波、(e) 移除全部前處理、(f) 完整前處理。}
   \label{fig:abl-preproc-cost}
 \end{figure}
 
@@ -896,7 +896,7 @@
     \label{fig:abl-cost-recon-full}
   \end{subfigure}
 
-  \caption[成本設計消融之重建疊合對照]{成本設計消融之重建疊合對照（代表切片 S3091-2\_b；黃色為命中段、綠色為漏連段、紅色為多餘段；放大區域同圖~\ref{fig:abl-preproc-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 線性成本、(b) 均勻成本、(c) 完整 AEL（指數成本）。}
+  \caption[成本設計消融之重建疊合對照]{成本設計消融之重建疊合對照（代表切片 S3091-2\_b；三色疊合圖之配色定義見圖~\ref{fig:prune-tau}；放大區域同圖~\ref{fig:abl-preproc-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 線性成本、(b) 均勻成本、(c) 完整 AEL（指數成本）。}
   \label{fig:abl-cost}
 \end{figure}
 
@@ -931,7 +931,7 @@
     \label{fig:abl-connect-full}
   \end{subfigure}
 
-  \caption[連結策略消融之重建疊合對照]{連結策略消融之重建疊合對照（代表切片 S3091-2\_b；配色與放大區域同圖~\ref{fig:abl-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 不裁剪邊（$\tau$）、(b) 不取最小生成森林、(c) 完全不連結、(d) 完整 AEL。}
+  \caption[連結策略消融之重建疊合對照]{連結策略消融之重建疊合對照（代表切片 S3091-2\_b；三色疊合圖之配色定義見圖~\ref{fig:prune-tau}、放大區域同圖~\ref{fig:abl-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 不裁剪邊（$\tau$）、(b) 不取最小生成森林、(c) 完全不連結、(d) 完整 AEL。}
   \label{fig:abl-connect}
 \end{figure}
 
@@ -940,7 +940,7 @@
 
 本節以具體案例之\textbf{重建視覺化}，逐一檢視切片個案，並將 AEL 與基準方法 MSF 進行比較。為隔離\textbf{連結策略}此一單一變因，本研究以最小生成森林連結（以下簡稱 MSF）作為基準（並非文獻既有方法），其具體實作步驟詳見附錄~A。正因兩者於分段、區域標記與跨越判定皆採同一段程式，計數差異完全來自連結策略造成之骨架差異，因此觀察重建即可直接解釋方法行為。
 
-每個案例皆先以一張綠色通道之全切片影像標示放大位置（紅框），再就框選之每個局部區域並列呈現三張圖：該區之綠色通道影像、MSF 與 AEL 之重建結果。重建結果以\textbf{骨架疊合圖}呈現——將演算法重建骨架與專家標註骨架 $S_{\text{gt}}$ 逐像素比對後以三色標示：\textbf{黃色}為兩者重合之命中段、\textbf{綠色}為 $S_{\text{gt}}$ 存在而重建未連及之漏連段、\textbf{紅色}為重建獨有而無 $S_{\text{gt}}$ 對應之多餘段。
+每個案例皆先以一張綠色通道之全切片影像標示放大位置（紅框），再就框選之每個局部區域並列呈現三張圖：該區之綠色通道影像、MSF 與 AEL 之重建結果。重建結果以\textbf{骨架疊合圖}呈現，以\textbf{黃}、\textbf{綠}、\textbf{紅}三色分別標示命中段、漏連段與多餘段（配色定義見圖~\ref{fig:prune-tau}）。
 
 \paragraph{纖維微粒群集內聚度高之切片：} 本類別針對纖維微粒沿纖維緊密排列、群集內聚度高之切片——微粒間距小且走向清晰，連結路徑幾無歧義，屬重建任務中相對單純之情形，用以檢驗 AEL 引入多源區域擴張後是否於此類切片上產生退步 (regression)，並觀察其連結貼合纖維之傾向。本類別選取兩張代表性切片分別說明。\textbf{樣本一}（切片 S558-2\_a）：在此纖維延續性良好、染色完整、纖維間距充裕之切片上，兩種方法皆能重建出與 $S_{\text{gt}}$ 高度相符之主幹拓樸（兩者 HD95 皆低），如圖~\ref{fig:qual-both-good} 所示。圖中兩處放大區域之重建骨架大多為與 $S_{\text{gt}}$ 重合之黃色命中段：區域 b 兩法幾乎一致，僅於局部留下零星紅綠誤差；區域 a 則可見一處明顯差異——MSF 之端點對端點最短路徑補出一段近乎直線、無 $S_{\text{gt}}$ 對應之\textbf{紅色多餘段}，以直線捷徑跨越纖維間之低訊號空隙；AEL 之多源擴張受成本走廊約束、僅沿低成本區延伸，連結貼著纖維走向而未補出此段紅色連線。本切片三項指標皆遠優於資料集平均、兩法俱佳——$\text{Dice}_{\text{cl}}$ 自 MSF 之 $95.40\%$ 微升至 AEL 之 $96.65\%$（$+1.25$ \%）、HD95 自 $1.9465$ 降至 $1.2800\,\mu\text{m}$（$-34\%$）、$\text{HD}_{\text{avg}}$ 自 $0.3920$ 微降至 $0.3493\,\mu\text{m}$（$-11\%$），符合本類別微粒群集內聚度高之挑樣條件；AEL 於 HD95 上之較明顯改善，正對應其於區域 a 未補出 MSF 之紅色直線多餘段（最壞情形偏差較小）。可見 AEL 在這類本就單純之切片上並未因引入多源區域擴張而退步，其連結貼合纖維、避免走直線捷徑之傾向於此亦已可看出。
 
@@ -978,7 +978,7 @@
     \label{fig:qual-both-good-ael}
   \end{subfigure}
 
-  \caption[纖維微粒群集內聚度高之切片（樣本一）]{纖維微粒群集內聚度高之代表切片——樣本一（切片 S558-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
+  \caption[纖維微粒群集內聚度高之切片（樣本一）]{纖維微粒群集內聚度高之代表切片——樣本一（切片 S558-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-both-good}
 \end{figure}
 
@@ -1017,7 +1017,7 @@
     \label{fig:qual-dense-s2-ael}
   \end{subfigure}
 
-  \caption[纖維微粒群集內聚度高之切片（樣本二）]{纖維微粒群集內聚度高之代表切片——樣本二（切片 S487-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
+  \caption[纖維微粒群集內聚度高之切片（樣本二）]{纖維微粒群集內聚度高之代表切片——樣本二（切片 S487-2\_a）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-dense-s2}
 \end{figure}
 
@@ -1056,7 +1056,7 @@
     \label{fig:qual-ael-wins-ael}
   \end{subfigure}
 
-  \caption[纖維微粒密集但內聚性低之切片（樣本一）]{纖維微粒密集但內聚性低之代表切片——樣本一（切片 S1196-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
+  \caption[纖維微粒密集但內聚性低之切片（樣本一）]{纖維微粒密集但內聚性低之代表切片——樣本一（切片 S1196-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-ael-wins}
 \end{figure}
 
@@ -1095,7 +1095,7 @@
     \label{fig:qual-sparse-s2-ael}
   \end{subfigure}
 
-  \caption[纖維微粒密集但內聚性低之切片（樣本二）]{纖維微粒密集但內聚性低之代表切片——樣本二（切片 S1571-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
+  \caption[纖維微粒密集但內聚性低之切片（樣本二）]{纖維微粒密集但內聚性低之代表切片——樣本二（切片 S1571-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-sparse-s2}
 \end{figure}
 
@@ -1138,7 +1138,7 @@
   \label{fig:qual-sparse-s3}
 \end{figure}
 
-\paragraph{染色品質不佳之切片：} 本類別針對\textbf{染色品質不佳}之切片——無論是局部過度染色之飽和亮塊、或染色瀰漫不勻所形成之塊狀亮區，皆會形成與真實纖維亮度相近之非纖維結構，使該區之纖維線索\textbf{失去鑑別度}。此時兩種方法皆受限，重建普遍出現\textbf{多斷點、小段紅色多餘與綠色漏連}，整體拓樸品質明顯低於前兩類；惟 AEL 受成本走廊約束、較不易被塊狀結構大幅帶偏，指標上仍優於 MSF（程度因切片而異）。本類別選取兩張代表性切片分別說明。\textbf{樣本一}（切片 S1585-2\_b）：此切片之問題源於局部\textbf{強烈染色之飽和亮帶}，如圖~\ref{fig:qual-both-bad} 所示。區域 a 有一道飽和亮帶緊鄰纖維：MSF 之端點對最短路徑被此飽和亮帶吸引而\textbf{繞道}，補出大幅偏離 $S_{\text{gt}}$ 之路徑，疊合圖上留下大量紅色多餘段；AEL 之成本走廊擴張雖未發生同等程度之繞道，卻因走廊遭亮結構截斷而使重建\textbf{破碎}為數段，疊合圖上則表現為多處 $S_{\text{gt}}$ 未被連及之綠色漏連段。區域 b 兩法雖能大致追出主幹網路，仍沿線散見紅綠誤差，重建皆與 $S_{\text{gt}}$ 有可見落差。此切片兩法之誤差形態雖異（繞道對破碎），三項指標卻「皆差且接近」——$\text{Dice}_{\text{cl}}$ 為 $87.38\%$（MSF）對 $87.42\%$（AEL）幾乎無差、HD95 自 $5.2771$ 降至 $4.6592\,\mu\text{m}$（$-12\%$）、$\text{HD}_{\text{avg}}$ 自 $1.2482$ 降至 $1.2324\,\mu\text{m}$（$-1\%$），AEL 雖微幅優於 MSF，但改善幅度遠小於前兩類。
+\paragraph{染色品質不佳之切片：} 本類別針對\textbf{染色品質不佳}之切片——無論是局部過度染色之飽和亮塊、或染色瀰漫不勻所形成之塊狀亮區，皆會形成與真實纖維亮度相近之非纖維結構，使該區之纖維線索\textbf{失去鑑別度}。此時兩種方法皆受限，重建普遍出現\textbf{多斷點、小段紅色多餘與綠色漏連}，整體拓樸品質明顯低於前兩類；惟 AEL 受成本走廊約束、較不易被塊狀結構大幅帶偏，指標上仍優於 MSF（程度因切片而異）。本類別選取兩張代表性切片分別說明。\textbf{樣本一}（切片 S1585-2\_b）：此切片之問題源於局部\textbf{強烈染色之飽和亮帶}，如圖~\ref{fig:qual-both-bad} 所示。區域 a 有一道飽和亮帶緊鄰纖維：MSF 之端點對最短路徑被此飽和亮帶吸引而\textbf{繞道}，補出大幅偏離 $S_{\text{gt}}$ 之路徑，疊合圖上留下大量紅色多餘段；AEL 之成本走廊擴張雖未發生同等程度之繞道，卻因走廊遭亮結構截斷而使重建\textbf{破碎}為數段，疊合圖上則表現為多處 $S_{\text{gt}}$ 未被連及之綠色漏連段。區域 b 兩法雖能大致重建出主幹網路，仍沿線散見紅綠誤差，重建皆與 $S_{\text{gt}}$ 有可見落差。此切片兩法之誤差形態雖異（繞道對破碎），三項指標卻「皆差且接近」——$\text{Dice}_{\text{cl}}$ 為 $87.38\%$（MSF）對 $87.42\%$（AEL）幾乎無差、HD95 自 $5.2771$ 降至 $4.6592\,\mu\text{m}$（$-12\%$）、$\text{HD}_{\text{avg}}$ 自 $1.2482$ 降至 $1.2324\,\mu\text{m}$（$-1\%$），AEL 雖微幅優於 MSF，但改善幅度遠小於前兩類。
 
 \begin{figure}[htbp]
   \centering
@@ -1173,7 +1173,7 @@
     \label{fig:qual-both-bad-ael}
   \end{subfigure}
 
-  \caption[染色品質不佳之切片（樣本一）]{染色品質不佳之代表切片——樣本一（切片 S1585-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域，依由左至右記為區域 a 與區域 b。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
+  \caption[染色品質不佳之切片（樣本一）]{染色品質不佳之代表切片——樣本一（切片 S1585-2\_b）。(a) 綠色通道之全切片影像，紅框標示兩處放大區域。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-both-bad}
 \end{figure}
 
@@ -1212,7 +1212,7 @@
     \label{fig:qual-poor-s2-ael}
   \end{subfigure}
 
-  \caption[染色品質不佳之切片（樣本二）]{染色品質不佳之代表切片——樣本二（切片 S2745-2\_a）。(a) 綠色通道之全切片影像，紅框與標號 a、b 標示兩處放大區域（區域 a 位於中段、區域 b 位於左側）。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
+  \caption[染色品質不佳之切片（樣本二）]{染色品質不佳之代表切片——樣本二（切片 S2745-2\_a）。(a) 綠色通道之全切片影像，紅框與標號 a、b 標示兩處放大區域。(b)--(d) 局部放大對照，上下兩列分別為區域 a（上）與區域 b（下）；三欄由左至右依序為 (b) 綠色通道影像、(c) MSF 重建結果、(d) AEL 重建結果。}
   \label{fig:qual-poor-s2}
 \end{figure}
 
