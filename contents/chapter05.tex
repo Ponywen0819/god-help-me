@@ -226,9 +226,9 @@
       & $\text{offset}$                & 感興趣區域向下膨脹之圓形結構元半徑        & $50\,\text{像素}$ \\
       & $r_{\text{bg}}$                & 白色頂帽結構元半徑                 & $2\,\text{像素}$ \\
       & $n_{\text{tile}}$              & CLAHE 之方塊尺度                 & $768\,\text{像素}$ \\
-      & $\beta$                        & CLAHE 之對比裁剪閾值              & $30$ \\
+      & $\beta$                        & CLAHE 之對比裁剪閾值              & $40$ \\
       & $\sigma_{\min}$                & Sato 多尺度之最小尺度 (像素)       & $1\,\text{像素}$ \\
-      & $\sigma_{\max}$                & Sato 多尺度之最大尺度 (像素)       & $4\,\text{像素}$ \\
+      & $\sigma_{\max}$                & Sato 多尺度之最大尺度 (像素)       & $3\,\text{像素}$ \\
     \midrule
     \multirow{3}{*}{元件層圖與骨架化}
       & $\tau$                         & 元件層圖之邊裁剪閾值              & $20$ \\
@@ -242,11 +242,11 @@
   \end{tabular}
 \end{table}
 
-\paragraph{白色頂帽結構元尺寸 $r_{\text{bg}}$：} $r_{\text{bg}}$ 為白色頂帽運算所用圓盤形結構元半徑，用以估計並扣除慢變背景。表~\ref{tab:param-bg} 顯示：完全不做背景去除（$r_{\text{bg}} = 0$）或結構元過小（$r_{\text{bg}} = 1$）時，$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 皆顯著劣於預設（$p < 0.001$），印證背景去除對重建品質之必要性；值得注意的是，$r_{\text{bg}} = 0$ 之劣化於 HD95 並未偵出（$p = 0.24$），$\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$ 則明確標記為顯著，可見 $\text{HD}_{\text{avg}}$ 確能捕捉 HD95 所忽略之整體性輕微劣化（至 $r_{\text{bg}} = 1$ 時 HD95 始達 $p < 0.05$）。而 $r_{\text{bg}} \ge 3$ 之較大取值，三項指標相對於預設之絕對變動皆極小，且於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項上與預設之差異\textbf{皆未達顯著}（所有 $p > 0.16$）。此一權衡於圖~\ref{fig:bg-remove} 之視覺化中清晰可見：結構元越小，慢變背景固然抑制得越徹底，但纖維本身之響應亦隨之被削弱、甚至斷裂成零碎線段（$r_{\text{bg}} = 1$ 尤為明顯）；結構元越大則纖維保留得越完整，但殘餘背景亦逐漸浮現。預設 $r_{\text{bg}} = 2$ 即取此二者之折衷，於 $\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$ 上皆取得全表最佳值（$\text{HD}_{\text{avg}}$ $= 0.7355\,\mu\text{m}$、$\text{Dice}_{\text{cl}}$ $= 90.53\%$；HD95 雖於 $r_{\text{bg}} = 4$ 略低，惟差異未達顯著），在充分抑制背景之同時保留連續而清晰之纖維。
+\paragraph{白色頂帽結構元尺寸 $r_{\text{bg}}$：} $r_{\text{bg}}$ 為白色頂帽運算所用圓盤形結構元半徑，用以估計並扣除慢變背景。表~\ref{tab:param-bg} 顯示：完全不做背景去除（$r_{\text{bg}} = 0$）或結構元過小（$r_{\text{bg}} = 1$）時，$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 皆顯著劣於預設（$p < 0.001$），印證背景去除對重建品質之必要性；值得注意的是，$r_{\text{bg}} = 0$ 之劣化於 HD95 僅呈邊際而未達顯著（$p = 0.083$），$\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$ 則明確標記為高度顯著（$p < 0.001$），可見 $\text{HD}_{\text{avg}}$ 確能捕捉 HD95 所忽略之整體性輕微劣化（至 $r_{\text{bg}} = 1$ 時 HD95 始達 $p < 0.05$）。而 $r_{\text{bg}} \ge 3$ 之較大取值，三項指標相對於預設之絕對變動皆極小：$r_{\text{bg}} = 3, 4$ 於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項上與預設之差異\textbf{皆未達顯著}（所有 $p > 0.1$），$r_{\text{bg}} = 5$ 亦僅 $\text{HD}_{\text{avg}}$ 達邊際顯著（$p = 0.027$）、$\text{Dice}_{\text{cl}}$ 與 HD95 則未達顯著。此一權衡於圖~\ref{fig:bg-remove} 之視覺化中清晰可見：結構元越小，慢變背景固然抑制得越徹底，但纖維本身之響應亦隨之被削弱、甚至斷裂成零碎線段（$r_{\text{bg}} = 1$ 尤為明顯）；結構元越大則纖維保留得越完整，但殘餘背景亦逐漸浮現。預設 $r_{\text{bg}} = 2$ 即取此二者之折衷，於三項指標上皆取得全表最佳值（$\text{Dice}_{\text{cl}}$ $= 90.57\%$、HD95 $= 2.4496\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $= 0.7340\,\mu\text{m}$），在充分抑制背景之同時保留連續而清晰之纖維。
 
 \begin{table}[htbp]
   \centering
-  \caption{白色頂帽結構元尺寸 $r_{\text{bg}}$ 之擾動結果。}
+  \caption{白色頂帽結構元尺寸 $r_{\text{bg}}$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
   \label{tab:param-bg}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -254,12 +254,12 @@
     \toprule
     $r_{\text{bg}}$ & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    $0$  & 90.30 & $<\!0.001$** & 2.4691 & 0.239   & 0.7460 & $<\!0.001$** \\
-    $1$  & 90.32 & $<\!0.001$** & 2.4973 & 0.012*  & 0.7450 & $<\!0.001$** \\
-    \textbf{$2$} & \textbf{90.53} & --- & \textbf{2.4512} & --- & \textbf{0.7355} & --- \\
-    $3$  & 90.46 & 0.192        & 2.4503 & 0.419   & 0.7402 & 0.167 \\
-    $4$  & 90.50 & 0.425        & 2.4319 & 0.791   & 0.7377 & 0.321 \\
-    $5$  & 90.47 & 0.196        & 2.4391 & 0.613   & 0.7388 & 0.191 \\
+    $0$  & 90.34 $\pm$ 4.13 & $<\!0.001$** & 2.4875 $\pm$ 1.0727 & 0.083  & 0.7416 $\pm$ 0.2179 & $<\!0.001$** \\
+    $1$  & 90.36 $\pm$ 3.94 & $<\!0.001$** & 2.4978 $\pm$ 0.9166 & 0.024* & 0.7436 $\pm$ 0.2161 & $<\!0.001$** \\
+    \textbf{2} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
+    $3$  & 90.50 $\pm$ 4.18 & 0.198 & 2.4576 $\pm$ 1.0217 & 0.334 & 0.7391 $\pm$ 0.2260 & 0.135 \\
+    $4$  & 90.52 $\pm$ 4.31 & 0.230 & 2.4660 $\pm$ 1.0750 & 0.235 & 0.7371 $\pm$ 0.2267 & 0.101 \\
+    $5$  & 90.46 $\pm$ 4.40 & 0.091 & 2.4814 $\pm$ 1.0704 & 0.075 & 0.7389 $\pm$ 0.2288 & 0.027* \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -268,17 +268,17 @@
   \centering
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{viz_bg_remove_r0.png}
+    \includegraphics[width=\linewidth]{figures/param/bg/viz_bg_remove_r0.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{viz_bg_remove_r3.png}
+    \includegraphics[width=\linewidth]{figures/param/bg/viz_bg_remove_r3.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{viz_bg_remove_r5.png}
+    \includegraphics[width=\linewidth]{figures/param/bg/viz_bg_remove_r5.png}
     \caption{}
   \end{subfigure}
 
@@ -286,17 +286,17 @@
 
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{viz_bg_remove_r7.png}
+    \includegraphics[width=\linewidth]{figures/param/bg/viz_bg_remove_r7.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{viz_bg_remove_r9.png}
+    \includegraphics[width=\linewidth]{figures/param/bg/viz_bg_remove_r9.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{viz_bg_remove_r11.png}
+    \includegraphics[width=\linewidth]{figures/param/bg/viz_bg_remove_r11.png}
     \caption{}
   \end{subfigure}
 
@@ -304,11 +304,11 @@
   \label{fig:bg-remove}
 \end{figure}
 
-\paragraph{CLAHE 對比裁剪閾值 $\beta$：} $\beta$ 限制 CLAHE 直方圖之裁剪高度，即局部對比強化之上限。由表~\ref{tab:param-clip}：閾值偏低時對比強化不足，纖維與背景未充分分離——$\beta = 10$ 於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標皆顯著劣於預設，$\beta = 20$ 亦於三項上顯著較差（$\text{Dice}_{\text{cl}}$ $p < 0.001$、HD95 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.05$）。$\beta \ge 30$ 後增益趨於飽和：$\beta = 30, 40, 50$ 三者之三項指標彼此無顯著差異（所有 $p > 0.4$），$\text{Dice}_{\text{cl}}$ 停於約 $90.5\%$ 之平台。$\beta = 40$ 雖於三項指標上較預設略佳，惟差異皆未達顯著；故選擇 $\beta = 30$ 作為達到此飽和平台之最小裁剪閾值。此一飽和現象於圖~\ref{fig:clahe-clip} 之差值視覺化中亦清晰可見：圖中以基準 $\beta = 30$ 之輸出為參照，$\beta < 30$（$\beta = 10, 20$）時差值為負且集中於纖維本身，顯示對比強化不足、纖維訊號連同背景一併被壓低，與表~\ref{tab:param-clip} 中此二取值顯著較差相互呼應；$\beta > 30$（$\beta = 40, 50$）時差值雖仍存在，卻不再集中於纖維、而是逐漸擴散至背景，意即額外之對比強化已無助於纖維--背景之分離，正對應指標於 $\beta \ge 30$ 之飽和平台。
+\paragraph{CLAHE 對比裁剪閾值 $\beta$：} $\beta$ 限制 CLAHE 直方圖之裁剪高度，即局部對比強化之上限。由表~\ref{tab:param-clip}：裁剪閾值偏低（$\beta = 30, 35$）時對比強化略顯不足，$\text{Dice}_{\text{cl}}$ 顯著劣於預設（$\beta = 30$、$\beta = 35$ 皆 $p < 0.01$，$\beta = 35$ 於 HD95、$\text{HD}_{\text{avg}}$ 亦達顯著），惟絕對差距極小（$\text{Dice}_{\text{cl}}$ 僅約 $0.03$--$0.04$ 百分點）。$\beta \ge 40$ 後增益趨於飽和：$\beta = 45, 50, 55$ 之三項指標與預設皆無顯著差異（所有 $p > 0.05$），$\text{Dice}_{\text{cl}}$ 停於約 $90.55\%$ 之平台。預設 $\beta = 40$ 於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標上皆取得全表最佳值（$\text{Dice}_{\text{cl}}$ $= 90.57\%$、HD95 $= 2.4496\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $= 0.7340\,\mu\text{m}$），為達到此飽和平台之最小裁剪閾值。各 $\beta$ 之 CLAHE 原始輸出見圖~\ref{fig:clahe-clip-raw}，其相對白色頂帽去背景影像 $I_{\text{th}}$ 之對比增益（差值）則見圖~\ref{fig:clahe-clip-diff}：$\beta$ 偏低（$\beta = 30, 35$）時纖維處之對比增益明顯偏弱，與表~\ref{tab:param-clip} 中此二取值顯著較差相互呼應；$\beta$ 增大後纖維處之增益逐漸飽和，額外之強化轉而擴及背景而無助於纖維--背景之分離，正對應指標於 $\beta \ge 40$ 之飽和平台。
 
 \begin{table}[htbp]
   \centering
-  \caption{CLAHE 對比裁剪閾值 $\beta$ 之擾動結果。}
+  \caption{CLAHE 對比裁剪閾值 $\beta$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
   \label{tab:param-clip}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -316,11 +316,12 @@
     \toprule
     $\beta$ & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    $10$ & 90.29 & $<\!0.001$** & 2.5144 & 0.001** & 0.7420 & $<\!0.001$** \\
-    $20$ & 90.44 & $<\!0.001$** & 2.4770 & 0.040*  & 0.7375 & 0.018* \\
-    \textbf{$30$} & \textbf{90.53} & --- & \textbf{2.4512} & --- & \textbf{0.7355} & --- \\
-    $40$ & 90.57 & 0.990        & 2.4496 & 0.632  & 0.7340 & 0.938 \\
-    $50$ & 90.55 & 0.942        & 2.4661 & 0.462  & 0.7343 & 0.887 \\
+    $30$ & 90.53 $\pm$ 3.98 & 0.010** & 2.4512 $\pm$ 0.9113 & 0.368  & 0.7355 $\pm$ 0.2180 & 0.062 \\
+    $35$ & 90.54 $\pm$ 4.02 & 0.002** & 2.4496 $\pm$ 0.9182 & 0.015* & 0.7342 $\pm$ 0.2191 & 0.007** \\
+    \textbf{40} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
+    $45$ & 90.56 $\pm$ 4.13 & 0.647 & 2.4537 $\pm$ 0.9929 & 0.455 & 0.7342 $\pm$ 0.2231 & 0.439 \\
+    $50$ & 90.55 $\pm$ 4.14 & 0.712 & 2.4661 $\pm$ 1.0255 & 0.154 & 0.7343 $\pm$ 0.2233 & 0.661 \\
+    $55$ & 90.56 $\pm$ 4.14 & 0.806 & 2.4868 $\pm$ 1.0413 & 0.055 & 0.7341 $\pm$ 0.2224 & 0.758 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -329,17 +330,17 @@
   \centering
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_clip_b10_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b30.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_clip_b20_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b35.png}
     \caption{}
   \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.28\linewidth}
+  \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_clip_b30.png}
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b40.png}
     \caption{}
   \end{subfigure}
 
@@ -347,24 +348,69 @@
 
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_clip_b40_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b45.png}
     \caption{}
-  \end{subfigure}\hspace{0.02\linewidth}
+  \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_clip_b50_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b50.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b55.png}
     \caption{}
   \end{subfigure}
 
-  \caption[CLAHE 對比裁剪閾值 $\beta$ 之差值視覺化]{各 $\beta$ 之 CLAHE 輸出相對基準 $\beta = 30$ 之差值（同一局部區域，色階一致）。(a)--(e) 分別對應 $\beta = 10, 20, 30, 40, 50$，其中 (c) $\beta = 30$ 為基準之原始輸出、其餘為相對 (c) 之差值。}
-  \label{fig:clahe-clip}
+  \caption[CLAHE 對比裁剪閾值 $\beta$ 之原始輸出]{各 $\beta$ 之 CLAHE 原始輸出。(a)--(f) 分別對應 $\beta = 30, 35, 40, 45, 50, 55$，其中 (c) $\beta = 40$ 為預設值。}
+  \label{fig:clahe-clip-raw}
 \end{figure}
 
-\paragraph{CLAHE 方塊尺度 $n_{\text{tile}}$：} $n_{\text{tile}}$ 決定 CLAHE 局部對比均衡之方塊大小。表~\ref{tab:param-grid} 顯示預設 $n_{\text{tile}} = 768$ 於 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 兩項指標上皆為全表最佳（HD95 於 $n_{\text{tile}} = 704$ 略低，惟差異未達顯著，$p = 0.20$）；鄰近取值雖部分達顯著（$p < 0.05$），但其絕對差距均極小——$\text{Dice}_{\text{cl}}$ 變動不超過 $0.05$ 百分點、HD95 僅約 $0.01$--$0.02\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $< 0.005\,\mu\text{m}$。顯示此參數對最終品質之影響雖可由統計檢定偵出，實務上之差異卻極小，此於圖~\ref{fig:clahe-grid} 之差值視覺化中亦可印證：方塊偏小（$n_{\text{tile}} = 704$）主要減低纖維之響應，方塊偏大（$n_{\text{tile}} = 832$）雖增強纖維響應卻同時增加背景雜訊，惟二者幅度俱小。
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b30_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b35_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b40_diff.png}
+    \caption{}
+  \end{subfigure}
+
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b45_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b50_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_clip/viz_clahe_clip_b55_diff.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[CLAHE 對比裁剪閾值 $\beta$ 之差值視覺化]{各 $\beta$ 之 CLAHE 輸出相對白色頂帽去背景影像 $I_{\text{th}}$ 之差值。(a)--(f) 分別對應 $\beta = 30, 35, 40, 45, 50, 55$。}
+  \label{fig:clahe-clip-diff}
+\end{figure}
+
+\paragraph{CLAHE 方塊尺度 $n_{\text{tile}}$：} $n_{\text{tile}}$ 決定 CLAHE 局部對比均衡之方塊大小。表~\ref{tab:param-grid} 顯示此參數於所掃描範圍內對重建品質之絕對影響均小——各取值之 $\text{Dice}_{\text{cl}}$ 變動不超過 $0.07$ 百分點、HD95 不及 $0.02\,\mu\text{m}$、$\text{HD}_{\text{avg}}$ $< 0.005\,\mu\text{m}$。預設 $n_{\text{tile}} = 768$ 於 $\text{Dice}_{\text{cl}}$ 與 HD95 兩項皆為全表最佳（$90.57\%$、$2.4496\,\mu\text{m}$），$\text{HD}_{\text{avg}}$ 亦為次低（$0.7340\,\mu\text{m}$，僅較最低之 $n_{\text{tile}} = 832$ 高 $0.0002\,\mu\text{m}$，差異未達顯著）。方塊過小時品質明顯下降：最小之 $n_{\text{tile}} = 672$ 於三項指標上皆顯著劣於預設（$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.001$、HD95 達 $p < 0.05$）；$n_{\text{tile}} = 704$ 及高端之 $n_{\text{tile}} = 832$ 則僅於 $\text{Dice}_{\text{cl}}$ 顯著略低於預設（$p < 0.05$，絕對降幅約 $0.03$--$0.05$ 百分點），於 HD95 與 $\text{HD}_{\text{avg}}$ 未達顯著；介於其間之 $n_{\text{tile}} = 736, 800$ 於三項指標上與預設皆無顯著差異。顯示除方塊過小之極端外，此參數對最終品質之影響雖可由統計檢定偵出，實務上之差異卻極小，此於圖~\ref{fig:clahe-grid-raw} 之原始輸出與圖~\ref{fig:clahe-grid-diff} 之差值視覺化中亦可印證：$n_{\text{tile}} = 704$ 至 $832$ 之差值圖彼此十分相近，纖維走廊之強化幾無肉眼可辨之差異，與表中此區間三項指標相近且多未達顯著之表現一致；唯獨方塊過小之 $n_{\text{tile}} = 672$ 明顯不同——其增益更為瀰漫，纖維周邊與背景出現較多被一併放大之雜訊，正對應其於表中三項指標皆顯著劣化。
 
 \begin{table}[htbp]
   \centering
-  \caption{CLAHE 方塊尺度 $n_{\text{tile}}$ 之擾動結果。}
+  \caption{CLAHE 方塊尺度 $n_{\text{tile}}$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
   \label{tab:param-grid}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -372,11 +418,12 @@
     \toprule
     $n_{\text{tile}}$ & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    $704$ & 90.48 & 0.004** & 2.4492 & 0.197   & 0.7397 & 0.011*  \\
-    $736$ & 90.52 & 0.084   & 2.4534 & 0.057   & 0.7360 & 0.041*  \\
-    \textbf{$768$} & \textbf{90.53} & --- & \textbf{2.4512} & --- & \textbf{0.7355} & --- \\
-    $800$ & 90.51 & 0.276   & 2.4668 & 0.004** & 0.7357 & 0.709 \\
-    $832$ & 90.48 & 0.006** & 2.4659 & 0.023*  & 0.7356 & 0.153 \\
+    $672$ & 90.50 $\pm$ 4.05 & $<\!0.001$** & 2.4665 $\pm$ 0.9615 & 0.022* & 0.7385 $\pm$ 0.2221 & $<\!0.001$** \\
+    $704$ & 90.52 $\pm$ 4.08 & 0.042* & 2.4567 $\pm$ 0.9837 & 0.251 & 0.7376 $\pm$ 0.2230 & 0.068 \\
+    $736$ & 90.56 $\pm$ 4.05 & 0.274 & 2.4501 $\pm$ 0.9702 & 0.743 & 0.7341 $\pm$ 0.2211 & 0.307 \\
+    \textbf{$768$} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
+    $800$ & 90.56 $\pm$ 4.04 & 0.385 & 2.4511 $\pm$ 0.9372 & 0.297 & 0.7344 $\pm$ 0.2186 & 0.647 \\
+    $832$ & 90.54 $\pm$ 4.06 & 0.014* & 2.4539 $\pm$ 0.9425 & 0.079 & 0.7338 $\pm$ 0.2193 & 0.363 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -385,29 +432,87 @@
   \centering
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_grid_n704_diff.png}
-    \caption{}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.28\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_grid_n768.png}
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n672.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_clahe_grid_n832_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n704.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n736.png}
     \caption{}
   \end{subfigure}
 
-  \caption[CLAHE 方塊尺度 $n_{\text{tile}}$ 之差值視覺化]{各 $n_{\text{tile}}$ 之 CLAHE 輸出相對基準 $n_{\text{tile}} = 768$ 之差值（同一局部區域，色階一致）。(a)--(c) 分別對應 $n_{\text{tile}} = 704, 768, 832$，其中 (b) $n_{\text{tile}} = 768$ 為基準之原始輸出、其餘為相對 (b) 之差值。}
-  \label{fig:clahe-grid}
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n768.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n800.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n832.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[CLAHE 方塊尺度 $n_{\text{tile}}$ 之原始輸出]{各 $n_{\text{tile}}$ 之 CLAHE 原始輸出（灰階，同一局部區域）。(a)--(f) 分別對應 $n_{\text{tile}} = 672, 704, 736, 768, 800, 832$，其中 (d) $n_{\text{tile}} = 768$ 為預設值。}
+  \label{fig:clahe-grid-raw}
 \end{figure}
 
-\paragraph{Sato 最大尺度 $\sigma_{\max}$：} $\sigma_{\max}$ 對應可被強化之最粗纖維尺度（固定 $\sigma_{\min} = 1$）。由表~\ref{tab:param-sstop}：HD95 於所變動範圍內對 $\sigma_{\max}$ 並不敏感，各取值之差異皆未達顯著（$p > 0.05$）；$\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$ 則於上界過小（$\sigma_{\max} = 2$，粗纖維響應不足）與上界過大（$\sigma_{\max} = 6$，鄰近纖維之響應彼此暈染）兩端皆顯著劣於預設，呈 U 形劣化（$\sigma_{\max} = 5$ 亦於 $\text{HD}_{\text{avg}}$ 達邊際顯著 $p < 0.05$）；$\sigma_{\max} = 3$ 則於 $\text{Dice}_{\text{cl}}$ 與預設並列（$90.53\%$）、$\text{HD}_{\text{avg}}$ 亦無顯著差異。整體而言，預設 $\sigma_{\max} = 4$ 於 HD95 與 $\text{HD}_{\text{avg}}$ 皆為全表最低、於 $\text{Dice}_{\text{cl}}$ 為（與 $\sigma_{\max} = 3$ 並列之）最高，兼顧粗纖維涵蓋與走廊銳利度；此 U 形劣化於圖~\ref{fig:sato-smax} 之差值視覺化中亦清晰可見：圖中以基準 $\sigma_{\max} = 4$ 之響應為參照，$\sigma_{\max} = 2$ 時上界過小，差值集中於纖維且為負，意即較粗之神經纖維響應不足、被一併消減；$\sigma_{\max} = 6$ 時上界過大，差值轉為正且向纖維周邊外溢，反映鄰近纖維之響應彼此暈染、走廊邊界趨於模糊；二者皆對應表~\ref{tab:param-sstop} 中兩端之顯著劣化，而 $\sigma_{\max} = 3, 5$ 之差值則相對輕微，與其指標貼近預設一致。
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n672_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n704_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n736_diff.png}
+    \caption{}
+  \end{subfigure}
+
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n768_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n800_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/clahe_grid/viz_clahe_grid_n832_diff.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[CLAHE 方塊尺度 $n_{\text{tile}}$ 之差值視覺化]{各 $n_{\text{tile}}$ 之 CLAHE 輸出相對白色頂帽去背景影像 $I_{\text{th}}$ 之差值（magma 色階，同一局部區域，各子圖標註其對應色標）。(a)--(f) 分別對應 $n_{\text{tile}} = 672, 704, 736, 768, 800, 832$。}
+  \label{fig:clahe-grid-diff}
+\end{figure}
+
+\paragraph{Sato 最大尺度 $\sigma_{\max}$：} $\sigma_{\max}$ 對應可被強化之最粗纖維尺度（固定 $\sigma_{\min} = 1$）。由表~\ref{tab:param-sstop}：HD95 於所變動範圍內對 $\sigma_{\max}$ 並不敏感，各取值與預設之差異皆未達顯著（$p > 0.05$）；$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 則以預設 $\sigma_{\max} = 3$ 為全表最佳，且於上界過小（$\sigma_{\max} = 1$，粗纖維響應不足）與上界過大（$\sigma_{\max} = 4, 5$，鄰近纖維之響應彼此暈染）兩端皆顯著劣於預設，呈輕微之 U 形劣化（惟絕對差距極小，$\text{Dice}_{\text{cl}}$ 不及 $0.05$ 百分點、$\text{HD}_{\text{avg}}$ 不及 $0.002\,\mu\text{m}$）；其中僅最接近預設之 $\sigma_{\max} = 2$ 於 $\text{Dice}_{\text{cl}}$ 未達顯著差異。整體而言，預設 $\sigma_{\max} = 3$ 於 $\text{Dice}_{\text{cl}}$ 為全表最高、於 $\text{HD}_{\text{avg}}$ 為全表最低，兼顧粗纖維涵蓋與走廊銳利度。各 $\sigma_{\max}$ 之原始響應輸出見圖~\ref{fig:sato-smax}；其相對 CLAHE 強化輸入影像 $I_{\text{eq}}$ 之差值則見圖~\ref{fig:sato-smax-diff}，可清楚對照兩端劣化之成因：$\sigma_{\max}$ 較小時（如 $\sigma_{\max} = 1, 2$），差值主要侷限於纖維本身，反映濾波器僅對細尺度之纖維結構作出響應、增益侷限於纖維走廊之內；而隨 $\sigma_{\max}$ 增大至 $4, 5$，相鄰兩條纖維之間隙開始出現明顯之暈染——大尺度核同時涵蓋鄰近之兩條纖維，於其中間區域產生虛假之連續響應，使走廊邊界趨於模糊，正對應表中此區間 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 之顯著劣化。
 
 \begin{table}[htbp]
   \centering
-  \caption{Sato 最大尺度 $\sigma_{\max}$（$\sigma_{\min}$ 固定為 $1$）之擾動結果。}
+  \caption{Sato 最大尺度 $\sigma_{\max}$之擾動結果。}
   \label{tab:param-sstop}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -415,11 +520,11 @@
     \toprule
     $\sigma_{\max}$ & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    $2$ & 90.47 & 0.013*  & 2.4644 & 0.061 & 0.7376 & 0.003** \\
-    $3$ & 90.53 & 0.585   & 2.4520 & 0.251 & 0.7362 & 0.083 \\
-    \textbf{$4$} & \textbf{90.53} & --- & \textbf{2.4512} & --- & \textbf{0.7355} & --- \\
-    $5$ & 90.51 & 0.074   & 2.4535 & 0.164 & 0.7358 & 0.049* \\
-    $6$ & 90.49 & 0.004** & 2.4562 & 0.117 & 0.7362 & 0.008** \\
+    $1$ & 90.52 $\pm$ 4.05 & 0.006** & 2.4425 $\pm$ 0.9237 & 0.478 & 0.7359 $\pm$ 0.2181 & 0.028* \\
+    $2$ & 90.56 $\pm$ 4.07 & 0.074   & 2.4493 $\pm$ 0.9618 & 0.422 & 0.7349 $\pm$ 0.2211 & 0.031* \\
+    \textbf{$3$} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
+    $4$ & 90.54 $\pm$ 4.07 & 0.004** & 2.4546 $\pm$ 0.9816 & 0.115 & 0.7348 $\pm$ 0.2215 & 0.009** \\
+    $5$ & 90.53 $\pm$ 4.07 & $<\!0.001$** & 2.4557 $\pm$ 0.9679 & 0.163 & 0.7351 $\pm$ 0.2216 & 0.005** \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -428,17 +533,17 @@
   \centering
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s1_2_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_post_clahe.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s1_3_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_2.png}
     \caption{}
   \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.28\linewidth}
+  \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s1_4.png}
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_3.png}
     \caption{}
   \end{subfigure}
 
@@ -446,24 +551,64 @@
 
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s1_5_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_4.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_5.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_6.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[Sato 最大尺度 $\sigma_{\max}$ 之輸出]{Sato 濾波之輸入與各 $\sigma_{\max}$ 之原始響應輸出（$\sigma_{\min} = 1$，同一局部區域）。(a) 為 Sato 濾波前之 CLAHE 強化輸入影像；(b)--(f) 分別對應 $\sigma_{\max} = 1, 2, 3, 4, 5$ 之 Sato 原始響應輸出，其中 (d) $\sigma_{\max} = 3$ 為預設值。}
+  \label{fig:sato-smax}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_2_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_3_diff.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_4_diff.png}
+    \caption{}
+  \end{subfigure}
+
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_5_diff.png}
     \caption{}
   \end{subfigure}\hspace{0.02\linewidth}
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s1_6_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_6_diff.png}
     \caption{}
   \end{subfigure}
 
-  \caption[Sato 最大尺度 $\sigma_{\max}$ 之差值視覺化]{各 $\sigma_{\max}$ 之 Sato 濾波響應相對基準 $\sigma_{\max} = 4$（$\sigma_{\min} = 1$）之差值（同一局部區域，色階一致）。(a)--(e) 分別對應 $\sigma_{\max} = 2, 3, 4, 5, 6$，其中 (c) $\sigma_{\max} = 4$ 為基準之原始輸出、其餘為相對 (c) 之差值。}
-  \label{fig:sato-smax}
+  \caption[Sato 最大尺度 $\sigma_{\max}$ 之差值視覺化]{各 $\sigma_{\max}$ 之 Sato 響應相對 CLAHE 強化輸入影像 $I_{\text{eq}}$ 之差值（RdBu 發散色階，藍色為負、紅色為正；同一局部區域，各子圖採同一色階）。(a)--(e) 分別對應 $\sigma_{\max} = 1, 2, 3, 4, 5$，其中 (c) $\sigma_{\max} = 3$ 為預設值。}
+  \label{fig:sato-smax-diff}
 \end{figure}
 
-\paragraph{Sato 最小尺度 $\sigma_{\min}$：} $\sigma_{\min}$ 對應 Sato 濾波器所能強化之最細纖維尺度（掃描時固定 $\sigma_{\max} = 4$）。表~\ref{tab:param-sstart} 中 $\sigma_{\min}$ 自預設之 $1$ 增至 $2$、$3$ 時，HD95 之差異未達顯著、$\text{HD}_{\text{avg}}$ 僅於 $\sigma_{\min} = 3$ 邊際顯著（$p = 0.034$）；$\text{Dice}_{\text{cl}}$ 雖於統計上達顯著（$p < 0.01$），然絕對降幅僅 $0.05$--$0.09$ 百分點，實務尺度極小。三項指標皆以 $\sigma_{\min} = 1$ 為最佳，預設使最細之纖維亦能被偵出，此於圖~\ref{fig:sato-smin} 之差值視覺化中亦可印證：圖中以基準 $\sigma_{\min} = 1$ 之響應為參照，$\sigma_{\min}$ 自 $1$ 增至 $2$、$3$ 時，差值為負且集中於最細之纖維處，顯示提高最小尺度會使 Sato 濾波器漏掉最細之神經纖維、其響應隨之被捨棄；且 $\sigma_{\min} = 3$ 之負差值較 $\sigma_{\min} = 2$ 更廣，與表~\ref{tab:param-sstart} 中 $\text{Dice}_{\text{cl}}$ 隨 $\sigma_{\min}$ 增大而漸次顯著（惟絕對降幅極小）下降之趨勢一致。
+\paragraph{Sato 最小尺度 $\sigma_{\min}$：} $\sigma_{\min}$ 對應 Sato 濾波器所能強化之最細纖維尺度（掃描時固定 $\sigma_{\max} = 3$）。表~\ref{tab:param-sstart} 中 $\sigma_{\min}$ 自預設之 $1$ 增至 $2$ 時，三項指標與預設皆無顯著差異；增至 $3$ 時，$\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 始達顯著劣化（$p = 0.016$、$p = 0.009$），HD95 仍未達顯著。三項指標皆以 $\sigma_{\min} = 1$ 為最佳（HD95 雖於 $\sigma_{\min} = 2$ 略低，然差異未達顯著），預設使最細之纖維亦能被偵出，且絕對降幅極小（$\text{Dice}_{\text{cl}}$ 不及 $0.1$ 百分點）；各 $\sigma_{\min}$ 之原始響應輸出見圖~\ref{fig:sato-smin}。
 
 \begin{table}[htbp]
   \centering
-  \caption{Sato 最小尺度 $\sigma_{\min}$（$\sigma_{\max}$ 固定為 $4$）之擾動結果。}
+  \caption{Sato 最小尺度 $\sigma_{\min}$（$\sigma_{\max}$ 固定為 $3$）之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
   \label{tab:param-sstart}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -471,40 +616,48 @@
     \toprule
     $\sigma_{\min}$ & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    \textbf{$1$} & \textbf{90.53} & --- & \textbf{2.4512} & --- & \textbf{0.7355} & --- \\
-    $2$ & 90.48 & 0.008** & 2.4602 & 0.104 & 0.7379 & 0.218 \\
-    $3$ & 90.44 & 0.004** & 2.4530 & 0.110 & 0.7382 & 0.034* \\
+    \textbf{$1$} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
+    $2$ & 90.55 $\pm$ 4.03 & 0.328 & 2.4416 $\pm$ 0.9305 & 0.611 & 0.7352 $\pm$ 0.2184 & 0.831 \\
+    $3$ & 90.47 $\pm$ 4.12 & 0.016* & 2.4609 $\pm$ 0.9576 & 0.159 & 0.7375 $\pm$ 0.2217 & 0.009** \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}[b]{0.28\linewidth}
+  \begin{subfigure}[b]{0.42\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s1_4.png}
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_post_clahe.png}
     \caption{}
   \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.32\linewidth}
+  \begin{subfigure}[b]{0.42\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s2_4_diff.png}
-    \caption{}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.32\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/viz_sato_s3_4_diff.png}
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s1_4.png}
     \caption{}
   \end{subfigure}
 
-  \caption[Sato 最小尺度 $\sigma_{\min}$ 之差值視覺化]{各 $\sigma_{\min}$ 之 Sato 濾波響應相對基準 $\sigma_{\min} = 1$（$\sigma_{\max} = 4$）之差值（同一局部區域，色階一致）。(a)--(c) 分別對應 $\sigma_{\min} = 1, 2, 3$，其中 (a) $\sigma_{\min} = 1$ 為基準之原始輸出、其餘為相對 (a) 之差值。}
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.42\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s2_4.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.42\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/sato/viz_sato_s3_4.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[Sato 最小尺度 $\sigma_{\min}$ 之輸出]{Sato 濾波之輸入與各 $\sigma_{\min}$ 之原始響應輸出（$\sigma_{\max} = 3$，同一局部區域）。(a) 為 Sato 濾波前之 CLAHE 強化輸入影像；(b)--(d) 分別對應 $\sigma_{\min} = 1, 2, 3$ 之 Sato 原始響應輸出，其中 (b) $\sigma_{\min} = 1$ 為預設值。}
   \label{fig:sato-smin}
 \end{figure}
 
-\paragraph{邊裁剪閾值 $\tau$：} $\tau$ 為元件層圖之邊裁剪門檻，是七個參數中影響最劇者。表~\ref{tab:param-prune} 顯示三項指標皆隨 $\tau$ 偏離預設而呈明顯之 U 形劣化——$\text{Dice}_{\text{cl}}$ 自 $90.53\%$ 降至 $88.93\%$（$-1.60$ pp）、HD95 由 $\tau = 20$ 之 $2.45\,\mu\text{m}$ 於 $\tau = 50$ 時惡化至 $3.69\,\mu\text{m}$（$+51\%$）、$\text{HD}_{\text{avg}}$ 自 $0.74$ 上升至 $0.82\,\mu\text{m}$（$+12\%$）；所有非基準取值於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標上\textbf{皆達顯著差異}（除 $\tau = 30$ 之 $\text{HD}_{\text{avg}}$ 為 $p < 0.05$ 外，餘皆 $p < 0.01$，多數 $p < 0.001$）。$\tau$ 過小時連接真實纖維之邊亦被裁去、拓樸破碎，過大則高成本之偽連線重新被納入。預設 $\tau = 20$ 明確位於品質谷底。圖~\ref{fig:prune-tau} 以疊合視覺化對照此兩種失效模式：各列左行均為預設 $\tau = 20$，向右偏離預設後，上列於 $\tau = 10$ 因過度裁剪而將連接真實纖維之邊剪去、出現綠色缺失（拓樸破碎），下列於 $\tau = 30$ 則因高成本之偽連線重新被納入而出現紅色過度連接。
+\paragraph{邊裁剪閾值 $\tau$：} $\tau$ 為元件層圖之邊裁剪門檻，是七個參數中影響最劇者。表~\ref{tab:param-prune} 顯示三項指標皆隨 $\tau$ 偏離預設而呈明顯之 U 形劣化——$\text{Dice}_{\text{cl}}$ 自 $90.57\%$ 降至 $89.50\%$（$-1.07$ pp）、HD95 由 $\tau = 20$ 之 $2.45\,\mu\text{m}$ 於 $\tau = 40$ 時惡化至 $3.26\,\mu\text{m}$（$+33\%$）、$\text{HD}_{\text{avg}}$ 自 $0.73$ 上升至 $0.79\,\mu\text{m}$（$+8\%$）；除最靠近預設之 $\tau = 15$ 於 HD95 未達顯著外，其餘非基準取值於 $\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 三項指標上\textbf{皆達顯著差異}（$\tau = 15$ 之另二項僅 $p < 0.05$，其餘多達 $p < 0.01$，$\tau = 10, 30, 40$ 更達 $p < 0.001$）。$\tau$ 過小時連接真實纖維之邊亦被裁去、拓樸破碎，過大則高成本之偽連線重新被納入。預設 $\tau = 20$ 明確位於品質谷底。圖~\ref{fig:prune-tau} 以疊合視覺化呈現此兩種失效模式於整個 $\tau$ 掃描範圍之消長：$\tau$ 過小時（$\tau = 10, 15$）過度裁剪將連接真實纖維之邊一併剪去，出現大量綠色缺失（拓樸破碎）；$\tau = 20$ 時重建近乎全為黃色之正確連接；$\tau$ 過大時（$\tau = 25, 30, 40$）高成本之偽連線重新被納入，紅色過度連接隨之逐漸增多。預設 $\tau = 20$ 恰位於綠色缺失與紅色錯接之間之品質谷底。
 
 \begin{table}[htbp]
   \centering
-  \caption{邊裁剪閾值 $\tau$ 之擾動結果。}
+  \caption{邊裁剪閾值 $\tau$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
   \label{tab:param-prune}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -512,50 +665,61 @@
     \toprule
     $\tau$ & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    $10$ & 89.39 & $<\!0.001$** & 2.9869 & $<\!0.001$** & 0.7856 & $<\!0.001$** \\
-    \textbf{$20$} & \textbf{90.53} & --- & \textbf{2.4512} & --- & \textbf{0.7355} & --- \\
-    $30$ & 90.17 & $<\!0.001$** & 2.6637 & 0.002**      & 0.7494 & 0.011* \\
-    $40$ & 89.60 & $<\!0.001$** & 3.1242 & $<\!0.001$** & 0.7806 & $<\!0.001$** \\
-    $50$ & 88.93 & $<\!0.001$** & 3.6897 & $<\!0.001$** & 0.8206 & $<\!0.001$** \\
+    $10$ & 89.60 $\pm$ 3.85 & $<\!0.001$** & 2.8944 $\pm$ 1.2822 & $<\!0.001$** & 0.7767 $\pm$ 0.2220 & $<\!0.001$** \\
+    $15$ & 90.40 $\pm$ 3.85 & 0.017* & 2.5137 $\pm$ 0.9075 & 0.113 & 0.7387 $\pm$ 0.2099 & 0.015* \\
+    \textbf{$20$} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
+    $25$ & 90.41 $\pm$ 4.25 & 0.008** & 2.5489 $\pm$ 1.1149 & 0.005** & 0.7415 $\pm$ 0.2278 & 0.003** \\
+    $30$ & 90.18 $\pm$ 4.42 & $<\!0.001$** & 2.7215 $\pm$ 1.2330 & $<\!0.001$** & 0.7512 $\pm$ 0.2367 & 0.001** \\
+    $40$ & 89.50 $\pm$ 4.70 & $<\!0.001$** & 3.2579 $\pm$ 1.7062 & $<\!0.001$** & 0.7899 $\pm$ 0.2675 & $<\!0.001$** \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}[b]{0.46\linewidth}
+  \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_frag_t20.png}
+    \includegraphics[width=\linewidth]{figures/param/prune/viz_prune_overlay_frag_t10.png}
     \caption{}
   \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.46\linewidth}
+  \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_frag_t10.png}
+    \includegraphics[width=\linewidth]{figures/param/prune/viz_prune_overlay_frag_t15.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/prune/viz_prune_overlay_frag_t20.png}
     \caption{}
   \end{subfigure}
 
   \vspace{0.6em}
 
-  \begin{subfigure}[b]{0.46\linewidth}
+  \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_over_t20.png}
+    \includegraphics[width=\linewidth]{figures/param/prune/viz_prune_overlay_frag_t25.png}
     \caption{}
   \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.46\linewidth}
+  \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_prune_overlay_over_t30.png}
+    \includegraphics[width=\linewidth]{figures/param/prune/viz_prune_overlay_frag_t30.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/prune/viz_prune_overlay_frag_t40.png}
     \caption{}
   \end{subfigure}
 
-  \caption[邊裁剪閾值 $\tau$ 之疊合視覺化]{邊裁剪閾值 $\tau$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接）。左行均為預設 $\tau = 20$：上列 (a) $\tau = 20$、(b) $\tau = 10$；下列 (c) $\tau = 20$、(d) $\tau = 30$。}
+  \caption[邊裁剪閾值 $\tau$ 之疊合視覺化]{邊裁剪閾值 $\tau$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接；同一局部區域）。(a)--(f) 分別對應 $\tau = 10, 15, 20, 25, 30, 40$，其中 (c) $\tau = 20$ 為預設值。}
   \label{fig:prune-tau}
 \end{figure}
 
-\paragraph{短樁修剪長度 $\ell_{\min}$：} $\ell_{\min}$ 為骨架化後線段層之短樁修剪門檻——任一邊界節點為端點且總像素長度小於此值之線段即被移除（詳見第~\ref{subsec:stub-prune}~節）。表~\ref{tab:param-stub} 顯示預設 $\ell_{\min} = 3$ 於三項指標上皆為全表最佳。不執行短樁修剪（$\ell_{\min} = 0$）時，$\text{Dice}_{\text{cl}}$ 與 HD95 與預設無顯著差異，僅 $\text{HD}_{\text{avg}}$ 達邊際顯著劣化（$p = 0.038$）——可見資料中雖確有少量短樁，其影響主要反映於整體性之 $\text{HD}_{\text{avg}}$。而 $\ell_{\min}$ 偏大則明顯劣化三項指標：$\ell_{\min} = 5$ 即於 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.001$ 顯著（HD95 達 $p < 0.05$），$\ell_{\min} = 7, 9$ 更全面顯著惡化——HD95 由 $\ell_{\min} = 3$ 之 $2.4512\,\mu\text{m}$ 上升至 $\ell_{\min} = 9$ 之 $2.7766\,\mu\text{m}$（$+13\%$）、$\text{HD}_{\text{avg}}$ 由 $0.7355$ 上升至 $0.7930\,\mu\text{m}$（$+8\%$）、$\text{Dice}_{\text{cl}}$ 自 $90.53\%$ 降至 $89.46\%$（$-1.07$ pp），皆達 $p < 0.001$ 之顯著差異——其原因為過嚴之短樁修剪會誤刪真實之短分支，造成拓樸破碎。預設 $\ell_{\min} = 3$ 為「足以剪除離散化毛刺、又不至誤刪真實短段」之最佳取值。此一權衡於圖~\ref{fig:stub-prune} 之疊合視覺化中清晰可見：未修剪（$\ell_{\min} = 0$）時，骨架邊緣殘留若干以紅色標示之短樁，即離散化所生、未對應真實纖維之毛刺；預設 $\ell_{\min} = 3$ 恰將此類紅色短樁剪除，使重建近乎全為黃色之正確段；而過嚴之 $\ell_{\min} = 9$ 則連真實之短分支亦一併誤刪，於圖中轉為綠色之缺失段、造成拓樸破碎，正對應表中 $\ell_{\min} \ge 5$ 後三項指標之漸次顯著劣化。
+\paragraph{短樁修剪長度 $\ell_{\min}$：} $\ell_{\min}$ 為骨架化後線段層之短樁修剪門檻——任一邊界節點為端點且總像素長度小於此值之線段即被移除（詳見第~\ref{subsec:stub-prune}~節）。表~\ref{tab:param-stub} 顯示預設 $\ell_{\min} = 3$ 於三項指標上皆為全表最佳。不執行短樁修剪（$\ell_{\min} = 0$，與 $\ell_{\min} = 1$ 結果完全相同，因長度小於 $2$ 之短樁實際上不存在、二者皆未剪除任何線段）時，$\text{Dice}_{\text{cl}}$ 與預設無顯著差異，HD95 與 $\text{HD}_{\text{avg}}$ 則僅達輕微之顯著劣化（$p = 0.006$、$p = 0.041$）——可見資料中確有少量短樁，其影響主要反映於 HD 類距離指標。而 $\ell_{\min}$ 偏大則明顯劣化三項指標：$\ell_{\min} = 5$ 即於 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 達 $p < 0.001$ 顯著（HD95 達 $p < 0.01$），$\ell_{\min} = 7, 9$ 更全面顯著惡化——HD95 由 $\ell_{\min} = 3$ 之 $2.4496\,\mu\text{m}$ 上升至 $\ell_{\min} = 9$ 之 $2.7066\,\mu\text{m}$（$+10\%$）、$\text{HD}_{\text{avg}}$ 由 $0.7340$ 上升至 $0.7835\,\mu\text{m}$（$+7\%$）、$\text{Dice}_{\text{cl}}$ 自 $90.57\%$ 降至 $89.51\%$（$-1.06$ pp），皆達 $p < 0.001$ 之顯著差異——其原因為過嚴之短樁修剪會誤刪真實之短分支，造成拓樸破碎。預設 $\ell_{\min} = 3$ 為「足以剪除離散化毛刺、又不至誤刪真實短段」之最佳取值。此一權衡於圖~\ref{fig:stub-prune} 之疊合視覺化中清晰可見：未修剪（$\ell_{\min} = 0, 1$）時，骨架邊緣殘留若干以紅色標示之短樁，即離散化所生、未對應真實纖維之毛刺；預設 $\ell_{\min} = 3$ 恰將此類紅色短樁剪除，使重建近乎全為黃色之正確段；而 $\ell_{\min}$ 過大時（$\ell_{\min} = 5, 7, 9$）則連真實之短分支亦逐漸一併誤刪，於圖中轉為綠色之缺失段、造成拓樸破碎，且綠色缺失隨 $\ell_{\min}$ 增大而漸增，正對應表中 $\ell_{\min} \ge 5$ 後三項指標之漸次顯著劣化。
 
 \begin{table}[htbp]
   \centering
-  \caption{短樁修剪長度 $\ell_{\min}$ 之擾動結果。}
+  \caption{短樁修剪長度 $\ell_{\min}$ 之擾動結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
   \label{tab:param-stub}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -563,11 +727,12 @@
     \toprule
     $\ell_{\min}$ & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    $0$ & 90.52 & 0.115        & 2.4622 & 0.170        & 0.7373 & 0.038* \\
-    \textbf{$3$} & \textbf{90.53} & --- & \textbf{2.4512} & --- & \textbf{0.7355} & --- \\
-    $5$ & 90.42 & $<\!0.001$** & 2.4705 & 0.014*       & 0.7396 & $<\!0.001$** \\
-    $7$ & 90.04 & $<\!0.001$** & 2.5717 & $<\!0.001$** & 0.7628 & $<\!0.001$** \\
-    $9$ & 89.46 & $<\!0.001$** & 2.7766 & $<\!0.001$** & 0.7930 & $<\!0.001$** \\
+    $0$ & 90.56 $\pm$ 4.04 & 0.076 & 2.4707 $\pm$ 0.9795 & 0.006** & 0.7357 $\pm$ 0.2212 & 0.041* \\
+    $1$ & 90.56 $\pm$ 4.04 & 0.076 & 2.4707 $\pm$ 0.9795 & 0.006** & 0.7357 $\pm$ 0.2212 & 0.041* \\
+    \textbf{$3$} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
+    $5$ & 90.46 $\pm$ 4.05 & $<\!0.001$** & 2.4739 $\pm$ 0.9872 & 0.005** & 0.7379 $\pm$ 0.2219 & $<\!0.001$** \\
+    $7$ & 90.09 $\pm$ 4.06 & $<\!0.001$** & 2.5564 $\pm$ 1.0064 & $<\!0.001$** & 0.7545 $\pm$ 0.2292 & $<\!0.001$** \\
+    $9$ & 89.51 $\pm$ 4.13 & $<\!0.001$** & 2.7066 $\pm$ 1.0666 & $<\!0.001$** & 0.7835 $\pm$ 0.2431 & $<\!0.001$** \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -576,25 +741,43 @@
   \centering
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_stub_t0.png}
+    \includegraphics[width=\linewidth]{figures/param/stub/viz_stub_t0.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_stub_t3.png}
+    \includegraphics[width=\linewidth]{figures/param/stub/viz_stub_t1.png}
     \caption{}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.32\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{figures/viz_stub_t9.png}
+    \includegraphics[width=\linewidth]{figures/param/stub/viz_stub_t3.png}
     \caption{}
   \end{subfigure}
 
-  \caption[短樁修剪長度 $\ell_{\min}$ 之疊合視覺化]{短樁修剪長度 $\ell_{\min}$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接）。(a) $\ell_{\min} = 0$；(b) $\ell_{\min} = 3$（基準）；(c) $\ell_{\min} = 9$。}
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/stub/viz_stub_t5.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/stub/viz_stub_t7.png}
+    \caption{}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/param/stub/viz_stub_t9.png}
+    \caption{}
+  \end{subfigure}
+
+  \caption[短樁修剪長度 $\ell_{\min}$ 之疊合視覺化]{短樁修剪長度 $\ell_{\min}$ 之疊合視覺化（黃色為正確連接、綠色為缺失連線、紅色為過度連接；同一局部區域）。(a)--(f) 分別對應 $\ell_{\min} = 0, 1, 3, 5, 7, 9$，其中 (c) $\ell_{\min} = 3$ 為預設值。}
   \label{fig:stub-prune}
 \end{figure}
 
-本節之單因子擾動說明表~\ref{tab:hyperparams} 所列之預設配置是經比較鄰近取值後選定，而非任意指定。前處理與 Sato 階段之五個參數於各自掃描範圍內，所有取值之 $\text{Dice}_{\text{cl}}$ 與 HD95 相對於預設之變動幅度皆小（$\text{Dice}_{\text{cl}}$ 在 $1$ 個百分點以內、HD95 多在 $0.05\,\mu\text{m}$ 以內）：偏離預設較遠之取值多顯著劣於預設，鄰近取值縱使部分達統計顯著，其絕對差距亦極微。掃描範圍內並無任一取值能於三項指標上同時明顯且顯著地勝過預設，因此採用此預設值。骨架化階段之短樁修剪長度 $\ell_{\min}$ 則以 $\ell_{\min} = 3$ 為最佳：完全不修剪（$\ell_{\min} = 0$）僅令 $\text{HD}_{\text{avg}}$ 輕微劣化，而 $\ell_{\min} \ge 5$ 則漸次顯著劣化三項指標，故預設取其平衡點 $\ell_{\min} = 3$。連結階段之邊裁剪閾值 $\tau$ 對重建品質之影響則實質而顯著，擾動結果明確指向 $\tau = 20$ 為最佳取值。後續所有實驗即採本節經此分析確立之基準配置（表~\ref{tab:hyperparams}）。
+本節之單因子擾動說明表~\ref{tab:hyperparams} 所列之預設配置是經比較鄰近取值後選定，而非任意指定。前處理與 Sato 階段之五個參數於各自掃描範圍內，所有取值之 $\text{Dice}_{\text{cl}}$ 與 HD95 相對於預設之變動幅度皆小（$\text{Dice}_{\text{cl}}$ 在 $1$ 個百分點以內、HD95 多在 $0.05\,\mu\text{m}$ 以內）：偏離預設較遠之取值多顯著劣於預設，鄰近取值縱使部分達統計顯著，其絕對差距亦極微。掃描範圍內並無任一取值能於三項指標上同時明顯且顯著地勝過預設，因此採用此預設值。骨架化階段之短樁修剪長度 $\ell_{\min}$ 則以 $\ell_{\min} = 3$ 為最佳：完全不修剪（$\ell_{\min} = 0$）僅令 HD95 與 $\text{HD}_{\text{avg}}$ 輕微（但顯著）劣化、$\text{Dice}_{\text{cl}}$ 則無顯著差異，而 $\ell_{\min} \ge 5$ 則漸次顯著劣化三項指標，故預設取其平衡點 $\ell_{\min} = 3$。連結階段之邊裁剪閾值 $\tau$ 對重建品質之影響則實質而顯著，擾動結果明確指向 $\tau = 20$ 為最佳取值。後續所有實驗即採本節經此分析確立之基準配置（表~\ref{tab:hyperparams}）。
 
 \section{結構性消融}
 \label{sec:ablation}
@@ -603,32 +786,34 @@
 
 \begin{table}[htbp]
   \centering
-  \caption{結構性消融之結果。}
+  \caption{結構性消融之結果（數值為平均值 $\pm$ 標準差，$n = 77$）。}
   \label{tab:ablation}
   \small
   \setlength{\tabcolsep}{4pt}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lcccccc}
     \toprule
     消融設定 & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    \textbf{完整 AEL} & \textbf{90.53} & --- & \textbf{2.451} & --- & \textbf{0.7355} & --- \\
+    \textbf{完整 AEL} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & ---  \\
     \midrule
-    移除頂帽去背景 & 90.30 & $<\!0.001$** & 2.469  & 0.239        & 0.7460 & $<\!0.001$** \\
-    移除 CLAHE     & 90.07 & $<\!0.001$** & 2.564  & 0.003**      & 0.7516 & $<\!0.001$** \\
-    移除 Sato 濾波 & 90.24 & $<\!0.001$** & 2.530  & 0.026*       & 0.7453 & $<\!0.001$** \\
-    移除全部前處理 & 89.72 & $<\!0.001$** & 2.645  & $<\!0.001$** & 0.7667 & $<\!0.001$** \\
+    移除頂帽去背景 & 90.30 $\pm$ 4.08 & $<\!0.001$** & 2.469 $\pm$ 1.003 & 0.239 & 0.7460 $\pm$ 0.2188 & $<\!0.001$** \\
+    移除 CLAHE     & 90.07 $\pm$ 3.89 & $<\!0.001$** & 2.564 $\pm$ 0.913 & 0.003** & 0.7516 $\pm$ 0.2115 & $<\!0.001$** \\
+    移除 Sato 濾波 & 90.24 $\pm$ 4.23 & $<\!0.001$** & 2.530 $\pm$ 1.072 & 0.026* & 0.7453 $\pm$ 0.2252 & $<\!0.001$** \\
+    移除全部前處理 & 89.72 $\pm$ 4.22 & $<\!0.001$** & 2.645 $\pm$ 1.076 & $<\!0.001$** & 0.7667 $\pm$ 0.2229 & $<\!0.001$** \\
     \midrule
-    線性成本       & 90.01 & $<\!0.001$** & 2.736  & $<\!0.001$** & 0.7556 & $<\!0.001$** \\
-    均勻成本       & 88.07 & $<\!0.001$** & 2.800  & $<\!0.001$** & 0.8170 & $<\!0.001$** \\
+    線性成本       & 90.01 $\pm$ 4.39 & $<\!0.001$** & 2.736 $\pm$ 1.247 & $<\!0.001$** & 0.7556 $\pm$ 0.2385 & $<\!0.001$** \\
+    均勻成本       & 88.07 $\pm$ 4.48 & $<\!0.001$** & 2.800 $\pm$ 1.083 & $<\!0.001$** & 0.8170 $\pm$ 0.2178 & $<\!0.001$** \\
     \midrule
-    不裁剪邊（$\tau$）   & 75.87 & $<\!0.001$** & 31.328 & $<\!0.001$** & 3.5486 & $<\!0.001$** \\
-    不取最小生成森林     & 83.93 & $<\!0.001$** & 3.086  & $<\!0.001$** & 0.9421 & $<\!0.001$** \\
-    完全不連結           & 71.17 & $<\!0.001$** & 15.239 & $<\!0.001$** & 2.2021 & $<\!0.001$** \\
+    不裁剪邊（$\tau$）   & 75.87 $\pm$ 8.20 & $<\!0.001$** & 31.328 $\pm$ 30.217 & $<\!0.001$** & 3.5486 $\pm$ 3.3815 & $<\!0.001$** \\
+    不取最小生成森林     & 83.93 $\pm$ 9.56 & $<\!0.001$** & 3.086 $\pm$ 1.249 & $<\!0.001$** & 0.9421 $\pm$ 0.3700 & $<\!0.001$** \\
+    完全不連結           & 72.34 $\pm$ 11.79 & $<\!0.001$** & 14.579 $\pm$ 14.657 & $<\!0.001$** & 2.1201 $\pm$ 1.7134 & $<\!0.001$** \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}%
+  }
 \end{table}
 
-由表~\ref{tab:ablation}，所有消融變體於三項指標上相對完整 AEL 之差異\textbf{除移除頂帽去背景於 HD95 一項外，餘皆達顯著}（多數 $p < 0.001$），印證 AEL 各設計模組均有實質貢獻。其中以\textbf{連結策略}之消融最為關鍵。最極端者為\textbf{完全不連結}（直接對 $P$ 骨架化、即移除整個連結階段）：此時骨架嚴重碎片化，$\text{Dice}_{\text{cl}}$ 跌至全表最低之 $71.17\%$，且因無法形成穿越表皮之連續路徑，各切片之跨越計數恆為 $0$、MAE 高達 $21.95$（對照完整 AEL 之 $5.05$），凸顯連結重組之不可或缺。在仍保留部分連結機制之兩項消融中：略過 $\tau$ 閾值裁剪時，遠距離元件之高成本偽相遇皆被納入最小生成森林，造成橫跨真皮之嚴重錯接，HD95 自 $2.451\,\mu\text{m}$ 暴增至 $31.328\,\mu\text{m}$（逾 $12$ 倍）、$\text{Dice}_{\text{cl}}$ 崩落至 $75.87\%$——其 HD95 甚至高於完全不連結之 $15.239\,\mu\text{m}$，顯示不加裁剪地連結比完全不連結更易產生遠離真值之長距離錯接；略過最小生成森林時，雖已先經 $\tau$ 裁剪，冗餘連線仍使拓樸顯著劣化（HD95 $3.086\,\mu\text{m}$、$\text{Dice}_{\text{cl}}$ $83.93\%$）。三者共同驗證第~\ref{sec:prune-mst}~節「閾值裁剪抑制偽連線、最小生成森林抑制冗餘連線」之設計分工，以及連結階段整體確為 AEL 拓樸品質之核心。
+由表~\ref{tab:ablation}，所有消融變體於三項指標上相對完整 AEL 之差異\textbf{除移除頂帽去背景於 HD95 一項外，餘皆達顯著}（多數 $p < 0.001$），印證 AEL 各設計模組均有實質貢獻。其中以\textbf{連結策略}之消融最為關鍵。最極端者為\textbf{完全不連結}（直接對 $P$ 骨架化、即移除整個連結階段）：此時骨架嚴重碎片化，$\text{Dice}_{\text{cl}}$ 跌至全表最低之 $72.34\%$，且因無法形成穿越表皮之連續路徑，各切片之跨越計數恆為 $0$、MAE 高達 $21.95$（對照完整 AEL 之 $5.05$），凸顯連結重組之不可或缺。在仍保留部分連結機制之兩項消融中：略過 $\tau$ 閾值裁剪時，遠距離元件之高成本偽相遇皆被納入最小生成森林，造成橫跨真皮之嚴重錯接，HD95 自 $2.451\,\mu\text{m}$ 暴增至 $31.328\,\mu\text{m}$（逾 $12$ 倍）、$\text{Dice}_{\text{cl}}$ 崩落至 $75.87\%$——其 HD95 甚至高於完全不連結之 $14.579\,\mu\text{m}$，顯示不加裁剪地連結比完全不連結更易產生遠離真值之長距離錯接；略過最小生成森林時，雖已先經 $\tau$ 裁剪，冗餘連線仍使拓樸顯著劣化（HD95 $3.086\,\mu\text{m}$、$\text{Dice}_{\text{cl}}$ $83.93\%$）。三者共同驗證第~\ref{sec:prune-mst}~節「閾值裁剪抑制偽連線、最小生成森林抑制冗餘連線」之設計分工，以及連結階段整體確為 AEL 拓樸品質之核心。
 
 \textbf{成本設計}方面，改用均勻常數成本使區域擴張喪失纖維響應之引導、退化為由幾何距離主導之連結，於三項指標上皆為前處理與成本各項消融中最差者（$\text{Dice}_{\text{cl}}$ $88.07\%$、$\text{HD}_{\text{avg}}$ $0.8170\,\mu\text{m}$），凸顯以纖維響應建構低成本走廊之必要；改用線性成本雖仍保有單調性，惟失去式~\eqref{eq:cost} 指數函數對強弱響應之對比放大，HD95 劣化至 $2.736\,\mu\text{m}$，顯示指數成本之凸性確有助於路徑沿高響應纖維前進。\textbf{前處理}方面，逐一移除頂帽、CLAHE 或 Sato 皆使 $\text{Dice}_{\text{cl}}$ 與 $\text{HD}_{\text{avg}}$ 顯著劣化，完全不做增強（移除全部前處理）則為前處理各項中最差（$\text{Dice}_{\text{cl}}$ $89.72\%$、$\text{HD}_{\text{avg}}$ $0.7667\,\mu\text{m}$）；值得注意的是，移除頂帽去背景於 HD95 並未達顯著（$p = 0.239$），其劣化僅反映於 $\text{HD}_{\text{avg}}$ 與 $\text{Dice}_{\text{cl}}$——此與第~\ref{sec:param-analysis}~節中 $r_{\text{bg}} = 0$（即不做背景去除）之觀察完全一致，再次顯示背景去除所致之整體性輕微劣化主要由 $\text{HD}_{\text{avg}}$ 而非 HD95 捕捉。整體而言，本節證實 AEL 自前處理、成本設計至連結策略之各模組皆對最終拓樸品質有正向且多數顯著之貢獻。
 
@@ -842,7 +1027,7 @@
   \centering
   \begin{subfigure}[b]{\linewidth}
     \centering
-    \includegraphics[width=0.76\linewidth]{S1196-2_b_green_boxed.png}
+    \includegraphics[width=\linewidth]{S1196-2_b_green_boxed.png}
     \caption{}%
     \label{fig:qual-ael-wins-overview}
   \end{subfigure}
@@ -881,7 +1066,7 @@
   \centering
   \begin{subfigure}[b]{\linewidth}
     \centering
-    \includegraphics[width=0.76\linewidth]{S1571-2_b_green_boxed.png}
+    \includegraphics[width=\linewidth]{S1571-2_b_green_boxed.png}
     \caption{}%
     \label{fig:qual-sparse-s2-overview}
   \end{subfigure}
@@ -920,7 +1105,7 @@
   \centering
   \begin{subfigure}[b]{\linewidth}
     \centering
-    \includegraphics[width=0.76\linewidth]{S2266-2_b_green_boxed.png}
+    \includegraphics[width=\linewidth]{S2266-2_b_green_boxed.png}
     \caption{}%
     \label{fig:qual-sparse-s3-overview}
   \end{subfigure}
@@ -959,7 +1144,7 @@
   \centering
   \begin{subfigure}[b]{\linewidth}
     \centering
-    \includegraphics[width=0.76\linewidth]{S1585-2_b_green_boxed.png}
+    \includegraphics[width=\linewidth]{S1585-2_b_green_boxed.png}
     \caption{}%
     \label{fig:qual-both-bad-overview}
   \end{subfigure}
@@ -998,7 +1183,7 @@
   \centering
   \begin{subfigure}[b]{\linewidth}
     \centering
-    \includegraphics[width=0.76\linewidth]{S2745-2_a_green_boxed.png}
+    \includegraphics[width=\linewidth]{S2745-2_a_green_boxed.png}
     \caption{}%
     \label{fig:qual-poor-s2-overview}
   \end{subfigure}
@@ -1054,15 +1239,15 @@
     \toprule
     Method & $\text{Dice}_{\text{cl}}$ (\%) $\uparrow$ & $p$ & HD95 ($\mu$m) $\downarrow$ & $p$ & $\text{HD}_{\text{avg}}$ ($\mu$m) $\downarrow$ & $p$ \\
     \midrule
-    MSF       & 89.30 & $<\!0.001$** & 3.0443  & $<\!0.001$**   & 0.7843 & $<\!0.001$** \\
-    \textbf{AEL} & \textbf{90.53}  & ---    & \textbf{2.4512} & ---   & \textbf{0.7355} & --- \\
+    MSF       & 89.30 $\pm$ 3.70 & $<\!0.001$** & 3.0443 $\pm$ 1.1706 & $<\!0.001$** & 0.7843 $\pm$ 0.1968 & $<\!0.001$** \\
+    \textbf{AEL} & \textbf{90.57} $\pm$ 4.05 & --- & \textbf{2.4496} $\pm$ 0.9685 & --- & \textbf{0.7340} $\pm$ 0.2212 & --- \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 AEL 於 $\text{Dice}_{\text{cl}}$、HD95 與 $\text{HD}_{\text{avg}}$ 三項指標上皆優於 MSF。
 
-AEL 較 MSF 之進一步改善則於三項指標上呈現可解釋之層次：$\text{Dice}_{\text{cl}}$ 僅多 $1.23$ 百分點（$89.30 \to 90.53$）、$\text{HD}_{\text{avg}}$ 降低約 $6\%$（$0.7843 \to 0.7355\,\mu\text{m}$）、HD95 則降低約 $19\%$（$3.0443 \to 2.4512\,\mu\text{m}$）。此一層次與 AEL 之成本設計相符：$\text{Dice}_{\text{cl}}$ 採 $1.28\,\mu\text{m}$ 之物理容忍半徑，只要路徑落於真實纖維附近就計入命中，MSF 既然已連結成功，其 $\text{Dice}_{\text{cl}}$ 自然貼近 AEL；$\text{HD}_{\text{avg}}$ 對全骨架之雙向最短距離取平均，AEL 之改善幅度有限；而 HD95 所刻畫之最壞情形偏差，正是 MSF 因不受形態學成本約束而容易產生偏離真值之短捷徑路徑之處——AEL 之多源成本聚合在此處發揮最大作用，明顯壓低最壞情形之偏差。
+AEL 較 MSF 之進一步改善則於三項指標上呈現可解釋之層次：$\text{Dice}_{\text{cl}}$ 僅多 $1.23$ 百分點（$89.30 \to 90.57$）、$\text{HD}_{\text{avg}}$ 降低約 $6\%$（$0.7843 \to 0.7340\,\mu\text{m}$）、HD95 則降低約 $19\%$（$3.0443 \to 2.4496\,\mu\text{m}$）。此一層次與 AEL 之成本設計相符：$\text{Dice}_{\text{cl}}$ 採 $1.28\,\mu\text{m}$ 之物理容忍半徑，只要路徑落於真實纖維附近就計入命中，MSF 既然已連結成功，其 $\text{Dice}_{\text{cl}}$ 自然貼近 AEL；$\text{HD}_{\text{avg}}$ 對全骨架之雙向最短距離取平均，AEL 之改善幅度有限；而 HD95 所刻畫之最壞情形偏差，正是 MSF 因不受形態學成本約束而容易產生偏離真值之短捷徑路徑之處——AEL 之多源成本聚合在此處發揮最大作用，明顯壓低最壞情形之偏差。
 
 \subsection{跨越計數結果}
 \label{subsec:counting-results}
@@ -1079,8 +1264,8 @@ AEL 較 MSF 之進一步改善則於三項指標上呈現可解釋之層次：$\
     \toprule
     Method & MAE $\downarrow$ & $p$ & RMSE $\downarrow$ & $p$ & $\rho$ $\uparrow$ & $p$ \\
     \midrule
-    MSF       & 6.0000 & $<\!0.001$** & 7.9451 & $<\!0.001$** & 0.8418          & $<\!0.001$** \\
-    \textbf{AEL} & \textbf{5.0521} & --- & \textbf{6.7662} & --- & \textbf{0.8662} & $<\!0.001$** \\
+    MSF       & 6.0000 $\pm$ 5.2420 & $<\!0.001$** & 7.9451 $\pm$ 7.9890 & $<\!0.001$** & 0.8418          & $<\!0.001$** \\
+    \textbf{AEL} & \textbf{5.0521 $\pm$ 4.7530} & --- & \textbf{6.7662 $\pm$ 7.1280} & --- & \textbf{0.8662} & $<\!0.001$** \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -1101,4 +1286,4 @@ AEL 之輸出為可視化之拓樸圖：演算法以成本走廊將原本破碎�
 
 \subsection{敏感度與可遷移性}
 
-本研究之預設參數於所使用之資料集上表現穩定。若應用於不同之切片厚度、染色協定或顯微鏡，\textbf{主要需重新校正連結階段之邊裁剪閾值 $\tau$}——其於第~\ref{sec:param-analysis}~節之擾動結果中影響最為實質且顯著（除 $\tau = 30$ 之 $\text{HD}_{\text{avg}}$ 為 $p < 0.05$ 外，所有非預設取值於三項指標上皆達 $p < 0.01$），須依新資料之成本圖尺度重新搜尋最適值。Sato 之尺度範圍 $[\sigma_{\min}, \sigma_{\max}]$ 則須\textbf{對應新影像下纖維之像素寬度}（$\sigma_{\min}$ 涵蓋最細纖維、$\sigma_{\max}$ 涵蓋最粗纖維），是隨資料決定之校準性常數，並非自由超參數。其餘參數於第~\ref{sec:param-analysis}~節之擾動範圍內對結果相對不敏感，可沿用本研究預設或依實作慣例設定。
+本研究之預設參數於所使用之資料集上表現穩定。若應用於不同之切片厚度、染色協定或顯微鏡，\textbf{主要需重新校正連結階段之邊裁剪閾值 $\tau$}——其於第~\ref{sec:param-analysis}~節之擾動結果中影響最為實質且顯著（除最靠近預設之 $\tau = 15$ 於 HD95 未達顯著、於另二項僅 $p < 0.05$ 外，其餘非預設取值於三項指標上多達 $p < 0.01$，部分達 $p < 0.001$），須依新資料之成本圖尺度重新搜尋最適值。Sato 之尺度範圍 $[\sigma_{\min}, \sigma_{\max}]$ 則須\textbf{對應新影像下纖維之像素寬度}（$\sigma_{\min}$ 涵蓋最細纖維、$\sigma_{\max}$ 涵蓋最粗纖維），是隨資料決定之校準性常數，並非自由超參數。其餘參數於第~\ref{sec:param-analysis}~節之擾動範圍內對結果相對不敏感，可沿用本研究預設或依實作慣例設定。
