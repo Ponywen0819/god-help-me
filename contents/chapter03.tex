@@ -112,7 +112,7 @@
   \label{eq:sato}
 \end{equation}
 
-\noindent 其中該濾波器基於 Hessian 矩陣之特徵值辨識亮色線狀區域，並對多尺度集合 $\Sigma = \{\sigma_{\min},\; \sigma_{\min}+1,\; \ldots,\; \sigma_{\max}\}$ 取各尺度響應之逐像素最大值，使不同粗細之纖維均能被有效偵測；$\sigma_{\min}, \sigma_{\max}$ 依目標纖維之最小與最大半寬選取，本研究於所用資料集上取 $\sigma_{\min} = 1$、$\sigma_{\max} = 4\,\text{像素}$。由於 $S$ 之動態範圍因影像而異，本研究再對其進行最小—最大線性正規化以對齊至固定區間 $[0, 255]$：
+\noindent 其中該濾波器基於 Hessian 矩陣之特徵值辨識亮色線狀區域，並對多尺度集合 $\Sigma = \{\sigma_{\min},\; \sigma_{\min}+1,\; \ldots,\; \sigma_{\max}\}$ 取各尺度響應之逐像素最大值，使不同粗細之纖維均能被有效偵測；$\sigma_{\min}, \sigma_{\max}$ 依目標纖維之最小與最大半寬選取，本研究於所用資料集上取 $\sigma_{\min} = 1$、$\sigma_{\max} = 3\,\text{像素}$。由於 $S$ 之動態範圍因影像而異，本研究再對其進行最小—最大線性正規化以對齊至固定區間 $[0, 255]$：
 \begin{equation}
   I_{\text{enhanced}}(x, y) \;=\; 255 \cdot \frac{S(x, y) - \min_{(x', y') \in \Omega} S(x', y')}{\max_{(x', y') \in \Omega} S(x', y') - \min_{(x', y') \in \Omega} S(x', y')},
   \label{eq:sato-norm}
