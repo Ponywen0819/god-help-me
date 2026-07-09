@@ -3,7 +3,7 @@
 \chapter{視覺化神經纖維分析工具}
 \label{chap:tool}
 
-為使第~\ref{chap:method}~章所述之 AEL 演算法得以互動執行、視覺檢驗、並進一步支援使用者於重建結果上手動修整再重新計數，本研究實作了一套桌面端之圖形使用者介面工具（以下簡稱\textbf{本工具}）。本章依序介紹設計動機、執行環境與系統架構、介面布局、典型工作流程、側邊欄分頁（樣本、圖層與演算法）、中央畫布、頂部工具列、互動模式、圖形編輯、遮罩塗改，以及結果輸出。
+為使第~\ref{chap:method}~章所述之 AEL 演算法得以互動執行、視覺檢驗、並進一步支援使用者於重建結果上手動修整再重新計數，本研究實作了一套桌面端之圖形使用者介面工具（以下簡稱\textbf{本工具}）。本章依序介紹設計動機、執行環境與系統架構、介面布局、典型工作流程、側邊欄分頁（檔案、圖層與演算法）、中央畫布、頂部工具列、互動模式、圖形編輯、遮罩塗改，以及檔案儲存與結果輸出。
 
 \section{設計動機}
 \label{sec:tool-overview}
@@ -35,7 +35,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/gui_main.png}
+  \includegraphics[width=\linewidth]{figures/gui/main.png}
   \caption[本工具主視窗布局]{本工具主視窗布局。圖中紅色框（左側）為左側邊欄（含樣本、圖層與演算法三分頁）、黃色框（上方）為頂部工具列（含模式切換與圖統計）、綠色框（中央）為中央畫布（影像與重建圖之疊合區）。}
   \label{fig:tool-layout}
 \end{figure}
@@ -46,13 +46,14 @@
 第一次使用本工具者，可依下列步驟完成「選定樣本 → 自動計數 → 重建結果修改 → 即時重新計數」之完整流程：
 
 \begin{enumerate}
-  \item \textbf{選擇工作目錄：}於左側邊欄之\textbf{樣本} (Samples) 分頁點擊\textbf{選擇工作目錄} (Select Working Folder) 按鈕，選定一存放待分析樣本之工作目錄。該目錄下之每個樣本各為一子資料夾，其中依檔名前綴放置\textbf{原始影像}（\texttt{image}）、\textbf{表皮遮罩}（\texttt{epidermis}）與\textbf{纖維微粒遮罩}（\texttt{particle}）三張影像；本工具會掃描該目錄並於分頁中列出所有可用樣本。所選工作目錄會被記憶，下次啟動時自動回復。
+  \item \textbf{選擇工作目錄：}於左側邊欄之\textbf{檔案} (Files) 分頁點擊\textbf{選擇工作目錄} (Select Working Folder) 按鈕，選定一存放待分析樣本之工作目錄。該目錄下之每個樣本各為一子資料夾，其中依檔名前綴放置\textbf{原始影像}（\texttt{image}）、\textbf{表皮遮罩}（\texttt{epidermis}）與\textbf{纖維微粒遮罩}（\texttt{particle}）三張影像；本工具會掃描該目錄並於分頁中列出所有可用樣本。所選工作目錄會被記憶，下次啟動時自動回復。
   \item \textbf{選擇樣本：}於同一分頁之樣本清單點選欲分析之切片，本工具即\textbf{自動載入}該樣本之 RGB 原始影像、表皮二值遮罩與纖維微粒標註遮罩三層，毋需逐張手動上傳；若該樣本先前已有自動儲存之工作階段，亦會一併還原其圖層設定、重建圖與計數結果。
   \item \textbf{開啟參數視窗檢視預設值（非必要）：}若無特殊需求，可直接沿用預設參數；如需調整，可切換至\textbf{演算法} (Algorithm) 分頁並點擊\textbf{參數} (Parameters) 按鈕（詳見第~\ref{sec:tool-params}~節）。
   \item \textbf{執行管線：}於\textbf{演算法}分頁點擊\textbf{全部執行} (Run All) 按鈕，後端會依序執行\textbf{感興趣區域} (ROI Mask)、\textbf{前處理} (Preprocess)、\textbf{重建} (Reconstruct) 三階段（第~\ref{sec:tool-pipeline}~節），並於重建完成後\textbf{自動計數}；完成後畫布上即呈現重建圖，頂部工具列之\textbf{有效跨越數} (Effective Crossings) 欄位即顯示計數結果。
   \item \textbf{重建結果修改（非必要）：}若自動重建之結果與專家判讀有出入，可於頂部工具列切換成\textbf{纖維編輯} (Fiber Edit) 模式，於畫布上新增、刪除節點與邊以修整圖（第~\ref{sec:tool-edit}~節）。
   \item \textbf{遮罩修改（非必要）：}若樣本之表皮遮罩或纖維微粒遮罩本身有誤，可於頂部工具列切換成\textbf{表皮編輯} (Epidermis Edit) 或\textbf{纖維微粒編輯} (Particle Edit) 模式，於畫布上直接塗改\textbf{表皮遮罩} (Epidermis Mask) 與\textbf{纖維微粒遮罩} (Particle Mask)。惟此二遮罩為管線之\textbf{輸入}，修改後不會自動更新重建結果，須重新點擊\textbf{全部執行}重跑整個演算法，方能將變更反映於後續之重建與計數。
   \item \textbf{即時重新計數：}修整過程中\textbf{毋需手動觸發計數}；本工具會於每次編輯後\textbf{自動}將當前修整後之圖送回後端重算，頂部工具列之有效跨越數與畫布上綠色有效跨越邊即隨之同步更新（詳見第~\ref{subsec:count-current}~節）。
+  \item \textbf{保存結果：}於\textbf{自動儲存} (Auto-save) 開啟時（預設），上述所有編輯之結果——包含修整後之重建圖、塗改後之遮罩與工作階段狀態——皆會自動寫回樣本資料夾，毋需任何存檔操作；若需將結果另存為指定檔名或輸出至他處，則使用\textbf{檔案}分頁之三個手動儲存按鈕（詳見第~\ref{sec:tool-io}~節）。
 \end{enumerate}
 
 後續各節依介面元素之分類詳述其全部選項與行為。
@@ -63,31 +64,31 @@
 左側邊欄之全部控制依功能分為三個分頁，可由分頁列頂端切換：
 
 \begin{itemize}
-  \item \textbf{樣本 (Samples)：}工作目錄選擇與樣本瀏覽，為每次分析之起點（第~\ref{subsec:tool-samples}~節）。
-  \item \textbf{圖層 (Layers)：}各影像圖層與重建圖之顯示控制與遮罩輸出（第~\ref{sec:tool-layers}~節）。
+  \item \textbf{檔案 (Files)：}工作目錄選擇、樣本瀏覽與檔案儲存控制，為每次分析之起點（第~\ref{subsec:tool-samples}~節）。
+  \item \textbf{圖層 (Layers)：}各影像圖層與重建圖之顯示控制（第~\ref{sec:tool-layers}~節）。
   \item \textbf{演算法 (Algorithm)：}AEL 管線之參數設定與階段執行（第~\ref{sec:tool-pipeline}~節）。
 \end{itemize}
 
 \noindent 三分頁之切換僅改變邊欄顯示之內容，不影響畫布狀態；以下三小節依序詳述之。
 
-\subsection{樣本分頁}
+\subsection{檔案分頁}
 \label{subsec:tool-samples}
 
-樣本分頁負責指定資料來源並於樣本間切換，其操作元件如下（如圖~\ref{fig:sample-tab} 所示）：
+檔案分頁負責指定資料來源、於樣本間切換，並集中所有檔案儲存之控制，其操作元件如下（如圖~\ref{fig:sample-tab} 所示）：
 
 \begin{itemize}
   \item \textbf{選擇工作目錄 (Select Working Folder)：}點擊後開啟原生資料夾對話框，選定一存放待分析樣本之工作目錄。該目錄下之每個子資料夾視為一個樣本，其中依\textbf{檔名前綴}放置原始影像（\texttt{image}）、表皮遮罩（\texttt{epidermis}）與纖維微粒遮罩（\texttt{particle}）三張影像（支援 \texttt{png}、\texttt{jpg}、\texttt{tif}、\texttt{tiff}、\texttt{webp} 等格式）；僅含原始影像之子資料夾方視為可用樣本。選定後按鈕標籤改為\textbf{Change Working Folder}，其下並列出目錄之完整路徑與可用樣本數。所選工作目錄會被記憶，下次啟動時自動回復。
+  \item \textbf{自動儲存切換鈕 (Auto-save)：}位於工作目錄區塊下方之總開關，控制本工具是否將編輯結果自動寫入磁碟（預設為\textbf{開啟}）。其狀態會被記憶，下次啟動時自動回復；所寫入之檔案與時機詳見第~\ref{subsec:io-autosave}~節。
+  \item \textbf{手動儲存按鈕：}三個按鈕——\textbf{Save Epidermis Mask}、\textbf{Save Particle Mask} 與 \textbf{Save Fiber}——分別將表皮遮罩、纖維微粒遮罩與重建結果另存至指定檔名與資料夾。點擊後開啟儲存視窗（第~\ref{subsec:io-manual}~節），其行為\textbf{不受自動儲存開關影響}。
   \item \textbf{樣本清單：}以按鈕逐列列出目錄中所有可用樣本（依名稱排序）。點選任一樣本即自動載入其三張影像並設為作用中樣本（作用中者以藍色標示）；若某樣本缺少表皮遮罩或纖維微粒遮罩，其右側會顯示一警示圖示以提醒該樣本不完整。
 \end{itemize}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.4\linewidth]{figures/gui/sample_tab.png}
-  \caption[樣本分頁]{樣本分頁之操作元件。紅色框為\textbf{選擇工作目錄}按鈕、綠色框為樣本清單。}
+  \includegraphics[width=0.4\linewidth]{figures/gui/file_tab.png}
+  \caption[檔案分頁]{檔案分頁之操作元件。紅色框為\textbf{選擇工作目錄}按鈕、綠色框為\textbf{自動儲存}切換鈕、黃色框為三個手動儲存按鈕、橘色框為樣本清單。}
   \label{fig:sample-tab}
 \end{figure}
-
-作用中樣本之工作階段——包含圖層設定、重建圖、演算法參數、各階段狀態與有效跨越數——會\textbf{自動儲存}於該樣本資料夾內之專案檔（\texttt{neurotrace\_project.json}），並於下次選取同一樣本時自動還原。使用者僅需切換樣本即可保留各自之修整進度，分析亦得於不同時間接續進行。
 
 \subsection{圖層分頁}
 \label{sec:tool-layers}
@@ -172,7 +173,7 @@
 \subsubsection{重建圖圖層之控制}
 \label{subsec:layer-graph}
 
-重建圖具有獨立之顯示／隱藏切換鈕（如圖~\ref{fig:layer-graph} 所示），可如其他圖層般快速切換其顯示；惟其不參與透明度控制。作為演算法輸出與使用者編輯之主要呈現載體，重建圖預設為顯示。其節點與邊之繪製與配色見第~\ref{subsec:graph-render}~節。
+重建圖具有獨立之顯示／隱藏切換鈕（如圖~\ref{fig:layer-graph} 所示），可如其他圖層般快速切換其顯示；惟其不參與透明度控制。作為演算法輸出與使用者編輯之主要呈現載體，重建圖預設為顯示。其節點與邊之繪製與配色見第~\ref{subsec:graph-render}~節，重建結果之保存與輸出則統一置於\textbf{檔案}分頁（第~\ref{sec:tool-io}~節）。
 
 \begin{figure}[htbp]
   \centering
@@ -355,7 +356,7 @@
 \section{頂部工具列}
 \label{sec:tool-toolbar}
 
-頂部工具列橫跨主視窗頂端，由左至右包含：四個\textbf{互動模式}切換按鈕、兩項當前樣本之讀數（有效跨越數與影像尺寸）、當前重建圖之節點與邊計數，以及一個\textbf{清除}按鈕。模式切換按鈕之行為詳見第~\ref{sec:tool-modes}~節、清除按鈕詳見第~\ref{subsec:edit-clear}~節；本節說明工具列之兩項讀數及其背後之自動計數。
+頂部工具列橫跨主視窗頂端，由左至右包含：四個\textbf{互動模式}切換按鈕、兩項當前樣本之讀數（有效跨越數與影像尺寸）、一個\textbf{自動儲存狀態指示器}、當前重建圖之節點與邊計數，以及一個\textbf{清除}按鈕。模式切換按鈕之行為詳見第~\ref{sec:tool-modes}~節、清除按鈕詳見第~\ref{subsec:edit-clear}~節；本節說明工具列之兩項讀數、自動儲存指示器，及讀數背後之自動計數。
 
 \subsection{有效跨越數與自動計數}
 \label{subsec:count-current}
@@ -374,7 +375,12 @@
 \subsection{影像尺寸}
 \label{subsec:toolbar-imagesize}
 
-\textbf{影像尺寸} (Image Size) 欄位顯示當前原始影像之原生像素尺寸（寬 $\times$ 高），供使用者確認載入切片之解析度；此尺寸亦為重建圖遮罩輸出時之光柵化解析度（見第~\ref{sec:tool-io}~節）。
+\textbf{影像尺寸} (Image Size) 欄位顯示當前原始影像之原生像素尺寸（寬 $\times$ 高），供使用者確認載入切片之解析度；此尺寸亦為重建圖遮罩寫出時之光柵化解析度（見第~\ref{subsec:io-fibermask}~節）。
+
+\subsection{自動儲存狀態指示器}
+\label{subsec:toolbar-autosave}
+
+工具列並顯示一\textbf{自動儲存狀態指示器}，以磁片圖示搭配文字標示當前之寫檔狀態：開啟時為綠色之 \textbf{Auto-save On}、關閉時為灰色之 \textbf{Auto-save Off}。此指示器\textbf{僅供顯示}，其切換須至\textbf{檔案}分頁之自動儲存切換鈕（第~\ref{subsec:tool-samples}~節）；置於工具列之目的在於使用者於畫布上長時間編輯時，得隨時確認其修整是否正被寫回磁碟，避免誤以為已保存。
 
 \section{互動模式}
 \label{sec:tool-modes}
@@ -388,7 +394,7 @@
   \item \textbf{表皮編輯 (Epidermis Edit) 模式}：刷子圖示，青色背景表示啟用，操作方式與纖維微粒編輯相同，惟編輯對象為表皮遮罩，且啟用時畫面僅保留原始影像與表皮遮罩兩層。
 \end{itemize}
 
-\noindent \textbf{纖維微粒編輯}與\textbf{表皮編輯}兩模式之詳細塗改操作見第~\ref{sec:tool-paint}~節；其所塗改之遮罩會寫回該樣本之來源檔並作為管線之輸入，故修改後須重新執行管線方能反映於重建與計數（見第~\ref{sec:tool-workflow}~節）。
+\noindent \textbf{纖維微粒編輯}與\textbf{表皮編輯}兩模式之詳細塗改操作見第~\ref{sec:tool-paint}~節；其所塗改之遮罩於自動儲存開啟時會寫回該樣本之來源檔，且無論是否寫檔皆作為管線之輸入，故修改後須重新執行管線方能反映於重建與計數（見第~\ref{sec:tool-workflow}~節）。
 
 \begin{figure}[htbp]
   \centering
@@ -518,18 +524,60 @@
   \label{fig:paint-menu}
 \end{figure}
 
-\noindent 塗改結果會即時寫回該樣本資料夾內之來源遮罩檔。表皮遮罩與纖維微粒遮罩皆會影響到演算法計算，修改後須重新執行管線（\textbf{全部執行}）才能反映於重建與計數（見第~\ref{sec:tool-workflow}~節）。
+\noindent 於\textbf{自動儲存}開啟時，塗改結果會即時寫回該樣本資料夾內之來源遮罩檔；若自動儲存已關閉，塗改僅保留於畫面與工作階段中，磁碟上之來源檔不受任何更動，使用者須主動以\textbf{Save Epidermis Mask} 或 \textbf{Save Particle Mask} 按鈕另存（見第~\ref{sec:tool-io}~節）。無論寫檔與否，表皮遮罩與纖維微粒遮罩皆會影響到演算法計算，修改後須重新執行管線（\textbf{全部執行}）才能反映於重建與計數（見第~\ref{sec:tool-workflow}~節）。
 
-\section{結果輸出}
+\section{檔案儲存與結果輸出}
 \label{sec:tool-io}
 
-除即時之檢視與編輯外，本工具提供\textbf{重建結果之遮罩輸出}功能，可將當前重建圖輸出為一張二元遮罩影像，其按鈕位於左側邊欄圖層分頁之重建圖區塊。至於整個工作階段之保存，本工具採\textbf{逐樣本自動儲存}（詳見第~\ref{subsec:tool-samples}~節）：作用中樣本之圖層設定、重建圖、演算法參數、各階段狀態與有效跨越數會自動寫入該樣本資料夾內之專案檔，並於下次選取時自動還原，使用者毋需手動存檔或載入專案。
+本工具之寫檔行為分為兩條互補之路徑：\textbf{自動儲存}於每次編輯後，將結果直接寫入該樣本自身之資料夾，不另行詢問檔名或位置——新產生之專案檔與纖維遮罩若已存在則直接覆蓋，塗改後之遮罩亦直接覆寫其來源檔；\textbf{手動儲存}則供使用者將特定產物以指定檔名另存至任意位置，作為結果之輸出與交付。二者之控制項皆集中於側邊欄之\textbf{檔案}分頁（第~\ref{subsec:tool-samples}~節），本節說明其語意：何者被寫入、於何時、以何檔名。
 
-\paragraph{重建圖之遮罩輸出（Export Mask）：}邊欄重建圖區塊之 \textbf{Export Mask} 按鈕（如圖~\ref{fig:io-export} 所示）可將當前重建圖輸出為一張\textbf{二元遮罩影像}（PNG）：以黑色為背景、白色沿各邊之像素軌跡繪製纖維線條（線寬 $1$ 像素），並依原始影像之原生解析度光柵化，使輸出之遮罩與原切片像素對齊。此遮罩可作為重建結果之存檔，亦可供下游之像素級分析（如與專家標註比對）使用，需畫布上已有重建圖（至少一條邊）方可輸出。
+\subsection{自動儲存}
+\label{subsec:io-autosave}
+
+自動儲存使用一開關控制，預設開啟，其狀態記憶於本機並於下次啟動時回復。開啟時，本工具會於作用中樣本之資料夾內自動寫入下列三類檔案，同名檔案一律直接覆蓋：
+
+\begin{enumerate}
+  \item \textbf{專案檔 \texttt{fibertrace\_project.json}：}記錄整個工作階段——圖層設定、重建圖之節點與邊、演算法參數、各階段狀態與有效跨越數——並於下次選取同一樣本時自動還原。
+  \item \textbf{纖維遮罩 \texttt{fibertrace\_mask.png}：}與專案檔同步寫出之當前重建圖\textbf{二元遮罩影像}，其光柵化方式見第~\ref{subsec:io-fibermask}~節。
+  \item \textbf{來源遮罩檔：}於纖維微粒編輯或表皮編輯模式下之塗改結果，直接覆寫該樣本之表皮遮罩或纖維微粒遮罩原檔（第~\ref{sec:tool-paint}~節）。
+\end{enumerate}
+
+關閉自動儲存時，\textbf{上述三類寫入全數停止}：專案檔與纖維遮罩不再產生，塗改亦僅存在於畫面與當前工作階段中，磁碟上之來源遮罩檔保持原狀。此模式適用於僅欲檢視或試驗性調整、而不希望更動原始資料之情境；惟此時若切換樣本或關閉應用程式，未經手動儲存之編輯將\textbf{不予保留}。頂部工具列之狀態指示器（第~\ref{subsec:toolbar-autosave}~節）即為此設計之安全提示。
+
+\subsection{手動儲存}
+\label{subsec:io-manual}
+
+\textbf{檔案}分頁下方之三個儲存按鈕可將對應之產物另存新檔。點擊任一按鈕即開啟\textbf{儲存視窗}（如圖~\ref{fig:io-save-modal} 所示），其中包含一\textbf{名稱}輸入框（帶有預設檔名）、一\textbf{選擇資料夾} (Choose Folder\ldots) 按鈕，及一行即時預覽\textbf{實際將寫出之檔名}之說明文字。未另行選擇資料夾時，預設寫入\textbf{當前作用中樣本之資料夾}。按下 \texttt{Enter} 鍵或\textbf{儲存} (Save) 按鈕即執行寫檔，\textbf{取消} (Cancel)、點擊視窗外之遮罩或關閉圖示則放棄操作。
+
+三個按鈕之產物、檔名規則與啟用條件列於表~\ref{tab:manual-save}。手動儲存\textbf{不受自動儲存開關影響}：即使自動儲存已關閉，仍可藉此將當前之遮罩與重建結果保存下來。
+
+\begin{table}[htbp]
+  \centering
+  \caption{檔案分頁之三個手動儲存按鈕。$\langle\text{name}\rangle$ 為使用者於儲存視窗輸入之名稱。}
+  \label{tab:manual-save}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{lp{4.2cm}lp{2.8cm}}
+    \toprule
+    按鈕 & 寫出之檔案 & 預設名稱 & 啟用條件 \\
+    \midrule
+    Save Epidermis Mask & $\langle\text{name}\rangle$\texttt{.png}                                                              & \texttt{epidermis}  & 已載入表皮遮罩 \\
+    Save Particle Mask  & $\langle\text{name}\rangle$\texttt{.png}                                                              & \texttt{particle}   & 已載入纖維微粒遮罩 \\
+    Save Fiber          & $\langle\text{name}\rangle$\texttt{\_project.json} \newline $\langle\text{name}\rangle$\texttt{\_mask.png} & \texttt{fibertrace} & 已載入完整樣本影像 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+前兩者輸出\textbf{當前畫面上之遮罩}（即已納入使用者塗改之版本），並於寫檔時正規化為二值影像；\textbf{Save Fiber} 則一次輸出\textbf{一組}檔案：一份與自動儲存格式相同之專案檔，及一張重建圖之二元遮罩影像，構成一個可攜之\textbf{具名工作階段快照}。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.45\linewidth]{figures/gui_export.png}
-  \caption[遮罩輸出按鈕]{邊欄重建圖區塊之 Export Mask 按鈕。}
-  \label{fig:io-export}
+  \includegraphics[width=0.5\linewidth]{figures/gui/save_context.png}
+  \caption[手動儲存視窗]{點擊手動儲存按鈕後開啟之儲存視窗。紅色框為名稱輸入框（預設 \texttt{fibertrace}）、綠色框為資料夾選擇按鈕與當前目標路徑、黃色框為將寫出之檔名預覽、橘色框為取消與儲存按鈕。}
+  \label{fig:io-save-modal}
 \end{figure}
+
+\subsection{重建圖之遮罩光柵化}
+\label{subsec:io-fibermask}
+
+自動儲存之 \texttt{fibertrace\_mask.png} 與手動儲存之 $\langle\text{name}\rangle$\texttt{\_mask.png} 皆為當前重建圖之\textbf{二元遮罩影像}（PNG），其產生方式相同：以黑色為背景、白色沿各邊之像素軌跡繪製纖維線條（線寬 $1$ 像素），並依原始影像之原生解析度（見第~\ref{subsec:toolbar-imagesize}~節）光柵化，使輸出之遮罩與原切片\textbf{像素對齊}。此遮罩可作為重建結果之存檔，亦可供下游之像素級分析（如與專家標註比對）使用。
