@@ -3,7 +3,7 @@
 \chapter{研究方法與設計}
 \label{chap:method}
 
-本章說明本研究所提出之\textbf{標註擴張連結} (AEL) 演算法之完整設計。給定一張免疫螢光染色之皮膚切片影像 $I \in \mathbb{R}^{H \times W \times 3}$、表皮遮罩 $M \in \{0, 255\}^{H \times W}$、以及由人工初步標註所得之二值纖維微粒~\cite{hsueh2026machine} 標註 $P \in \{0, 255\}^{H \times W}$，AEL 之目標為輸出一個\textbf{像素級無向圖} $G_{\text{trim}} = (V_{\text{trim}}, E_{\text{trim}})$，其中 $V_{\text{trim}} \subseteq \mathbb{Z}^2$ 為骨架節點所對應之像素座標集合、$E_{\text{trim}}$ 為沿纖維之連線集合，並於其上計算有效跨越數 $N_{\text{pred}}$。以下各節依序詳述：第~\ref{sec:preprocessing}~節說明前處理與成本圖建構；第~\ref{sec:dijkstra}~節說明多源區域擴張；第~\ref{sec:component-graph}~節描述相遇點偵測與元件層圖之建立；第~\ref{sec:prune-mst}~節說明成本裁剪與最小生成森林；第~\ref{sec:skeleton}~節說明像素級拓樸之建構；最後第~\ref{sec:crossing}~節說明於該拓樸上進行有效跨越計數之完整程序。
+本章說明本研究所提出之\textbf{標註擴張連結} (AEL) 演算法之完整設計。給定一張免疫螢光染色之皮膚切片影像 $I \in \mathbb{R}^{H \times W \times 3}$、表皮遮罩 $M \in \{0, 255\}^{H \times W}$、以及由人工初步標註所得之二值纖維微粒~\cite{hsueh2026machine} 標註 $P \in \{0, 255\}^{H \times W}$，AEL 之目標為輸出一個\textbf{像素級無向圖} $G_{\text{trim}} = (V_{\text{trim}}, E_{\text{trim}})$，其中 $V_{\text{trim}} \subseteq \mathbb{Z}^2$ 為骨架節點所對應之像素座標集合、$E_{\text{trim}}$ 為沿纖維之連線集合，並於其上計算有效跨越數 $N_{\text{pred}}$。以下各節依序詳述：第~\ref{sec:preprocessing}~節說明前處理與成本圖建構；第~\ref{sec:dijkstra}~節說明多源區域擴張；第~\ref{sec:component-graph}~節描述相遇點偵測與元件層圖之建立；第~\ref{sec:prune-mst}~節說明成本裁剪與最小生成森林；第~\ref{sec:skeleton}~節說明像素級拓樸之建構；最後第~\ref{sec:crossing}~節說明於該拓樸上進行有效神經纖維計數之完整程序。
 
 \section{前處理與成本圖建構}
 \label{sec:preprocessing}
@@ -56,7 +56,7 @@
 
 令 $I$ 為 RGB 三通道影像，記其各通道為 $I = (I_r, I_g, I_b)$，其中 $I_g : \Omega \to [0, 255]$ 為綠色通道之灰階影像。由於免疫螢光染色之色彩資訊主要落在綠色通道，後續處理皆以 $I_g$ 作為輸入，並依序執行三個運算：形態學背景去除、CLAHE 局部對比增強、與多尺度 Sato 線狀結構濾波，分述如下。
 
-\paragraph{形態學背景去除：}免疫螢光染色於切片各區域之強度本即不均勻，使整張影像存在一層慢變之背景偏移；若直接套用後續之對比增強，背景偏亮處將與真實纖維之響應混淆，不利於成本圖之建構。本研究以\textbf{白色頂帽} (white top-hat) 變換~\cite{serra1983image,soille1999morphological} 消除此一慢變背景，其形式定義為原影像與其形態學開運算之差：
+\paragraph{形態學背景去除：}免疫螢光染色於切片各區域之強度不均勻，使整張影像存在背景偏移；若直接套用後續之對比增強，背景偏亮處將與真實纖維之響應混淆，不利於成本圖之建構。本研究以\textbf{白色頂帽} (white top-hat) 變換~\cite{serra1983image,soille1999morphological} 消除此一慢變背景，其形式定義為原影像與其形態學開運算之差：
 \begin{equation}
   I_{\text{th}} \;=\; I_g - (I_g \circ K_{r_{\text{bg}}}),
   \label{eq:tophat}
@@ -167,7 +167,7 @@
 \section{多源區域擴張}
 \label{sec:dijkstra}
 
-本節之核心為「多源區域擴張」，奠基於經典之 Dijkstra 最短路徑演算法~\cite{dijkstra1959note}，並依本研究之目標影像與輸入特性作調整。
+本節之核心為「多源區域擴張」，基於經典之 Dijkstra 最短路徑演算法~\cite{dijkstra1959note}，並依本研究之目標影像與輸入特性作調整。
 
 \subsection{連通元件之標記}
 \label{subsec:cc}
@@ -472,12 +472,12 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
 \end{equation}
 \noindent 其中 $R(\mathbf{v}) = 0$ 表示節點 $\mathbf{v}$ 落於\textbf{表皮}內、$R(\mathbf{v}) = 1$ 表示落於\textbf{真皮}內。任一於 $E_{\text{cov}}$ 之邊 $(\mathbf{u}, \mathbf{v})$，若其兩端節點分屬不同區域，即 $R(\mathbf{u}) \ne R(\mathbf{v})$，則稱該邊為一條\textbf{跨越邊} (crossing edge)。圖~\ref{fig:crossing-point} 視覺化所偵測之跨越邊位置（圖~\ref{fig:crossing} 各子圖中之黃色虛線皆為表皮遮罩 $M$ 之下邊緣，作為區分表皮側與真皮側之參考）。
 
-\subsection{有效跨越計數}
+\subsection{有效神經纖維計數}
 \label{subsec:effective-count}
 
-在上述區域標記完成後，本研究依\textbf{線段}（而非邊）為單位計算跨越數；遵循 EFNS/PNS 切片計數規範~\cite{jointtaskforce2010skinbiopsy}，一條線段即使包含多個跨越邊亦僅計為一次。偶然搭上 DEJ 一小段即折返之毛刺已於 第~\ref{subsec:stub-prune}~節之短樁修剪階段一併排除，故於此階段不再對線段於兩側區域之延伸長度施加額外限制。
+在上述區域標記完成後，本研究依\textbf{線段}（而非邊）為單位計算跨越數；遵循 EFNS/PNS 切片計數規範~\cite{jointtaskforce2010skinbiopsy}，一條線段即使包含多個跨越邊亦僅計為一次。
 
-綜上所述，一條線段被計為一次有效跨越，需\textbf{同時}滿足：(i) 其所屬連通分量已通過微粒涵蓋篩選（第~\ref{subsec:coverage-filter}~節）而保留於 $G_{\text{cov}}$ 中；(ii) 至少包含一條跨越邊。滿足之線段總數 $N_{\text{pred}}$ 即為 AEL 輸出之有效跨越數，最終計入之線段如圖~\ref{fig:crossing-effective} 所示，於該示例中最終計入之線段數為 $2$。若已知切片之表皮長度（可自 $M$ 之上緣輪廓計算），$N_{\text{pred}}$ 可用於計算 IENFD，並與專家人工計數直接比較。
+綜上所述，一條線段被計為一次有效跨越，需\textbf{同時}滿足：(i) 其所屬連通分量已通過微粒涵蓋篩選（第~\ref{subsec:coverage-filter}~節）而保留於 $G_{\text{cov}}$ 中；(ii) 至少包含一條跨越邊。滿足之線段總數 $N_{\text{pred}}$ 即為 AEL 輸出之有效神經纖維數，最終計入之線段如圖~\ref{fig:crossing-effective} 所示，於該示例中最終計入之線段數為 $2$。若已知切片之表皮長度（可自 $M$ 之上緣輪廓計算），$N_{\text{pred}}$ 可用於計算 IENFD，並與專家人工計數直接比較。
 
 \begin{figure}[htbp]
   \centering
@@ -508,14 +508,14 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
 \section{本章小結}
 \label{sec:method-summary}
 
-綜合前述各節之說明，AEL 自輸入影像至有效跨越數之完整流程可整理為演算法~\ref{alg:ael}。本研究提出之 AEL 演算法以多源區域擴張為核心，將原本不完整之纖維微粒標註逐步整合為一個於像素層級具一致性之拓樸圖：擴張過程於成本圖上自動劃分各元件之 沃羅諾伊 領域，並於相鄰領域邊界處產生具最小累積成本之相遇點，藉此重建因斷裂而失聯之纖維延續關係。為避免遠距離元件之高成本相遇被誤納，AEL 進一步在元件層圖上施以閾值裁剪並計算最小生成森林，使每棵樹對應一條重建後之纖維、同時抑制偽連線與冗餘連線。最後將樹邊之像素路徑與原微粒標註取聯集後骨架化，並於骨架上以線段為單位執行區域標記與有效跨越判定；輸出之 $N_{\text{pred}}$ 結合切片之表皮長度即和 IENFD 相比，完成自破碎之纖維微粒至可量化指標之完整流程。
+綜合前述各節之說明，AEL 自輸入影像至有效神經纖維數之完整流程可整理為演算法~\ref{alg:ael}。本研究提出之 AEL 演算法以多源區域擴張為核心，將原本不完整之纖維微粒標註逐步整合為一個於像素層級具一致性之拓樸圖：擴張過程於成本圖上自動劃分各元件之沃羅諾伊領域，並於相鄰領域邊界處產生具最小累積成本之相遇點，藉此重建因斷裂而失聯之纖維延續關係。為避免遠距離元件之高成本相遇被誤納，AEL 進一步在元件層圖上施以閾值裁剪並計算最小生成森林，使每棵樹對應一條重建後之纖維、同時抑制偽連線與冗餘連線。最後將樹邊之像素路徑與原微粒標註取聯集後骨架化，並於骨架上以線段為單位執行區域標記與有效神經纖維判定；輸出之 $N_{\text{pred}}$ 結合切片之表皮長度即和 IENFD 相比，完成自破碎之纖維微粒至可量化指標之完整流程。
 
 
 \begin{algorithm}[htbp]
   \caption{Annotation Expansion Linker}
   \label{alg:ael}
   \textbf{Input:} histological image $I$, epidermis mask $M$, particle annotation $P$; parameters $\{\text{offset}, r_{\text{bg}}, n_{\text{tile}}, \beta, \sigma_{\min}, \sigma_{\max}, \tau, r_d, \ell_{\min}, N_{\min}\}$.\\
-  \textbf{Output:} pixel-level topology graph $G_{\text{trim}}$ and effective crossing count $N_{\text{pred}}$.
+  \textbf{Output:} pixel-level topology graph $G_{\text{trim}}$ and effective nerve fiber count $N_{\text{pred}}$.
   \begin{enumerate}
     \item Compute the region-of-interest mask $M_{\text{ROI}}$ from the epidermis mask $M$ via Eq.~\eqref{eq:roi}.
     \item Compute the enhanced image $I_{\text{enhanced}}$ of the green channel within the region of interest (Sec.~\ref{subsec:enhance}).
@@ -530,7 +530,7 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
     \item Obtain the topology $G_{\text{trim}}$ from $G_{\text{skel}}$(Secs.~\ref{subsec:segment}--\ref{subsec:stub-prune}).
     \item Apply filtering to $G_{\text{trim}}$ to obtain $G_{\text{cov}}$ (Sec.~\ref{subsec:coverage-filter}).
     \item Region-label every node of $G_{\text{cov}}$ via Eq.~\eqref{eq:region-label}.
-    \item Count the effective crossings on $G_{\text{cov}}$ to obtain $N_{\text{pred}}$ (Sec.~\ref{subsec:effective-count}).
+    \item Count the effective nerve fibers on $G_{\text{cov}}$ to obtain $N_{\text{pred}}$ (Sec.~\ref{subsec:effective-count}).
   \end{enumerate}
 \end{algorithm}
 

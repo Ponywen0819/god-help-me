@@ -12,7 +12,7 @@
 
 \begin{enumerate}
   \item \textbf{中介產物之視覺檢驗：} AEL 除重建之纖維拓樸圖外，其最終量化指標為一純量計數 $N_{\text{pred}}$，而此計數之品質高度依賴前處理、成本圖與多源擴張等中介結果之合理性；臨床端使用者需能即時觀察各階段之輸出疊合於原始影像上，以判斷個別參數設定是否合理。
-  \item \textbf{人為修整之回饋迴圈：} 於染色嚴重斷裂或微粒標註本身有誤之切片上，自動重建之結果未必能完全符合專家判讀；使用者需能於重建後直接在影像上新增、刪除節點與邊，並以修整後之拓樸重新進行有效跨越計數。
+  \item \textbf{人為修整之回饋迴圈：} 於染色嚴重斷裂或微粒標註本身有誤之切片上，自動重建之結果未必能完全符合專家判讀；使用者需能於重建後直接在影像上新增、刪除節點與邊，並以修整後之拓樸重新進行有效神經纖維計數。
 \end{enumerate}
 
 本工具即針對此兩項需求設計：以多圖層疊合呈現中介產物、並提供互動式圖形編輯與重新計數。
@@ -29,7 +29,7 @@
 
 \begin{enumerate}
   \item \textbf{左側邊欄 (Sidebar)：} 該區域主要負責控制，並依照功能分成多個分頁。包括樣本讀取、圖層控制與演算法控制。
-  \item \textbf{頂部工具列 (Top Toolbar)：} 包含模式切換按鈕與當前樣本資訊顯示（有效跨越數與圖片大小），並且帶有重置重建圖按鈕。
+  \item \textbf{頂部工具列 (Top Toolbar)：} 包含模式切換按鈕與當前樣本資訊顯示（有效神經纖維數與圖片大小），並且帶有重置重建圖按鈕。
   \item \textbf{中央畫布 (Canvas)：} 影像圖層與重建圖之疊合區域，支援平移、縮放與互動式編輯。
 \end{enumerate}
 
@@ -49,10 +49,10 @@
   \item \textbf{選擇工作目錄：}於左側邊欄之\textbf{檔案} (Files) 分頁點擊\textbf{選擇工作目錄} (Select Working Folder) 按鈕，選定一存放待分析樣本之工作目錄。該目錄下之每個樣本各為一子資料夾，其中依檔名前綴放置\textbf{原始影像}（\texttt{image}）、\textbf{表皮遮罩}（\texttt{epidermis}）與\textbf{纖維微粒遮罩}（\texttt{particle}）三張影像；本工具會掃描該目錄並於分頁中列出所有可用樣本。所選工作目錄會被記憶，下次啟動時自動回復。
   \item \textbf{選擇樣本：}於同一分頁之樣本清單點選欲分析之切片，本工具即\textbf{自動載入}該樣本之 RGB 原始影像、表皮二值遮罩與纖維微粒標註遮罩三層，毋需逐張手動上傳；若該樣本先前已有自動儲存之工作階段，亦會一併還原其圖層設定、重建圖與計數結果。
   \item \textbf{開啟參數視窗檢視預設值（非必要）：}若無特殊需求，可直接沿用預設參數；如需調整，可切換至\textbf{演算法} (Algorithm) 分頁並點擊\textbf{參數} (Parameters) 按鈕（詳見第~\ref{sec:tool-params}~節）。
-  \item \textbf{執行管線：}於\textbf{演算法}分頁點擊\textbf{全部執行} (Run All) 按鈕，後端會依序執行\textbf{感興趣區域} (ROI Mask)、\textbf{前處理} (Preprocess)、\textbf{重建} (Reconstruct) 三階段（第~\ref{sec:tool-pipeline}~節），並於重建完成後\textbf{自動計數}；完成後畫布上即呈現重建圖，頂部工具列之\textbf{有效跨越數} (Effective Crossings) 欄位即顯示計數結果。
+  \item \textbf{執行管線：}於\textbf{演算法}分頁點擊\textbf{全部執行} (Run All) 按鈕，後端會依序執行\textbf{感興趣區域} (ROI Mask)、\textbf{前處理} (Preprocess)、\textbf{重建} (Reconstruct) 三階段（第~\ref{sec:tool-pipeline}~節），並於重建完成後\textbf{自動計數}；完成後畫布上即呈現重建圖，頂部工具列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位即顯示計數結果。
   \item \textbf{重建結果修改（非必要）：}若自動重建之結果與專家判讀有出入，可於頂部工具列切換成\textbf{纖維編輯} (Fiber Edit) 模式，於畫布上新增、刪除節點與邊以修整圖（第~\ref{sec:tool-edit}~節）。
   \item \textbf{遮罩修改（非必要）：}若樣本之表皮遮罩或纖維微粒遮罩本身有誤，可於頂部工具列切換成\textbf{表皮編輯} (Epidermis Edit) 或\textbf{纖維微粒編輯} (Particle Edit) 模式，於畫布上直接塗改\textbf{表皮遮罩} (Epidermis Mask) 與\textbf{纖維微粒遮罩} (Particle Mask)。惟此二遮罩為管線之\textbf{輸入}，修改後不會自動更新重建結果，須重新點擊\textbf{全部執行}重跑整個演算法，方能將變更反映於後續之重建與計數。
-  \item \textbf{即時重新計數：}修整過程中\textbf{毋需手動觸發計數}；本工具會於每次編輯後\textbf{自動}將當前修整後之圖送回後端重算，頂部工具列之有效跨越數與畫布上綠色有效跨越邊即隨之同步更新（詳見第~\ref{subsec:count-current}~節）。
+  \item \textbf{即時重新計數：}修整過程中\textbf{無需手動觸發計數}；本工具會於每次編輯後\textbf{自動}將當前修整後之圖送回後端重算，頂部工具列之有效神經纖維數與畫布上綠色有效邊即隨之同步更新（詳見第~\ref{subsec:count-current}~節）。
   \item \textbf{保存結果：}於\textbf{自動儲存} (Auto-save) 開啟時（預設），上述所有編輯之結果——包含修整後之重建圖、塗改後之遮罩與工作階段狀態——皆會自動寫回樣本資料夾，毋需任何存檔操作；若需將結果另存為指定檔名或輸出至他處，則使用\textbf{檔案}分頁之三個手動儲存按鈕（詳見第~\ref{sec:tool-io}~節）。
 \end{enumerate}
 
@@ -356,21 +356,21 @@
 \section{頂部工具列}
 \label{sec:tool-toolbar}
 
-頂部工具列橫跨主視窗頂端，由左至右包含：四個\textbf{互動模式}切換按鈕、兩項當前樣本之讀數（有效跨越數與影像尺寸）、一個\textbf{自動儲存狀態指示器}、當前重建圖之節點與邊計數，以及一個\textbf{清除}按鈕。模式切換按鈕之行為詳見第~\ref{sec:tool-modes}~節、清除按鈕詳見第~\ref{subsec:edit-clear}~節；本節說明工具列之兩項讀數、自動儲存指示器，及讀數背後之自動計數。
+頂部工具列橫跨主視窗頂端，由左至右包含：四個\textbf{互動模式}切換按鈕、兩項當前樣本之讀數（有效神經纖維數與影像尺寸）、一個\textbf{自動儲存狀態指示器}、當前重建圖之節點與邊計數，以及一个\textbf{清除}按鈕。模式切換按鈕之行為詳見第~\ref{sec:tool-modes}~節、清除按鈕詳見第~\ref{subsec:edit-clear}~節；本節說明工具列之兩項讀數、自動儲存指示器，及讀數背後之自動計數。
 
-\subsection{有效跨越數與自動計數}
+\subsection{有效神經纖維數與自動計數}
 \label{subsec:count-current}
 
-工具列之\textbf{有效跨越數} (Effective Crossings) 欄位顯示最近一次計數之 $N_{\text{pred}}$（如圖~\ref{fig:count-badge} 所示）。此計數\textbf{不設獨立按鈕、亦非管線階段}，而是由前端持續監看畫布上之重建圖：凡重建圖發生變動——無論是重建階段產生之新圖，或使用者於纖維編輯模式下增刪節點與邊——本工具即自動將\textbf{當前畫布上之重建圖}送回後端計數，該欄位之數值與畫布上綠色有效跨越邊隨之同步更新。為避免連續編輯期間發出過多請求，計數採短暫去抖動：一連串編輯僅於停止後觸發一次，且恆以最新之圖為準。
+工具列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位顯示最近一次計數之 $N_{\text{pred}}$（如圖~\ref{fig:count-badge} 所示）。此計數\textbf{不設獨立按鈕、亦非管線階段}，而是由前端持續監看畫布上之重建圖：凡重建圖發生變動——無論是重建階段產生之新圖，或使用者於纖維編輯模式下增刪節點與邊——本工具即自動將\textbf{當前畫布上之重建圖}送回後端計數，該欄位之數值與畫布上綠色有效神經纖維邊隨之同步更新。為避免連續編輯期間發出過多請求，計數採短暫去抖動：一連串編輯僅於停止後觸發一次，且恆以最新之圖為準。
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.3\linewidth]{figures/gui/cross.png}
-  \caption[計數結果之資訊框]{頂部工具列之\textbf{有效跨越數} (Effective Crossings) 欄位，於計數完成後顯示其數值。}
+  \caption[計數結果之資訊框]{頂部工具列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位，於計數完成後顯示其數值。}
   \label{fig:count-badge}
 \end{figure}
 
-如此「重建 $\to$ 編輯 $\to$ 重新計數」之人機協同流程近乎透明：使用者只需於自動重建後切入纖維編輯模式修整重建圖，畫布上之有效跨越數與綠色有效跨越邊即隨每次編輯自動同步更新，無須手動觸發計數。
+如此「重建 $\to$ 編輯 $\to$ 重新計數」之人機協同流程近乎透明：使用者只需於自動重建後切入纖維編輯模式修整重建圖，畫布上之有效神經纖維數與綠色有效邊即隨每次編輯自動同步更新，無須手動觸發計數。
 
 \subsection{影像尺寸}
 \label{subsec:toolbar-imagesize}

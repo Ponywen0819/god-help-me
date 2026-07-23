@@ -34,7 +34,7 @@
   \item \textbf{表皮遮罩} $M$：以多邊形標註表皮區域。
   \item \textbf{纖維微粒}標註 $P$：由人工標註之纖維微粒遮罩。
   \item \textbf{神經纖維骨架遮罩} $S_{\text{gt}}$：由神經學專家於原影像上人工標註之纖維骨架二值遮罩，作為拓樸品質評估之真值。
-  \item \textbf{有效跨越數真值} $N_{\text{gt}}$：由神經病專家於原影像上依 EFNS 規則~\cite{jointtaskforce2010skinbiopsy} 人工計數而得。
+  \item \textbf{有效神經纖維數真值} $N_{\text{gt}}$：由神經病專家於原影像上依 EFNS 規則~\cite{jointtaskforce2010skinbiopsy} 人工計數而得。
 \end{enumerate}
 
 上述前四項具影像形式之資料，其內容與外觀示意於圖~\ref{fig:dataset-inputs}。
@@ -172,9 +172,9 @@
 
 \noindent 式中 $d(\cdot, S)$ 之意義同式~\eqref{eq:hd95}、$\operatorname{mean}\{\cdot\}$ 為對集合內所有元素取算術平均 (arithmetic mean) 之運算子；外層之 $\tfrac{1}{2}(\cdot + \cdot)$ 則對兩個方向之平均距離再取算術平均，使 $\text{HD}_{\text{avg}}$ 成為對稱之雙向距離。$\text{HD}_{\text{avg}}$ 與 HD95 之差異有二：其一，逐方向以\textbf{算術平均}取代 $95\%$ 分位數，使骨架上每一像素之偏差均納入計算；其二，兩方向之彙整以\textbf{平均}取代 $\max$，反映整體而非單側之貼合程度。$\text{HD}_{\text{avg}}$ 因此刻畫的是\textbf{典型}而非\textbf{極端}之距離誤差，單位同為微米 ($\mu$m)，越低越好。三項指標因此各有分工：$\text{Dice}_{\text{cl}}$ 自\textbf{重疊與拓樸連通}之角度評估重建品質、HD95 自\textbf{距離}角度刻畫抑制離群後之最壞偏差、$\text{HD}_{\text{avg}}$ 則自\textbf{距離}角度刻畫平均偏差；三者並用，較能兼顧重建結果之拓樸完整性與幾何精確度。
 
-\subsection{跨越計數指標}
+\subsection{有效神經纖維計數指標}
 
-令 $N_{\text{pred}}$ 為演算法輸出之有效跨越數、$N_{\text{gt}}$ 為其真值，並以上標 $(k)$ 標示第 $k$ 張切片、$K$ 為切片總數；本研究定義以下三項\textbf{切片層級}之指標：
+令 $N_{\text{pred}}$ 為演算法輸出之有效神經纖維數、$N_{\text{gt}}$ 為其真值，並以上標 $(k)$ 標示第 $k$ 張切片、$K$ 為切片總數；本研究定義以下三項\textbf{切片層級}之指標：
 
 \begin{itemize}
   \item \textbf{平均絕對誤差 (Mean Absolute Error, MAE)} $N_{\text{MAE}}$：
@@ -1249,14 +1249,14 @@ AEL 於 $\text{Dice}_{\text{cl}}$、HD95 與 $\text{HD}_{\text{avg}}$ 三項指�
 
 AEL 較 MSF 之進一步改善則於三項指標上呈現可解釋之層次：$\text{Dice}_{\text{cl}}$ 僅多 $1.23$ 百分點（$89.30 \to 90.57$）、$\text{HD}_{\text{avg}}$ 降低約 $6\%$（$0.7843 \to 0.7340\,\mu\text{m}$）、HD95 則降低約 $19\%$（$3.0443 \to 2.4496\,\mu\text{m}$）。此一層次與 AEL 之成本設計相符：$\text{Dice}_{\text{cl}}$ 採 $1.28\,\mu\text{m}$ 之物理容忍半徑，只要路徑落於真實纖維附近就計入命中，MSF 既然已連結成功，其 $\text{Dice}_{\text{cl}}$ 自然貼近 AEL；$\text{HD}_{\text{avg}}$ 對全骨架之雙向最短距離取平均，AEL 之改善幅度有限；而 HD95 所刻畫之最壞情形偏差，正是 MSF 因不受形態學成本約束而容易產生偏離真值之短捷徑路徑之處——AEL 之多源成本聚合在此處發揮最大作用，明顯壓低最壞情形之偏差。
 
-\subsection{跨越計數結果}
+\subsection{有效神經纖維計數結果}
 \label{subsec:counting-results}
 
-表~\ref{tab:main-results} 彙整 AEL 與 MSF 之跨越計數指標，其中 MAE、RMSE 越低越好、$\rho$ 越接近 $1$ 越好。
+表~\ref{tab:main-results} 彙整 AEL 與 MSF 之有效神經纖維計數指標，其中 MAE、RMSE 越低越好、$\rho$ 越接近 $1$ 越好。
 
 \begin{table}[htbp]
   \centering
-  \caption{各連結方法於本資料集上之跨越計數指標。}
+  \caption{各連結方法於本資料集上之有效神經纖維計數指標。}
   \label{tab:main-results}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -1270,7 +1270,7 @@ AEL 較 MSF 之進一步改善則於三項指標上呈現可解釋之層次：$\
   \end{tabular}
 \end{table}
 
-AEL 於 MAE、RMSE 兩項誤差指標上皆低於 MSF，$\rho$ 亦較 MSF 為高；此一計數指標之排序與第~\ref{subsec:topo-results}~節之拓樸品質排序一致，佐證較高之 $\rho$ 確實對應較佳之重建品質。相較於 MSF，AEL 將 MAE 降低約 $16\%$（$6.0000 \to 5.0521$）、RMSE 降低約 $15\%$（$7.9451 \to 6.7662$），且兩項差距於配對檢定下皆達 $p < 0.001$。值得注意的是，MSF 之 $\rho = 0.8418$ 已接近 AEL 之 $0.8662$，顯示\textbf{單純之微粒連結}已足以反映切片間計數之相對趨勢；但其絕對誤差仍顯著高於 AEL，意謂連結拓樸雖能捕捉趨勢，卻缺乏對纖維形態與跨越有效性之約束來校正絕對量。AEL 透過第~\ref{chap:method}~章所述之多源成本聚合、形態學剪枝與跨越有效性判定，在趨勢一致之基礎上進一步壓低絕對誤差。
+AEL 於 MAE、RMSE 兩項誤差指標上皆低於 MSF，$\rho$ 亦較 MSF 為高；此一計數指標之排序與第~\ref{subsec:topo-results}~節之拓樸品質排序一致，佐證較高之 $\rho$ 確實對應較佳之重建品質。相較於 MSF，AEL 將 MAE 降低約 $16\%$（$6.0000 \to 5.0521$）、RMSE 降低約 $15\%$（$7.9451 \to 6.7662$），且兩項差距於配對檢定下皆達 $p < 0.001$。值得注意的是，MSF 之 $\rho = 0.8418$ 已接近 AEL 之 $0.8662$，顯示\textbf{單純之微粒連結}已足以反映切片間計數之相對趨勢；但其絕對誤差仍顯著高於 AEL，意謂連結拓樸雖能捕捉趨勢，卻缺乏對纖維形態與有效神經纖維有效性之約束來校正絕對量。AEL 透過第~\ref{chap:method}~章所述之多源成本聚合、形態學剪枝與有效神經纖維有效性判定，在趨勢一致之基礎上進一步壓低絕對誤差。
 
 
 \section{討論}
