@@ -432,10 +432,10 @@ $\mathcal{B}$ 將分散於各邊之像素路徑整合為單一之像素層遮罩
 \noindent 其中 $G_{\text{trim}}$ 為後續交叉點分析所依據之最終像素級拓樸，如圖~\ref{fig:bs-pruned} 所示之結果。
 
 
-\section{交叉點分析與有效跨越計數}
+\section{交叉點分析與有效神間纖維計數}
 \label{sec:crossing}
 
-在 第~\ref{sec:skeleton}~節已建構出經分段與短樁修剪之像素級拓樸 $G_{\text{trim}}$ 後，本節依序執行三個步驟以將其轉換為可計數之 IENFD：(i) 於纖維層以微粒涵蓋數篩除偽神經，得到僅由篩選後神經組成之 $G_{\text{cov}}$；(ii) 於 $G_{\text{cov}}$ 上對節點進行區域標記，並依此判定跨越邊；(iii) 將跨越邊以所屬線段為單位彙整，計數有效跨越事件。
+在 第~\ref{sec:skeleton}~節已建構出經分段與短樁修剪之像素級拓樸 $G_{\text{trim}}$ 後，本節依序執行三個步驟以將其轉換為可計數之 IENFD：(i) 於纖維層以微粒涵蓋數篩除偽神經，得到僅由篩選後神經組成之 $G_{\text{cov}}$；(ii) 於 $G_{\text{cov}}$ 上對節點進行區域標記，並依此判定跨越邊；(iii) 將跨越邊以所屬線段為單位彙整，計數有效神經纖維。
 
 \subsection{纖維層之微粒涵蓋篩選}
 \label{subsec:coverage-filter}
@@ -518,17 +518,17 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
   \textbf{Output:} pixel-level topology graph $G_{\text{trim}}$ and effective nerve fiber count $N_{\text{pred}}$.
   \begin{enumerate}
     \item Compute the region-of-interest mask $M_{\text{ROI}}$ from the epidermis mask $M$ via Eq.~\eqref{eq:roi}.
-    \item Compute the enhanced image $I_{\text{enhanced}}$ of the green channel within the region of interest (Sec.~\ref{subsec:enhance}).
+    \item Compute the enhanced image $I_{\text{enhanced}}$ of the green channel within the region of interest via Eq.~\eqref{eq:sato-norm}.
     \item Compute the pixel cost map $C$ from $I_{\text{enhanced}}$ via Eq.~\eqref{eq:cost}.
     \item Label the fiber particles within $M_{\text{ROI}}$ to obtain the component label map $L$ and the component count $N$, used as expansion seeds (Sec.~\ref{subsec:cc}).
-    \item Run the multi-source region expansion on $C$ to obtain the per-pixel owner, accumulated-cost, and predecessor maps (Sec.~\ref{subsec:dijkstra-rule}).
-    \item Detect the meeting points $\mathcal{P}$ (Sec.~\ref{subsec:meeting-def}).
-    \item Build the component-level graph $G_c$ from $\mathcal{P}$ (Sec.~\ref{subsec:build-gc}).
+    \item Run the multi-source region expansion on $C$ via Eq.~\eqref{eq:dijkstra-update} to obtain the per-pixel owner, accumulated-cost, and predecessor maps.
+    \item Detect the meeting points $\mathcal{P}$ via Eq.~\eqref{eq:meet-cost}.
+    \item Build the component-level graph $G_c$ from $\mathcal{P}$ via Eq.~\eqref{eq:gc-edges}.
     \item Remove the edges whose weight exceeds the threshold $\tau$ to obtain $G_c^{\text{pruned}}$ (Sec.~\ref{sec:prune-mst}).
     \item Compute the minimum spanning forest $G_{\text{msf}}$ of $G_c^{\text{pruned}}$ (Sec.~\ref{sec:prune-mst}).
-    \item Construct skeleton $G_{\text{skel}}$ from $G_{\text{msf}}$ (Sec.~\ref{subsec:bridge-skeleton}).
+    \item Construct skeleton $G_{\text{skel}}$ from $G_{\text{msf}}$ via Eq.~\eqref{eq:gskel}.
     \item Obtain the topology $G_{\text{trim}}$ from $G_{\text{skel}}$(Secs.~\ref{subsec:segment}--\ref{subsec:stub-prune}).
-    \item Apply filtering to $G_{\text{trim}}$ to obtain $G_{\text{cov}}$ (Sec.~\ref{subsec:coverage-filter}).
+    \item Apply filtering to $G_{\text{trim}}$ to obtain $G_{\text{cov}}$ via Eq.~\eqref{eq:particle-min}.
     \item Region-label every node of $G_{\text{cov}}$ via Eq.~\eqref{eq:region-label}.
     \item Count the effective nerve fibers on $G_{\text{cov}}$ to obtain $N_{\text{pred}}$ (Sec.~\ref{subsec:effective-count}).
   \end{enumerate}
