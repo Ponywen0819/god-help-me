@@ -126,7 +126,7 @@
 \subsection{像素成本圖}
 \label{subsec:cost}
 
-令 $\tilde{I}_{\text{enhanced}}(x, y) = I_{\text{enhanced}}(x, y) / 255 \in [0, 1]$ 為正規化後之纖維響應，本研究將像素成本定義為
+令 $\tilde{I}_{\text{enhanced}}(x, y) = I_{\text{enhanced}}(x, y) / 255 \in [0, 1]$ 為正規化後之纖維響應。本研究之連結策略延續\textbf{測地線最短路徑} (geodesic minimal path) 之框架~\cite{cohen1997global, chen2019active}將像素成本定義為
 
 \begin{equation}
   C(x, y) \;=\; e^{\,1 - \tilde{I}_{\text{enhanced}}(x, y)} - 1.
@@ -527,8 +527,8 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
     \item Compute the pixel cost map $C$ from $I_{\text{enhanced}}$ via Eq.~\eqref{eq:cost}.
     \item Label the fiber particles within $M_{\text{ROI}}$ to obtain the component label map $L$ and the component count $N$, used as expansion seeds (Sec.~\ref{subsec:cc}).
     \item Run the multi-source region expansion on $C$ via Eq.~\eqref{eq:dijkstra-update} to obtain the per-pixel owner, accumulated-cost, and predecessor maps.
-    \item Detect the meeting points $\mathcal{P}$ via Eq.~\eqref{eq:meet-cost}.
-    \item Build the component-level graph $G_c$ from $\mathcal{P}$ via Eq.~\eqref{eq:gc-edges}.
+    \item Detect the meeting points via Eq.~\eqref{eq:meet-cost}.
+    \item Build the component-level graph $G_c$ via Eq.~\eqref{eq:gc-edges}.
     \item Remove the edges whose weight exceeds the threshold $\tau$ to obtain $G_c^{\text{pruned}}$ (Sec.~\ref{sec:prune-mst}).
     \item Compute the minimum spanning forest $G_{\text{msf}}$ of $G_c^{\text{pruned}}$ (Sec.~\ref{sec:prune-mst}).
     \item Construct skeleton $G_{\text{skel}}$ from $G_{\text{msf}}$ via Eq.~\eqref{eq:gskel}.

@@ -150,7 +150,7 @@
 \end{equation}
 \noindent 其中 $r_v$ 控制容忍範圍之大小。為使容忍範圍在不同解析度之切片間對應一致之實際距離，本研究不以固定像素數設定 $r_v$，而是先指定一固定之物理容忍半徑、再逐樣本依其像素物理標度換算為對應之離散像素半徑。
 
-此一物理容忍半徑之取值，依專家標註纖維之實際粗細而定。容忍範圍旨在涵蓋纖維之\textbf{物理橫向範圍}——纖維本身具有限寬度，預測中心線只要落於真實纖維體內，即應視為命中，因此容忍半徑應對應纖維中心線至其邊緣之寬度。為此，本研究以距離轉換 (distance transform) 量測全部 $77$ 張切片之專家標註神經纖維於中心線各像素處之物理半寬，共 $920{,}503$ 個中心線像素：其半寬分布之中位數為 $0.64\,\mu\text{m}$、第 $95$ 百分位為 $1.28\,\mu\text{m}$。取 $r_v = 1.28\,\mu\text{m}$ 可使容忍範圍涵蓋約 $95\%$ 中心線位置之纖維半寬，標準不過嚴（若取中位數 $0.64\,\mu\text{m}$ 則僅涵蓋半數），也不過寬；此值並不低於兩種掃描解析度子集各自之第 $90$ 百分位（$0.32\,\mu\text{m/像素}$ 子集為 $0.96\,\mu\text{m}$、$0.64\,\mu\text{m/像素}$ 子集為 $1.28\,\mu\text{m}$），對解析度差異具穩健性。此外，$1.28\,\mu\text{m}$ 恰對應兩種解析度下之整數像素半徑——於 $0.32\,\mu\text{m/像素}$ 之影像 $r_v = 4\,\text{像素}$、於 $0.64\,\mu\text{m/像素}$ 之影像 $r_v = 2\,\text{像素}$——無須採用次像素結構元。此物理尺度因此既能吸收離散化與標註之微小偏移，又能使容忍範圍貼合纖維之實際粗細。
+此一物理容忍半徑之取值，依專家標註纖維之實際粗細而定。容忍範圍旨在涵蓋纖維之\textbf{物理橫向範圍}——纖維本身具有限寬度，預測中心線只要落於真實纖維體內，即應視為命中，因此容忍半徑對應纖維中心線至其邊緣之寬度。為此，本研究以距離轉換 (distance transform) 量測全部 $77$ 張切片之專家標註神經纖維於中心線各像素處之物理半寬，共 $920{,}503$ 個中心線像素：其半寬分布之中位數為 $0.64\,\mu\text{m}$、第 $95$ 百分位為 $1.28\,\mu\text{m}$。取 $r_v = 1.28\,\mu\text{m}$ 可使容忍範圍涵蓋約 $95\%$ 中心線位置之纖維半寬，標準不過嚴（若取中位數 $0.64\,\mu\text{m}$ 則僅涵蓋半數），此值並不低於兩種掃描解析度子集各自之第 $90$ 百分位（$0.32\,\mu\text{m/像素}$ 子集為 $0.96\,\mu\text{m}$、$0.64\,\mu\text{m/像素}$ 子集為 $1.28\,\mu\text{m}$），對解析度差異具穩健性。此外，$1.28\,\mu\text{m}$ 恰對應兩種解析度下之整數像素半徑——於 $0.32\,\mu\text{m/像素}$ 之影像 $r_v = 4\,\text{像素}$、於 $0.64\,\mu\text{m/像素}$ 之影像 $r_v = 2\,\text{像素}$——無須採用次像素結構元。此物理尺度因此既能吸收離散化與標註之微小偏移，又能使容忍範圍貼合纖維之實際粗細。
 
 \noindent 相較於一般 Dice，$\text{Dice}_{\text{cl}}$針對\textbf{拓樸中斷}較為敏感，因此適合評估本研究所關注之微粒重建品質。
 
@@ -172,17 +172,36 @@
 
 \noindent 式中 $d(\cdot, S)$ 之意義同式~\eqref{eq:hd95}、$\operatorname{mean}\{\cdot\}$ 為對集合內所有元素取算術平均 (arithmetic mean) 之運算子；外層之 $\tfrac{1}{2}(\cdot + \cdot)$ 則對兩個方向之平均距離再取算術平均，使 $\text{HD}_{\text{avg}}$ 成為對稱之雙向距離。$\text{HD}_{\text{avg}}$ 與 HD95 之差異有二：其一，逐方向以\textbf{算術平均}取代 $95\%$ 分位數，使骨架上每一像素之偏差均納入計算；其二，兩方向之彙整以\textbf{平均}取代 $\max$，反映整體而非單側之貼合程度。$\text{HD}_{\text{avg}}$ 因此刻畫的是\textbf{典型}而非\textbf{極端}之距離誤差，單位同為微米 ($\mu$m)，越低越好。三項指標因此各有分工：$\text{Dice}_{\text{cl}}$ 自\textbf{重疊與拓樸連通}之角度評估重建品質、HD95 自\textbf{距離}角度刻畫抑制離群後之最壞偏差、$\text{HD}_{\text{avg}}$ 則自\textbf{距離}角度刻畫平均偏差；三者並用，較能兼顧重建結果之拓樸完整性與幾何精確度。
 
+\subsection{拓樸總長度誤差指標}
+
+除上述以\textbf{中心線}逐點比對之指標外，本研究另以\textbf{拓樸總長度誤差}衡量重建拓樸之整體規模是否貼近真值。定義 $L_{\text{pred}}$、$L_{\text{gt}}$ 分別為 $G_{\text{trim}}$、$S_{\text{gt}}$ 中所有邊之路徑長度總和——每條邊之長度以其路徑上相鄰點間之歐式距離逐段加總而得，而非連結階段用以搜尋最小成本路徑之\textbf{成本}——再依該切片之像素物理標度換算為微米 ($\mu$m)。以上標 $(k)$ 標示第 $k$ 張切片、$K$ 為切片總數，定義以下兩項\textbf{切片層級}之指標：
+
+\begin{itemize}
+  \item \textbf{平均絕對誤差 (Mean Absolute Error, MAE)} $L_{\text{MAE}}$：
+    \begin{equation}
+      L_{\text{MAE}} = \frac{1}{K} \sum_{k=1}^{K} \bigl| L^{(k)}_{\text{pred}} - L^{(k)}_{\text{gt}} \bigr|.
+      \label{eq:lmae}
+    \end{equation}
+  \item \textbf{均方根誤差 (Root Mean Square Error, RMSE)} $L_{\text{RMSE}}$：
+    \begin{equation}
+      L_{\text{RMSE}} = \sqrt{\dfrac{1}{K} \sum_{k=1}^{K} \bigl( L^{(k)}_{\text{pred}} - L^{(k)}_{\text{gt}} \bigr)^2}.
+      \label{eq:lrmse}
+    \end{equation}
+\end{itemize}
+
+\noindent $L_{\text{MAE}}$、$L_{\text{RMSE}}$ 皆越低越好，單位同為微米 ($\mu$m)。
+
 \subsection{有效神經纖維計數指標}
 
 令 $N_{\text{pred}}$ 為演算法輸出之有效神經纖維數、$N_{\text{gt}}$ 為其真值，並以上標 $(k)$ 標示第 $k$ 張切片、$K$ 為切片總數；本研究定義以下三項\textbf{切片層級}之指標：
 
 \begin{itemize}
-  \item \textbf{平均絕對誤差 (Mean Absolute Error, MAE)} $N_{\text{MAE}}$：
+  \item \textbf{平均絕對誤差} $N_{\text{MAE}}$：
     \begin{equation}
       N_{\text{MAE}} = \frac{1}{K} \sum_{k=1}^{K} \bigl| N^{(k)}_{\text{pred}} - N^{(k)}_{\text{gt}} \bigr|.
       \label{eq:mae}
     \end{equation}
-  \item \textbf{均方根誤差 (Root Mean Square Error, RMSE)} $N_{\text{RMSE}}$：
+  \item \textbf{均方根誤差} $N_{\text{RMSE}}$：
     \begin{equation}
       N_{\text{RMSE}} = \sqrt{\dfrac{1}{K} \sum_{k=1}^{K} \bigl( N^{(k)}_{\text{pred}} - N^{(k)}_{\text{gt}} \bigr)^2}.
       \label{eq:rmse}
@@ -201,7 +220,7 @@
 為評估各項比較之差異是否具統計意義，本研究依指標性質採用兩種不同之顯著性檢定：
 
 \begin{itemize}
-  \item \textbf{單尾 Wilcoxon 符號秩檢定} (one-sided signed-rank test)~\cite{wilcoxon1945individual}：適用於 $N_{\text{MAE}}$、$N_{\text{RMSE}}$、$\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 五項指標——五者皆可於\textbf{切片層級}逐張取得，故對待比較兩者之逐切片配對差值執行此檢定。對立假設為「所主張之一方較佳」，即其 $N_{\text{MAE}}$、$N_{\text{RMSE}}$、HD95 與 $\text{HD}_{\text{avg}}$ 較低、且 $\text{Dice}_{\text{cl}}$ 較高（主實驗中所主張者為 AEL、相對於各基準方法；參數分析中則為各參數之基準取值、相對於其鄰近取值；結構性消融中則為完整 AEL、相對於各消融變體）。
+  \item \textbf{單尾 Wilcoxon 符號秩檢定} (one-sided signed-rank test)~\cite{wilcoxon1945individual}：適用於 $N_{\text{MAE}}$、$N_{\text{RMSE}}$、$L_{\text{MAE}}$、$L_{\text{RMSE}}$、$\text{Dice}_{\text{cl}}$、HD95、$\text{HD}_{\text{avg}}$ 七項指標——七者皆可於\textbf{切片層級}逐張取得，故對待比較兩者之逐切片配對差值執行此檢定。對立假設為「所主張之一方較佳」，即其 $N_{\text{MAE}}$、$N_{\text{RMSE}}$、$L_{\text{MAE}}$、$L_{\text{RMSE}}$、HD95 與 $\text{HD}_{\text{avg}}$ 較低、且 $\text{Dice}_{\text{cl}}$ 較高（主實驗中所主張者為 AEL、相對於各基準方法；參數分析中則為各參數之基準取值、相對於其鄰近取值；結構性消融中則為完整 AEL、相對於各消融變體）。
   \item \textbf{$t$ 檢定} (t-test)~\cite{student1908correlation}：適用於 $\rho$。$\rho$ 為將整個資料集之 $(N_{\text{pred}}, N_{\text{gt}})$ 點對聚合後再計算之單一統計量，無法於切片層級與 AEL 配對比較；因此 $\rho$ 欄改以該方法自身之顯著性 $t$ 檢定（檢定 $\rho \ne 0$ 之雙尾 $t$ 檢定）。
 \end{itemize}
 
@@ -1221,7 +1240,7 @@
 \section{統計分析}
 \label{sec:quant}
 
-本節報告 AEL 與 MSF 基準於本資料集上之定量比較，依評估面向分為\textbf{拓樸品質}與\textbf{跨越計數}兩個子節：前者檢視重建骨架本身於形態上之品質，後者則直接對應臨床所關心之 IENF 計數結果。表中加粗者為各欄之最佳值；各表 $p$ 欄所採之顯著性檢定方式詳見第~\ref{subsec:significance}~節。
+本節報告 AEL 與 MSF 基準於本資料集上之定量比較，依評估面向分為\textbf{拓樸品質}、\textbf{拓樸總長度誤差}與\textbf{跨越計數}三個子節：第一者檢視重建骨架本身於形態上之品質，第二者檢視重建骨架之整體規模是否貼近真值，第三者則直接對應臨床所關心之 IENF 計數結果。表中加粗者為各欄之最佳值；各表 $p$ 欄所採之顯著性檢定方式詳見第~\ref{subsec:significance}~節。
 
 
 \subsection{拓樸品質結果}
@@ -1248,6 +1267,29 @@
 AEL 於 $\text{Dice}_{\text{cl}}$、HD95 與 $\text{HD}_{\text{avg}}$ 三項指標上皆優於 MSF。
 
 AEL 較 MSF 之進一步改善則於三項指標上呈現可解釋之層次：$\text{Dice}_{\text{cl}}$ 僅多 $1.23$ 百分點（$89.30 \to 90.57$）、$\text{HD}_{\text{avg}}$ 降低約 $6\%$（$0.7843 \to 0.7340\,\mu\text{m}$）、HD95 則降低約 $19\%$（$3.0443 \to 2.4496\,\mu\text{m}$）。此一層次與 AEL 之成本設計相符：$\text{Dice}_{\text{cl}}$ 採 $1.28\,\mu\text{m}$ 之物理容忍半徑，只要路徑落於真實纖維附近就計入命中，MSF 既然已連結成功，其 $\text{Dice}_{\text{cl}}$ 自然貼近 AEL；$\text{HD}_{\text{avg}}$ 對全骨架之雙向最短距離取平均，AEL 之改善幅度有限；而 HD95 所刻畫之最壞情形偏差，正是 MSF 因不受形態學成本約束而容易產生偏離真值之短捷徑路徑之處——AEL 之多源成本聚合在此處發揮最大作用，明顯壓低最壞情形之偏差。
+
+\subsection{拓樸總長度誤差結果}
+\label{subsec:length-results}
+
+本節報告第~\ref{sec:metrics}~節所定義之 $L_{\text{MAE}}$、$L_{\text{RMSE}}$（式~\eqref{eq:lmae}、式~\eqref{eq:lrmse}）於本資料集上之比較結果，兩者皆越低越好。表~\ref{tab:length-results} 顯示 AEL 之總長度誤差顯著低於 MSF。
+
+\begin{table}[htbp]
+  \centering
+  \caption{各連結方法於本資料集上之拓樸總長度誤差指標。}
+  \label{tab:length-results}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{lcccc}
+    \toprule
+    Method & $L_{\text{MAE}}$ ($\mu$m) $\downarrow$ & $p$ & $L_{\text{RMSE}}$ ($\mu$m) $\downarrow$ & $p$ \\
+    \midrule
+    MSF       & 319.93 $\pm$ 256.06 & 0.003** & 408.74 $\pm$ 411.38 & 0.002** \\
+    \textbf{AEL} & \textbf{242.94 $\pm$ 235.79} & --- & \textbf{337.48 $\pm$ 289.85} & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+AEL 將總長度 MAE 降低約 $24\%$（$319.93 \to 242.94\,\mu\text{m}$）、RMSE 降低約 $17\%$（$408.74 \to 337.48\,\mu\text{m}$），兩項差距於配對檢定下皆達 $p < 0.01$；此與第~\ref{subsec:topo-results}~節之拓樸品質結果一致，顯示 AEL 不僅骨架重合程度較高，其整體重建之纖維總長度亦更貼近真值。
 
 \subsection{有效神經纖維計數結果}
 \label{subsec:counting-results}
