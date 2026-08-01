@@ -3,7 +3,7 @@
 \appendix{B}{視覺化神經纖維分析工具}
 \label{app:tool}
 
-為使第~\ref{chap:method}~章所述之 AEL 演算法得以互動執行、視覺檢驗、並進一步支援使用者於重建結果上手動修整再重新計數，本研究實作了一套桌面端之圖形使用者介面工具（以下簡稱\textbf{本工具}）。本附錄依序介紹設計動機、執行環境與系統架構、介面布局、典型工作流程、側邊欄分頁（檔案、圖層、演算法與纖維）、中央畫布、頂部工具列、互動模式、圖形編輯、遮罩塗改，以及檔案儲存與結果輸出。
+為使第~\ref{chap:method}~章所述之 AEL 演算法得以互動執行、視覺檢驗、並進一步支援使用者於重建結果上手動修整再重新計數，本研究實作了一套桌面端之圖形使用者介面工具（以下簡稱\textbf{本工具}）。本附錄依序介紹設計動機、執行環境與系統架構、介面布局、典型工作流程、側邊欄分頁（檔案、圖層、演算法與纖維）、中央畫布、頂部工具列與底部狀態列、互動模式、圖形編輯、遮罩塗改，以及檔案儲存與結果輸出。
 
 \section{設計動機}
 \label{sec:tool-overview}
@@ -25,18 +25,19 @@
 \section{介面布局}
 \label{sec:tool-layout}
 
-本工具之主視窗分為三大區塊（圖~\ref{fig:tool-layout}）：
+本工具之主視窗分為四大區塊（圖~\ref{fig:tool-layout}）：
 
 \begin{enumerate}
   \item \textbf{左側邊欄 (Sidebar)：} 該區域主要負責控制，並依照功能分成多個分頁。包括樣本讀取、圖層控制、演算法控制與纖維長度瀏覽。
-  \item \textbf{頂部工具列 (Top Toolbar)：} 包含模式切換按鈕與當前樣本資訊顯示（有效神經纖維數與圖片大小），並且帶有重置重建圖按鈕。
+  \item \textbf{頂部工具列 (Top Toolbar)：} 包含互動模式切換按鈕，以及右側之清除（重置重建圖）按鈕。
   \item \textbf{中央畫布 (Canvas)：} 影像圖層與重建圖之疊合區域，支援平移、縮放與互動式編輯。
+  \item \textbf{底部狀態列 (Status Bar)：} 位於中央畫布下方之窄幅列，顯示當前樣本與重建圖之各項數據（有效神經纖維數、影像尺寸、重建圖節點／邊數），並在右方顯示自動儲存狀態（第~\ref{sec:tool-toolbar}~節）。
 \end{enumerate}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/gui/main.png}
-  \caption[本工具主視窗布局]{本工具主視窗布局。圖中紅色框（左側）為左側邊欄（含樣本、圖層與演算法三分頁）、黃色框（上方）為頂部工具列（含模式切換與圖統計）、綠色框（中央）為中央畫布（影像與重建圖之疊合區）。}
+  \caption[本工具主視窗布局]{本工具主視窗布局。圖中紅色框（左側）為左側邊欄（含樣本、圖層與演算法三分頁）、黃色框（上方）為頂部工具列、綠色框（中央）為中央畫布（影像與重建圖之疊合區）、橘色框（下方）為底部狀態列。}
   \label{fig:tool-layout}
 \end{figure}
 
@@ -49,10 +50,10 @@
   \item \textbf{選擇工作目錄：}於左側邊欄之\textbf{檔案} (Files) 分頁點擊\textbf{選擇工作目錄} (Select Working Folder) 按鈕，選定一存放待分析樣本之工作目錄。該目錄下之每個樣本各為一子資料夾，其中依檔名前綴放置\textbf{原始影像}（\texttt{image}）、\textbf{表皮遮罩}（\texttt{epidermis}）與\textbf{纖維微粒遮罩}（\texttt{particle}）三張影像；本工具會掃描該目錄並於分頁中列出所有可用樣本。所選工作目錄會被記憶，下次啟動時自動回復。
   \item \textbf{選擇樣本：}於同一分頁之樣本清單點選欲分析之切片，本工具即\textbf{自動載入}該樣本之 RGB 原始影像、表皮二值遮罩與纖維微粒標註遮罩三層，毋需逐張手動上傳；若該樣本先前已有自動儲存之工作階段，亦會一併還原其圖層設定、重建圖與計數結果。
   \item \textbf{開啟參數視窗檢視預設值（非必要）：}若無特殊需求，可直接沿用預設參數；如需調整，可切換至\textbf{演算法} (Algorithm) 分頁並點擊\textbf{參數} (Parameters) 按鈕（詳見第~\ref{sec:tool-params}~節）。
-  \item \textbf{執行管線：}於\textbf{演算法}分頁點擊\textbf{全部執行} (Run All) 按鈕，後端會依序執行\textbf{感興趣區域} (ROI Mask)、\textbf{前處理} (Preprocess)、\textbf{重建} (Reconstruct) 三階段（第~\ref{sec:tool-pipeline}~節），並於重建完成後\textbf{自動計數}；完成後畫布上即呈現重建圖，頂部工具列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位即顯示計數結果。
+  \item \textbf{執行管線：}於\textbf{演算法}分頁點擊\textbf{全部執行} (Run All) 按鈕，後端會依序執行\textbf{感興趣區域} (ROI Mask)、\textbf{前處理} (Preprocess)、\textbf{重建} (Reconstruct) 三階段（第~\ref{sec:tool-pipeline}~節），並於重建完成後\textbf{自動計數}；完成後畫布上即呈現重建圖，底部狀態列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位即顯示計數結果。
   \item \textbf{重建結果修改（非必要）：}若自動重建之結果與專家判讀有出入，可於頂部工具列切換成\textbf{纖維編輯} (Fiber Edit) 模式，於畫布上新增、刪除節點與邊以修整圖（第~\ref{sec:tool-edit}~節）。
   \item \textbf{遮罩修改（非必要）：}若樣本之表皮遮罩或纖維微粒遮罩本身有誤，可於頂部工具列切換成\textbf{表皮編輯} (Epidermis Edit) 或\textbf{纖維微粒編輯} (Particle Edit) 模式，於畫布上直接塗改\textbf{表皮遮罩} (Epidermis Mask) 與\textbf{纖維微粒遮罩} (Particle Mask)。惟此二遮罩為管線之\textbf{輸入}，修改後不會自動更新重建結果，須重新點擊\textbf{全部執行}重跑整個演算法，方能將變更反映於後續之重建與計數。
-  \item \textbf{即時重新計數有效神經數量：}修整過程中無需手動觸發有效神經計數；本工具會於每次編輯後自動將當前修整後之圖送回後端重算，頂部工具列之有效神經纖維數與畫布上綠色有效邊即隨之同步更新（詳見第~\ref{subsec:count-current}~節）。
+  \item \textbf{即時重新計數有效神經數量：}修整過程中無需手動觸發有效神經計數；本工具會於每次編輯後自動將當前修整後之圖送回後端重算，底部狀態列之有效神經纖維數與畫布上綠色有效邊即隨之同步更新（詳見第~\ref{subsec:count-current}~節）。
   \item \textbf{保存結果：}於\textbf{自動儲存} (Auto-save) 開啟時（預設），上述所有編輯之結果——包含修整後之重建圖、塗改後之遮罩與工作階段狀態——皆會自動寫回樣本資料夾，毋需任何存檔操作；若需將結果另存為指定檔名或輸出至他處，則使用\textbf{檔案}分頁之三個手動儲存按鈕（詳見第~\ref{sec:tool-io}~節）。
 \end{enumerate}
 
@@ -159,7 +160,7 @@
   \label{tab:mask-layers}
   \small
   \setlength{\tabcolsep}{4pt}
-  \begin{tabular}{lllc}
+  \begin{tabular}{lp{5cm}lc}
     \toprule
     圖層名稱 & 來源 & 預設染色 & 出現時機 \\
     \midrule
@@ -290,7 +291,9 @@
 
 \textbf{纖維} (Fibers) 分頁列出當前重建圖中每一條獨立纖維之長度，由長至短排序，並於清單頂端顯示總長度。此清單之數據來源與第~\ref{subsec:count-current}~節所述之\textbf{自動計數}共用同一次後端運算：計數階段於回傳有效跨越數之同時，另按連通分量逐一回報其子樹統計（子樹編號、節點數、邊數與總長度），並於重建圖之每條邊上標註其所屬子樹編號。前端據此將長度列表與畫布上每條邊之歸屬同步呈現，故\textbf{纖維分頁之內容隨自動計數一併更新}——無論是重建階段產生新圖、或使用者於纖維編輯模式下增刪節點與邊，長度列表皆會與有效神經纖維數同步重新整理。
 
-\paragraph{單位換算：} 各纖維長度預設以\textbf{微米 ($\mu$m)} 顯示，換算方式為將像素長度乘以該樣本之像素物理比例（$\mu\text{m} = \text{px} \times \text{ratio}$）；比例值讀取自工作目錄下之 \texttt{px\_um.json}，以樣本資料夾名稱為鍵值查詢。若該樣本於此設定檔中查無對應比例，則長度改以\textbf{像素 (px)} 顯示，並於分頁標題列以\textbf{橘色}文字標示 \texttt{(px)} 提示使用者當前顯示之數值尚未換算為物理單位。
+\paragraph{像素-微米比例輸入欄：} 纖維分頁清單上方設有一數字輸入欄，用以指定當前樣本之\textbf{像素物理比例}（$\mu\text{m/px}$），預設值為 $0.64$。切換樣本時，若工作目錄下之 \texttt{px\_um.json} 中查得該樣本之比例（以樣本資料夾名稱為鍵值查詢），則自動套用該值；否則回復為預設值 $0.64$。使用者亦可直接於此欄位手動修改比例，變更會\textbf{立即反映}於纖維列表、總長度，以及畫布上（如選取纖維提示框，第~\ref{subsec:fiber-highlight}~節）之長度標籤。輸入過程中之暫存文字（例如僅輸入 \texttt{0.} 或暫時清空欄位）不會被中斷或強制修正，僅於形成合法數值時才更新換算結果。
+
+\paragraph{單位換算：} 各纖維長度統一以微米 ($\mu$m) 顯示，換算方式為將像素長度乘以上述比例（$\mu\text{m} = \text{px} \times \text{ratio}$）。
 
 \subsection{纖維選取與提示}
 \label{subsec:fiber-highlight}
@@ -299,7 +302,7 @@
 
 \begin{itemize}
   \item 該纖維之所有邊變為粉紅色並加粗（見第~\ref{subsec:graph-render}~節之邊顏色）。
-  \item 纖維外圍出現一虛線框，並帶有脈動 (pulse) 動畫，框外標示該纖維之長度（單位換算規則同上）。
+  \item 纖維外圍出現一虛線框，框之左上角以兩行文字標示該纖維之資訊：第一行為長度（單位換算規則同上），第二行為其分支點與端點數量（格式如「2 branch points · 3 endpoints」）。此二數量之判準與節點顏色（第~\ref{subsec:graph-render}~節）相同，皆依節點於重建圖中之度數 (degree) 決定：度數為 $1$ 者計入\textbf{端點} (endpoints)，度數大於 $2$ 者計入\textbf{分支點} (branch points)。
   \item 畫面自動置中並縮放至剛好框住該纖維——此動作僅由\textbf{清單點選}觸發；若選取係由\textbf{畫布直接點擊}觸發，因該纖維本已可見，畫面不會另行移動或縮放。
   \item 反之，若選取係由畫布點擊觸發，纖維分頁中對應之清單項目會自動捲動至可視範圍內，便於使用者確認所點選之纖維與長度數值。
 \end{itemize}
@@ -307,7 +310,7 @@
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.6\linewidth]{figures/gui/selected_fiber.png}
-  \caption[纖維選取提示]{纖維被選取後之提示狀態：對應邊變為粉紅色並加粗，外圍出現帶脈動動畫之虛線框，框外標示該纖維之長度。}
+  \caption[纖維選取提示]{纖維被選取後之提示狀態：對應邊變為粉紅色並加粗，外圍出現帶脈動動畫之虛線框，框內左上角以兩行文字標示其長度與分支點／端點數量。}
   \label{fig:selected-fiber}
 \end{figure}
 
@@ -385,34 +388,49 @@
   \item \textbf{自動適配視野 (fit-to-view)}：當載入新樣本之原始影像時，畫布會自動依容器尺寸計算最大可顯示縮放比例（保留約 $24\,\text{像素}$邊距）並將影像置中。
 \end{itemize}
 
-\section{頂部工具列}
+\section{頂部工具列與底部狀態列}
 \label{sec:tool-toolbar}
 
-頂部工具列橫跨主視窗頂端，由左至右包含：四個\textbf{互動模式}切換按鈕、兩項當前樣本之讀數（有效神經纖維數與影像尺寸）、一個\textbf{自動儲存狀態指示器}、當前重建圖之節點與邊計數，以及一个\textbf{清除}按鈕。模式切換按鈕之行為詳見第~\ref{sec:tool-modes}~節、清除按鈕詳見第~\ref{subsec:edit-clear}~節；本節說明工具列之兩項讀數、自動儲存指示器，及讀數背後之自動計數。
+主視窗上下各有一列固定高度之列狀區域：\textbf{頂部工具列}（高度固定，橫跨視窗頂端）與\textbf{底部狀態列}（高度固定，位於中央畫布正下方）。兩者版面各自獨立、互不影響：頂部工具列僅負責互動模式切換與清除操作，底部狀態列則集中顯示當前樣本與重建圖之各項唯讀統計。
 
-\subsection{有效神經纖維數與自動計數}
+\subsection{頂部工具列}
+\label{subsec:tool-toolbar-header}
+
+頂部工具列由左至右僅包含：四個\textbf{互動模式}切換按鈕，以及右側之\textbf{清除}按鈕。模式切換按鈕之行為詳見第~\ref{sec:tool-modes}~節、清除按鈕詳見第~\ref{subsec:edit-clear}~節。
+
+\subsection{底部狀態列}
+\label{subsec:tool-statusbar}
+
+底部狀態列位於中央畫布正下方，由左至右依序顯示\textbf{有效神經纖維數}（第~\ref{subsec:count-current}~節）、\textbf{影像尺寸}（第~\ref{subsec:toolbar-imagesize}~節）與\textbf{重建圖節點／邊計數}（第~\ref{subsec:toolbar-graphcount}~節）三項讀數，並將\textbf{自動儲存狀態指示器}（第~\ref{subsec:toolbar-autosave}~節）靠右對齊。當視窗寬度不足以容納全部讀數時，狀態列會以\textbf{水平捲動}而非擠壓各項文字之方式呈現（各讀數之文字恆保持單行、不換行），避免內容重疊或被裁切；狀態列之高度亦固定，不受中央畫布縮放或內容多寡影響。
+
+\subsubsection{有效神經纖維數與自動計數}
 \label{subsec:count-current}
 
-工具列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位顯示最近一次計數之 $N_{\text{pred}}$（如圖~\ref{fig:count-badge} 所示）。此計數\textbf{不設獨立按鈕、亦非管線階段}，而是由前端持續監看畫布上之重建圖：凡重建圖發生變動——無論是重建階段產生之新圖，或使用者於纖維編輯模式下增刪節點與邊——本工具即自動將\textbf{當前畫布上之重建圖}送回後端計數，該欄位之數值與畫布上綠色有效神經纖維邊隨之同步更新。為避免連續編輯期間發出過多請求，計數採短暫去抖動：一連串編輯僅於停止後觸發一次，且恆以最新之圖為準。
+狀態列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位顯示最近一次計數之 $N_{\text{pred}}$（如圖~\ref{fig:count-badge} 所示）。此計數不設獨立按鈕、亦非管線階段，而是由前端持續監看畫布上之重建圖：凡重建圖發生變動——無論是重建階段產生之新圖，或使用者於纖維編輯模式下增刪節點與邊——本工具即自動將當前畫布上之重建圖進行記數，該欄位之數值與畫布上綠色有效神經纖維邊隨之同步更新。計數請求進行期間，該欄位左側會顯示一個小型讀取中圖示 (spinner)，計數完成後即消失並換上最新數值。
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.3\linewidth]{figures/gui/cross.png}
-  \caption[計數結果之資訊框]{頂部工具列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位，於計數完成後顯示其數值。}
+  \caption[計數結果之資訊框]{底部狀態列之\textbf{有效神經纖維數} (Effective Nerve Fibers) 欄位，於計數完成後顯示其數值。}
   \label{fig:count-badge}
 \end{figure}
 
-如此「重建 $\to$ 編輯 $\to$ 重新計數」之人機協同流程近乎透明：使用者只需於自動重建後切入纖維編輯模式修整重建圖，畫布上之有效神經纖維數與綠色有效邊即隨每次編輯自動同步更新，無須手動觸發計數。
+如此「重建 $\to$ 編輯 $\to$ 重新計數」之人機協同流程近乎透明：使用者只需於自動重建後切入纖維編輯模式修整重建圖，狀態列之有效神經纖維數與畫布上綠色有效邊即隨每次編輯自動同步更新，無須手動觸發計數。
 
-\subsection{影像尺寸}
+\subsubsection{影像尺寸}
 \label{subsec:toolbar-imagesize}
 
 \textbf{影像尺寸} (Image Size) 欄位顯示當前原始影像之原生像素尺寸（寬 $\times$ 高），供使用者確認載入切片之解析度；此尺寸亦為重建圖遮罩寫出時之光柵化解析度（見第~\ref{subsec:io-fibermask}~節）。
 
-\subsection{自動儲存狀態指示器}
+\subsubsection{重建圖節點與邊計數}
+\label{subsec:toolbar-graphcount}
+
+狀態列另顯示當前重建圖之\textbf{節點數} (Nodes) 與\textbf{邊數} (Edges)，即時反映畫布上重建圖之拓樸規模。此二數值純粹統計前端當前圖之元素數量，隨每次編輯（新增、刪除節點與邊）即時更新，不若有效神經纖維數需送回後端運算。
+
+\subsubsection{自動儲存狀態指示器}
 \label{subsec:toolbar-autosave}
 
-工具列並顯示一\textbf{自動儲存狀態指示器}，以磁片圖示搭配文字標示當前之寫檔狀態：開啟時為綠色之 \textbf{Auto-save On}、關閉時為灰色之 \textbf{Auto-save Off}。此指示器\textbf{僅供顯示}，其切換須至\textbf{檔案}分頁之自動儲存切換鈕（第~\ref{subsec:tool-samples}~節）；置於工具列之目的在於使用者於畫布上長時間編輯時，得隨時確認其修整是否正被寫回磁碟，避免誤以為已保存。
+狀態列右側顯示一\textbf{自動儲存狀態指示器}，以磁片圖示搭配文字標示當前之寫檔狀態：開啟時為綠色之 \textbf{Auto-save On}、關閉時為灰色之 \textbf{Auto-save Off}。此指示器\textbf{僅供顯示}，其切換須至\textbf{檔案}分頁之自動儲存切換鈕（第~\ref{subsec:tool-samples}~節）；置於狀態列右側之目的在於使用者於畫布上長時間編輯時，得隨時確認其修整是否正被寫回磁碟，避免誤以為已保存。
 
 \section{互動模式}
 \label{sec:tool-modes}
@@ -574,7 +592,7 @@
   \item \textbf{來源遮罩檔：}於纖維微粒編輯或表皮編輯模式下之塗改結果，直接覆寫該樣本之表皮遮罩或纖維微粒遮罩原檔（第~\ref{sec:tool-paint}~節）。
 \end{enumerate}
 
-關閉自動儲存時，\textbf{上述三類寫入全數停止}：專案檔與纖維遮罩不再產生，塗改亦僅存在於畫面與當前工作階段中，磁碟上之來源遮罩檔保持原狀。此模式適用於僅欲檢視或試驗性調整、而不希望更動原始資料之情境；惟此時若切換樣本或關閉應用程式，未經手動儲存之編輯將\textbf{不予保留}。頂部工具列之狀態指示器（第~\ref{subsec:toolbar-autosave}~節）即為此設計之安全提示。
+關閉自動儲存時，\textbf{上述三類寫入全數停止}：專案檔與纖維遮罩不再產生，塗改亦僅存在於畫面與當前工作階段中，磁碟上之來源遮罩檔保持原狀。此模式適用於僅欲檢視或試驗性調整、而不希望更動原始資料之情境；惟此時若切換樣本或關閉應用程式，未經手動儲存之編輯將不予保留。底部狀態列之狀態指示器（第~\ref{subsec:toolbar-autosave}~節）即為此設計之安全提示。
 
 \subsection{手動儲存}
 \label{subsec:io-manual}
