@@ -8,7 +8,7 @@
 \section{表皮內神經纖維密度量化}
 \label{sec:ienf-related}
 
-如第~\ref{sec:background}~節所述，EFNS 量測指引~\cite{lauria2010skinbiopsy, jointtaskforce2010skinbiopsy} 將 IENFD 之計數規則明確定義於免疫螢光(Immunofluorescence) 染色之皮膚垂直切片上，並奉為小纖維神經病變診斷之參考標準。值得注意的是，此規則同時隱含兩項子任務：其一為「拓樸連續性判定」，即辨識一條由真皮穿越進入表皮之纖維；其二為「重複跨越之排除」，即同一條纖維無論如何分支皆僅計為一次。然而代表性之早期自動化工作~\cite{vanacker2016automated, dabbah2011automatic} 多集中於第一步之影像增強與分割，並未真正觸及拓樸層面之推理。
+如第~\ref{sec:background}~節所述，EFNS 量測指引~\cite{lauria2010skinbiopsy} 將 IENFD 之計數規則明確定義於免疫螢光(Immunofluorescence) 染色之皮膚垂直切片上，並奉為小纖維神經病變診斷之參考標準。值得注意的是，此規則同時隱含兩項子任務：其一為「拓樸連續性判定」，即辨識一條由真皮穿越進入表皮之纖維；其二為「重複跨越之排除」，即同一條纖維無論如何分支皆僅計為一次。然而代表性之早期自動化工作~\cite{vanacker2016automated, dabbah2011automatic} 多集中於第一步之影像增強與分割，並未真正觸及拓樸層面之推理。
 
 Vanacker 等人 (2016)~\cite{vanacker2016automated} 針對糖尿病 (Diabetes Mellitus, DM) 患者之皮膚切片，提出以形態學閉運算配合 Otsu 閾值對免疫螢光染色影像進行二值化，再以連通元件數粗略估計纖維數，但由於缺乏排除重複跨越之機制，容易高估密度，亦無法處理表皮內分支；類似以閾值化加連通元件統計之策略亦見於角膜共軛焦顯微 (Corneal Confocal Microscopy, CCM) 影像之糖尿病周邊神經病變評估~\cite{dabbah2011automatic}。較晚近之工作則進一步將皮膚切片之 IENFD 量化流程自動化：Corr{\`a} 等人 (2021)~\cite{corra2021advantages} 針對免疫螢光染色之皮膚切片影像，自動描繪表皮／真皮交界並自動計數纖維，於量測之可重複性與效率上較人工判讀具優勢；Burgess 等人 (2024)~\cite{burgess2024automated} 則針對纖維肌痛症 (Fibromyalgia Syndrome, FMS) 與特發性小纖維神經病變 (idiopathic small fiber neuropathy, ISFN) 病患之螢光免疫組織化學染色影像，提出自動化 IENFD 量化之概念驗證。然而此類方法之輸出仍以密度數值為主，並未產生可供逐條纖維稽核之拓樸中介產物。上述顯示，從分割結果到可計數之拓樸結構之間存在結構性缺口，而此缺口正是本研究所欲處理之核心。
 

@@ -11,7 +11,7 @@
 \subsection{感興趣區域之建立}
 \label{subsec:roi}
 
-依 EFNS/PNS 計數規範~\cite{jointtaskforce2010skinbiopsy}，IENF 之計數對象為自真皮穿越表皮／真皮交界進入表皮之纖維；判定一條纖維是否符合此規則，需同時觀察其在表皮內與真皮側之走向。故本研究將分析區域定義為\textbf{表皮本身及其下方一段固定寬度之真皮}，使交界線兩側之纖維走向皆落入後續處理範圍。本研究於表皮遮罩 $M$ 上定義一個僅向下膨脹之運算
+依 EFNS/PNS 計數規範~\cite{lauria2010skinbiopsy}，IENF 之計數對象為自真皮穿越表皮／真皮交界進入表皮之纖維；判定一條纖維是否符合此規則，需同時觀察其在表皮內與真皮側之走向。故本研究將分析區域定義為\textbf{表皮本身及其下方一段固定寬度之真皮}，使交界線兩側之纖維走向皆落入後續處理範圍。本研究於表皮遮罩 $M$ 上定義一個僅向下膨脹之運算
 
 \begin{equation}
   M_{\text{ROI}} \;=\; \big(\,M \oplus K_{\text{offset}}\,\big) \cap M_{\downarrow},
@@ -475,7 +475,7 @@ $G_{\text{cov}}$ 即為通過纖維層篩選之拓樸圖（如圖~\ref{fig:cross
 \subsection{有效神經纖維計數}
 \label{subsec:effective-count}
 
-在上述區域標記完成後，本研究依\textbf{線段}（而非邊）為單位計算跨越數；遵循 EFNS/PNS 切片計數規範~\cite{jointtaskforce2010skinbiopsy}，一條線段即使包含多個跨越邊亦僅計為一次。
+在上述區域標記完成後，本研究依\textbf{線段}（而非邊）為單位計算跨越數；遵循 EFNS/PNS 切片計數規範~\cite{lauria2010skinbiopsy}，一條線段即使包含多個跨越邊亦僅計為一次。
 
 綜上所述，一條線段被計為一次有效跨越，需\textbf{同時}滿足：(i) 其所屬連通分量已通過微粒涵蓋篩選（第~\ref{subsec:coverage-filter}~節）而保留於 $G_{\text{cov}}$ 中；(ii) 至少包含一條跨越邊。滿足之線段總數 $N_{\text{pred}}$ 即為 AEL 輸出之有效神經纖維數，最終計入之線段如圖~\ref{fig:crossing-effective} 所示，於該示例中最終計入之線段數為 $2$。若已知切片之表皮長度（可自 $M$ 之上緣輪廓計算），$N_{\text{pred}}$ 可用於計算 IENFD，並與專家人工計數直接比較。
 
