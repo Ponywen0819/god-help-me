@@ -801,7 +801,7 @@
 \section{結構性消融}
 \label{sec:ablation}
 
-第~\ref{sec:param-analysis}~節之單因子擾動檢視了各超參數\textbf{取值}之選擇，本節則進一步檢視 AEL 各\textbf{設計模組}之必要性：以完整 AEL（表~\ref{tab:hyperparams} 之基準配置）為對照，每次僅移除或替換單一模組、其餘維持預設，於全部 $77$ 張切片上量測 $\text{Dice}_{\text{cl}}$、HD95 與 $\text{HD}_{\text{avg}}$ 三項拓樸品質指標。所檢視之消融涵蓋三個階段：(i) \textbf{前處理}——分別略過白色頂帽去背景、CLAHE、Sato 線狀結構濾波，以及完全不做任何增強；(ii) \textbf{成本設計}——以線性成本 $C = 1 - \tilde{I}_{\text{enhanced}}$ 取代式~\eqref{eq:cost} 之指數成本，或改用均勻常數成本使區域擴張喪失纖維響應之引導、退化為由幾何距離主導之連結；(iii) \textbf{連結策略}——略過 $\tau$ 閾值裁剪、略過最小生成森林，或完全不連結（直接對 $P$ 骨架化、即移除整個連結階段）。各消融變體與完整 AEL 之逐切片配對差異採第~\ref{subsec:significance}~節之單尾 Wilcoxon 符號秩檢定（對立假設為完整 AEL 較佳），結果列於表~\ref{tab:ablation}。
+第~\ref{sec:param-analysis}~節之單因子擾動檢視了各超參數\textbf{取值}之選擇，本節則進一步檢視 AEL 各\textbf{設計模組}之必要性：以完整 AEL（表~\ref{tab:hyperparams} 之基準配置）為對照，每次僅移除或替換單一模組、其餘維持預設，於全部 $77$ 張切片上量測 $\text{Dice}_{\text{cl}}$、HD95 與 $\text{HD}_{\text{avg}}$ 三項拓樸品質指標。所檢視之消融涵蓋三個階段：(i) \textbf{前處理}——分別略過白色頂帽去背景、CLAHE、Sato 線狀結構濾波，以及完全不做任何增強；(ii) \textbf{成本設計}——將式~\eqref{eq:cost} 之指數成本替換為\textbf{線性成本} $C = 1 - \tilde{I}_{\text{enhanced}}$（保留響應引導，但移除對強弱差距之指數放大），或\textbf{均勻常數成本} $C \equiv 1$（完全忽略纖維響應，使區域擴張退化為由幾何距離主導之連結）；(iii) \textbf{連結策略}——略過 $\tau$ 閾值裁剪、略過最小生成森林，或完全不連結（直接對 $P$ 骨架化、即移除整個連結階段）。各消融變體與完整 AEL 之逐切片配對差異採第~\ref{subsec:significance}~節之單尾 Wilcoxon 符號秩檢定（對立假設為完整 AEL 較佳），結果列於表~\ref{tab:ablation}。
 
 \begin{table}[htbp]
   \centering
@@ -838,7 +838,7 @@
 
 為直觀呈現上述各模組之作用，圖~\ref{fig:abl-preproc-cost} 至圖~\ref{fig:abl-connect} 以單一代表切片（S3091-2\_b）之兩處放大區域，逐一視覺化各消融設定之效果。前處理之影響最直接地反映於\textbf{成本圖}（圖~\ref{fig:abl-preproc-cost}）：完整前處理下，纖維於成本圖上呈現清晰、連續且與背景明確區隔之高響應走廊；移除頂帽去背景後，原應抑制之網狀背景紋理大量殘留、與纖維競爭，使低成本走廊之邊界趨於模糊；移除 CLAHE 後全域響應整體偏暗，較弱之纖維段近乎沒入背景；移除 Sato 線狀濾波後影像失去線狀結構之增強而退化為顆粒狀雜訊，纖維走廊不再連貫；完全不做增強則近乎原始綠色通道，纖維微弱而背景偏亮。
 
-成本設計與連結策略之影響則直接顯現於\textbf{重建疊合圖}。成本設計方面（圖~\ref{fig:abl-cost}），完整 AEL 之指數成本使重建幾乎全為黃色命中段；改用線性成本後，因失去對強弱響應之對比放大，於區域 a 補出一段橫越纖維間隙之\textbf{紅色多餘段}；改用均勻成本使連結退化為由幾何距離主導，紅色多餘段更為明顯。連結策略方面（圖~\ref{fig:abl-connect}），略過 $\tau$ 裁剪時可見一條橫貫區域之\textbf{紅色長距離錯接}（對應表中 HD95 自 $2.451$ 暴增至 $31.328\,\mu\text{m}$）；略過最小生成森林時則出現多處紅綠交雜之冗餘連線與漏連；完全不連結時骨架嚴重碎片化，大量本應連通之纖維段轉為\textbf{綠色漏連段}。該結果與表~\ref{tab:ablation} 之量化結論相符。
+成本設計與連結策略之影響則直接顯現於\textbf{重建疊合圖}。成本設計方面（圖~\ref{fig:abl-cost}），完整 AEL 之指數成本使重建幾乎全為黃色命中段；改用線性成本後，因失去對強弱響應之對比放大，於區域 a 補出一段橫越纖維間隙之\textbf{紅色多餘段}；改用均勻成本使連結退化為由幾何距離主導，紅色多餘段更為明顯。此一差異之根源可由成本圖 $C$ 與多源擴張所得之累積成本場 $D$ 直接觀察（圖~\ref{fig:abl-cost-field}）：指數成本將 Sato 響應之強弱差距放大，纖維核心之成本被壓至趨近於零、背景則維持高值，故 $D$ 沿纖維走向形成明顯之低成本走廊，相鄰來源之擴張前線僅於真正之纖維間隙處相遇（圖中洋紅色脊線）；線性成本之對比放大有限，走廊與背景之成本落差隨之縮小；均勻成本則使 $C$ 於整個感興趣區域內退化為常數，$D$ 僅反映純幾何之測地距離，前線相遇位置與影像證據完全脫鉤，此即其多餘連結最為嚴重之直接原因。連結策略方面（圖~\ref{fig:abl-connect}），略過 $\tau$ 裁剪時可見一條橫貫區域之\textbf{紅色長距離錯接}（對應表中 HD95 自 $2.451$ 暴增至 $31.328\,\mu\text{m}$）；略過最小生成森林時則出現多處紅綠交雜之冗餘連線與漏連；完全不連結時骨架嚴重碎片化，大量本應連通之纖維段轉為\textbf{綠色漏連段}。該結果與表~\ref{tab:ablation} 之量化結論相符。
 
 \begin{figure}[htbp]
   \centering
@@ -917,6 +917,40 @@
 
   \caption[成本設計消融之重建疊合對照]{成本設計消融之重建疊合對照（代表切片 S3091-2\_b；三色疊合圖之配色定義見圖~\ref{fig:prune-tau}；放大區域同圖~\ref{fig:abl-preproc-cost}）。上下兩列分別為區域 a（上）與區域 b（下）；(a) 線性成本、(b) 均勻成本、(c) 完整 AEL（指數成本）。}
   \label{fig:abl-cost}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_linear_cost_cost.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_linear_cost_cost.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_linear_cost_dist.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_linear_cost_dist.png}
+    \caption{}%
+    \label{fig:abl-cost-field-linear}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_uniform_cost_cost.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_uniform_cost_cost.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_uniform_cost_dist.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_uniform_cost_dist.png}
+    \caption{}%
+    \label{fig:abl-cost-field-uniform}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full_cost.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full_cost.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop0_full_dist.png}\\[0.3em]
+    \includegraphics[width=\linewidth]{S3091-2_b_crop1_full_dist.png}
+    \caption{}%
+    \label{fig:abl-cost-field-full}
+  \end{subfigure}
+
+  \caption[成本設計消融之成本圖與累積成本場]{成本設計消融對成本圖 $C$ 與累積成本場 $D$ 之影響（代表切片 S3091-2\_b；放大區域同圖~\ref{fig:abl-preproc-cost}）。由上而下四列依序為區域 a 之成本圖、區域 b 之成本圖、區域 a 之累積成本場、區域 b 之累積成本場；(a) 線性成本、(b) 均勻成本、(c) 完整 AEL。}
+  \label{fig:abl-cost-field}
 \end{figure}
 
 \begin{figure}[htbp]
